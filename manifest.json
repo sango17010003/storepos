@@ -1,21 +1,20 @@
 {
+  "name": "StorePOS System",
   "short_name": "StorePOS",
-  "name": "StorePOS - Integrated Retail Terminal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060d17",
+  "theme_color": "#060d17",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3144/3144456.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3144/3144456.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#4338ca",
-  "theme_color": "#4338ca",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }

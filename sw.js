@@ -1,4 +1,4 @@
-const CACHE_NAME = 'storepos-cache-v3';
+const CACHE_NAME = 'storepos-system-v4';
 const LOCAL_ASSETS = [
   '/',
   '/index.html',
@@ -18,9 +18,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+          if (key !== CACHE_NAME) return caches.delete(key);
         })
       );
     }).then(() => self.clients.claim())
@@ -28,11 +26,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only intercept requests for local origin files; bypass external CDNs
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
-        .then((cachedResponse) => cachedResponse || fetch(event.request))
+        .then((res) => res || fetch(event.request))
         .catch(() => caches.match('/index.html'))
     );
   }
