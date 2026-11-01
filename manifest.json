@@ -1,0 +1,21 @@
+{
+  "short_name": "StorePOS",
+  "name": "StorePOS - Integrated Retail Terminal",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3144/3144456.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3144/3144456.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#4338ca",
+  "theme_color": "#4338ca",
+  "display": "standalone",
+  "orientation": "portrait"
+}
