@@ -409,7 +409,7 @@
     // ----------------------------------------------------
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co/rest/v1/";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let activeUser = null;
     let activeProfile = null;
