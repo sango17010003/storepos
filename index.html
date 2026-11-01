@@ -473,11 +473,63 @@
     }
 
     async function submitAuthentication() {
-      const email = document.getElementById("inp-email").value.trim();
-      const password = document.getElementById("inp-password").value.trim();
-      const shopName = document.getElementById("inp-shop-name").value.trim();
-      const msg = document.getElementById("auth-status-msg");
-      msg.innerText = "";
+  const email = document.getElementById("inp-email").value.trim();
+  const password = document.getElementById("inp-password").value.trim();
+  const shopName = document.getElementById("inp-shop-name") ? document.getElementById("inp-shop-name").value.trim() : "";
+  const msg = document.getElementById("auth-status-msg");
+  const submitBtn = document.getElementById("auth-submit-btn");
+
+  msg.innerText = "";
+  if (!email || !password) {
+    msg.innerText = "Please enter both email and password.";
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = "Processing...";
+
+  try {
+    const client = getDb(); // Guarantees the client is initialized
+
+    if (isRegistering) {
+      if (!shopName) {
+        msg.innerText = "Please enter an outlet name.";
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Launch POS Terminal";
+        return;
+      }
+
+      console.log("Signing up:", email);
+      const { data: authData, error: authErr } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { shop_name: shopName } }
+      });
+
+      if (authErr) throw authErr;
+      if (!authData.user) throw new Error("Signup failed. Check credentials.");
+
+      if (!authData.session) {
+        const { data: loginData, error: loginErr } = await client.auth.signInWithPassword({ email, password });
+        if (loginErr) throw loginErr;
+        await completeAppLogin(loginData.user);
+      } else {
+        await completeAppLogin(authData.user);
+      }
+    } else {
+      console.log("Signing in:", email);
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await completeAppLogin(data.user);
+    }
+  } catch (err) {
+    console.error("Auth error:", err);
+    msg.innerText = err.message || "An unexpected error occurred.";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = isRegistering ? "Launch POS Terminal" : "Sign In to Terminal";
+  }
+}
 
       if (isRegistering) {
         if (!shopName) return (msg.innerText = "Please enter an outlet name.");
@@ -508,7 +560,7 @@
         if (error) return (msg.innerText = error.message);
         completeAppLogin(data.user);
       }
-    }
+    
 
     async function completeAppLogin(user) {
       activeUser = user;
