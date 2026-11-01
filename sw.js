@@ -1,30 +1,39 @@
-const CACHE_NAME = 'storepos-cache-v1';
-const ASSETS = [
+const CACHE_NAME = 'storepos-cache-v3';
+const LOCAL_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+  '/manifest.json'
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(LOCAL_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null)));
-    }).then(() => clients.claim())
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((res) => res || fetch(e.request)).catch(() => caches.match('/index.html'))
-  );
+self.addEventListener('fetch', (event) => {
+  // Only intercept requests for local origin files; bypass external CDNs
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request)
+        .then((cachedResponse) => cachedResponse || fetch(event.request))
+        .catch(() => caches.match('/index.html'))
+    );
+  }
 });
