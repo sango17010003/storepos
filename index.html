@@ -407,9 +407,147 @@
     // ----------------------------------------------------
     // A. CONFIGURATION & STATE
     // ----------------------------------------------------
-    const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co/rest/v1/";
-    const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ==========================================
+// 1. SUPABASE CLIENT & GETTER
+// ==========================================
+const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co/rest/v1/"; // Put your real URL
+const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";              // Put your real Anon Key
+
+let db = null;
+
+function getDb() {
+  if (!db) {
+    if (!window.supabase) {
+      throw new Error("Supabase SDK is still loading. Please wait a moment.");
+    }
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return db;
+}
+
+// ==========================================
+// 2. AUTHENTICATION CONTROLLER
+// ==========================================
+function toggleAuthForm(mode) {
+  isRegistering = mode === 'LOGIN' ? false : !isRegistering;
+  const title = document.getElementById("auth-title");
+  const fieldShop = document.getElementById("field-shop-name");
+  const submitBtn = document.getElementById("auth-submit-btn");
+  const toggleBtn = document.getElementById("auth-toggle-btn");
+  const msg = document.getElementById("auth-status-msg");
+
+  if (title) title.innerText = isRegistering ? "Create Store & Account" : "Sign in to StorePOS";
+  if (fieldShop) fieldShop.classList.toggle("hidden", !isRegistering);
+  if (submitBtn) submitBtn.innerText = isRegistering ? "Launch POS Terminal" : "Sign In to Terminal";
+  if (toggleBtn) toggleBtn.innerText = isRegistering ? "Already registered? Click here to Sign In" : "Need a new store? Click here to Register";
+  if (msg) msg.innerText = "";
+}
+
+async function submitAuthentication() {
+  const emailInput = document.getElementById("inp-email");
+  const passInput = document.getElementById("inp-password");
+  const shopInput = document.getElementById("inp-shop-name");
+  const msg = document.getElementById("auth-status-msg");
+  const submitBtn = document.getElementById("auth-submit-btn");
+
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passInput ? passInput.value.trim() : "";
+  const shopName = shopInput ? shopInput.value.trim() : "";
+
+  if (msg) msg.innerText = "";
+
+  if (!email || !password) {
+    if (msg) msg.innerText = "Please enter both email and password.";
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Processing...";
+  }
+
+  try {
+    const client = getDb();
+
+    if (isRegistering) {
+      if (!shopName) {
+        if (msg) msg.innerText = "Please enter an outlet name.";
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Launch POS Terminal";
+        }
+        return;
+      }
+
+      console.log("Signing up:", email);
+      const { data: authData, error: authErr } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { shop_name: shopName } }
+      });
+
+      if (authErr) throw authErr;
+      if (!authData.user) throw new Error("Signup failed. Check credentials.");
+
+      if (!authData.session) {
+        const { data: loginData, error: loginErr } = await client.auth.signInWithPassword({ email, password });
+        if (loginErr) throw loginErr;
+        await completeAppLogin(loginData.user);
+      } else {
+        await completeAppLogin(authData.user);
+      }
+    } else {
+      console.log("Signing in:", email);
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await completeAppLogin(data.user);
+    }
+  } catch (err) {
+    console.error("Auth error:", err);
+    if (msg) msg.innerText = err.message || "An unexpected error occurred.";
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = isRegistering ? "Launch POS Terminal" : "Sign In to Terminal";
+    }
+  }
+}
+
+async function completeAppLogin(user) {
+  activeUser = user;
+  const client = getDb();
+  
+  const { data: profile, error } = await client
+    .from("profiles")
+    .select("role, shop_id, shops(name, owner_pin)")
+    .eq("id", activeUser.id)
+    .single();
+
+  if (error || !profile) {
+    alert("Profile not found. Make sure the database trigger was executed in Supabase.");
+    return;
+  }
+
+  activeProfile = profile;
+  document.getElementById("view-landing").classList.add("hidden");
+  document.getElementById("view-app").classList.remove("hidden");
+  document.getElementById("header-shop-name").innerText = profile.shops.name;
+
+  if (profile.role === "STAFF") {
+    document.getElementById("role-switch-btn").classList.add("hidden");
+  } else {
+    document.getElementById("role-switch-btn").classList.remove("hidden");
+  }
+
+  await loadStoreInventory();
+  syncOfflineOrdersQueue();
+}
+
+async function executeLogout() {
+  const client = getDb();
+  await client.auth.signOut();
+  location.reload();
+}
 
     let activeUser = null;
     let activeProfile = null;
