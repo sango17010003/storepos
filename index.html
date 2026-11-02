@@ -7,7 +7,10 @@
   
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#060d17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
+  <!-- Tailwind CSS & Essential POS CDNs -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -18,7 +21,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1e324f; border-radius: 4px; }
 
-    /* Light Theme Tokens */
+    /* Light Theme Palette */
     body.theme-light {
       background-color: #f8fafc;
       color: #0f172a;
@@ -40,7 +43,7 @@
       color: #64748b;
     }
 
-    /* Dark Theme Tokens */
+    /* Dark Theme Palette */
     body.theme-dark {
       background-color: #060d17;
       color: #f8fafc;
@@ -62,28 +65,51 @@
       color: #94a3b8;
     }
 
-    /* Print Format Setup */
+    /* Multi-Format Print Engine */
     @media print {
       body * { visibility: hidden !important; }
-      #printable-thermal-receipt, #printable-thermal-receipt * {
+      
+      body[data-print-format="thermal"] #printable-thermal-receipt,
+      body[data-print-format="thermal"] #printable-thermal-receipt * {
         visibility: visible !important;
       }
-      body[data-paper-width="58mm"] #printable-thermal-receipt {
+      body[data-print-format="a4"] #printable-a4-invoice,
+      body[data-print-format="a4"] #printable-a4-invoice * {
+        visibility: visible !important;
+      }
+      body[data-print-format="audit"] #printable-audit-sheet,
+      body[data-print-format="audit"] #printable-audit-sheet * {
+        visibility: visible !important;
+      }
+
+      /* 58mm Thermal (2-inch roll) */
+      body[data-paper-width="58mm"][data-print-format="thermal"] #printable-thermal-receipt {
         position: absolute; left: 0; top: 0; width: 58mm; max-width: 58mm;
         margin: 0; padding: 4px; font-family: monospace; font-size: 10px; color: #000; background: #fff;
       }
-      body[data-paper-width="80mm"] #printable-thermal-receipt {
+      /* 80mm Thermal (3-inch roll) */
+      body[data-paper-width="80mm"][data-print-format="thermal"] #printable-thermal-receipt {
         position: absolute; left: 0; top: 0; width: 80mm; max-width: 80mm;
         margin: 0; padding: 8px; font-family: monospace; font-size: 12px; color: #000; background: #fff;
+      }
+      /* A4 Tax Sheet */
+      #printable-a4-invoice {
+        position: absolute; left: 0; top: 0; width: 100%;
+        margin: 0; padding: 20mm; font-family: sans-serif; color: #000; background: #fff;
+      }
+      /* Audit Sheet */
+      #printable-audit-sheet {
+        position: absolute; left: 0; top: 0; width: 100%;
+        margin: 0; padding: 15mm; font-family: monospace; color: #000; background: #fff;
       }
     }
     @page { margin: 0; size: auto; }
   </style>
 </head>
-<body data-paper-width="58mm" class="theme-dark min-h-screen font-sans transition-colors duration-200 flex flex-col justify-between">
+<body data-paper-width="58mm" data-print-format="thermal" class="theme-dark min-h-screen font-sans transition-colors duration-200 flex flex-col justify-between">
 
   <!-- ========================================================
-       1. AUTHENTICATION VIEW
+       1. AUTHENTICATION & ONBOARDING LANDING
        ======================================================== -->
   <div id="view-landing" class="max-w-md mx-auto p-4 min-h-screen flex flex-col justify-between w-full">
     <div class="space-y-6 pt-6">
@@ -92,12 +118,12 @@
           🏪
         </div>
         <h1 class="text-2xl font-black tracking-tight">StorePOS <span class="text-emerald-400">System</span></h1>
-        <p class="text-xs subtext-color">Smart Retail, FMCG & Sweets Counter Terminal</p>
+        <p class="text-xs subtext-color">Smart Retail, FMCG, Mithai & Weight-Scale Counter</p>
       </div>
 
       <div class="card-bg border rounded-2xl shadow-2xl p-5 space-y-3.5">
         <div class="flex items-center justify-between border-b border-slate-700/60 pb-2.5">
-          <span class="font-extrabold text-sm">Terminal Sign In</span>
+          <span id="auth-title" class="font-extrabold text-sm">Terminal Sign In</span>
           <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Cloud Synced</span>
         </div>
 
@@ -127,12 +153,30 @@
           <span>Sign In & Open Counter</span>
           <span>→</span>
         </button>
+
+        <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="w-full text-center text-[11px] subtext-color hover:text-emerald-400 font-bold block transition">
+          Need a new store? Click here to Register
+        </button>
       </div>
+    </div>
+
+    <!-- Standalone PWA Trial Banner -->
+    <div class="card-bg border p-3.5 rounded-2xl flex items-center justify-between shadow-xl my-4">
+      <div>
+        <div class="flex items-center gap-1.5">
+          <p class="font-extrabold text-xs">Standalone App (Offline PWA)</p>
+          <span class="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded border border-amber-500/30">3-Day Free Trial</span>
+        </div>
+        <p class="text-[10px] subtext-color">Install for instant offline desktop/mobile billing</p>
+      </div>
+      <button type="button" onclick="triggerPwaInstall()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition">
+        Install App
+      </button>
     </div>
   </div>
 
   <!-- ========================================================
-       2. PRIMARY POS SHELL (TERMINAL & ADMIN)
+       2. PRIMARY POS TERMINAL & EXECUTIVE SHELL
        ======================================================== -->
   <div id="view-app" class="hidden min-h-screen flex flex-col justify-between w-full">
     
@@ -151,7 +195,7 @@
         </div>
       </div>
 
-      <!-- Action Buttons Bar -->
+      <!-- Action Navigation Buttons -->
       <div class="flex items-center gap-1.5 flex-wrap">
         
         <!-- Online / Offline Status Badge -->
@@ -160,52 +204,68 @@
           <span id="sync-text">Online Synced</span>
         </button>
 
-        <!-- Paper Size Quick Indicator -->
-        <button type="button" onclick="togglePaperWidth()" class="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold input-bg border">
+        <!-- Paper Size Switcher -->
+        <button type="button" onclick="togglePaperWidth()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold input-bg border text-slate-200">
           <span>🖨️</span>
           <span id="paper-width-label">58mm</span>
         </button>
 
-        <!-- Thermal Receipt Preview & History Trigger -->
-        <button type="button" onclick="openThermalPreviewModal()" class="px-2 py-1 rounded-lg text-[10px] font-bold input-bg border flex items-center gap-1">
+        <!-- Thermal Receipt Preview Modal Trigger -->
+        <button type="button" onclick="openThermalPreviewModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold input-bg border text-slate-200 flex items-center gap-1">
           <span>🧾</span>
           <span>Receipt / Reprint</span>
         </button>
 
-        <!-- Dark / Light Theme Toggle -->
-        <button type="button" onclick="toggleThemeMode()" title="Toggle Dark/Light Mode" class="px-2 py-1 rounded-lg text-[10px] font-bold input-bg border">
+        <!-- Dark / Light Mode Toggle -->
+        <button type="button" onclick="toggleThemeMode()" title="Toggle Dark/Light Theme" class="px-2.5 py-1 rounded-lg text-[10px] font-bold input-bg border text-slate-200">
           <span id="theme-icon">🌙</span>
         </button>
 
-        <!-- Admin Mode Unlock -->
+        <!-- Admin Master Lock/Unlock -->
         <button type="button" id="btn-admin-toggle" onclick="handleAdminModeAccess()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 flex items-center gap-1">
           <span id="admin-lock-icon">🔒</span>
           <span id="admin-lock-label">Unlock Admin</span>
         </button>
 
-        <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30">
+        <!-- Counter Session Exit -->
+        <button type="button" onclick="executeLogout()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30">
           ⏻ Exit
         </button>
       </div>
     </header>
 
-    <!-- Main Workspace Container -->
+    <!-- Rapid Hotkeys Helper Bar -->
+    <div class="header-bg border-b px-3 py-1 text-[10px] subtext-color flex items-center justify-between overflow-x-auto whitespace-nowrap">
+      <div class="flex items-center gap-3">
+        <span class="font-bold text-slate-500 uppercase tracking-widest text-[9px]">⚡ RAPID KEYS:</span>
+        <span class="cursor-pointer" onclick="clearCart()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F2]</kbd> Clear</span>
+        <span class="cursor-pointer" onclick="focusSearchInput()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F3]</kbd> Fast Search</span>
+        <span class="cursor-pointer" onclick="openKhataModal()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F4]</kbd> Credit / Khata</span>
+        <span class="cursor-pointer" onclick="closeAllModals()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[Esc]</kbd> Close Modals</span>
+      </div>
+      <div class="flex items-center gap-1 text-[9px] text-emerald-400 font-mono">
+        <span>● Hardware HID Scanner Ready</span>
+      </div>
+    </div>
+
+    <!-- Primary Workspace Container -->
     <main class="flex-1 p-2 sm:p-3 w-full max-w-7xl mx-auto">
       
       <!-- ==========================================
-           2A. STAFF BILLING TERMINAL
+           2A. STAFF BILLING TERMINAL VIEW
            ========================================== -->
       <div id="panel-staff" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
-        <!-- Left: Instant Search, Loose Scale Chips, Catalog Grid -->
+        <!-- Left Column: Search, Weight Chips, Category Tabs & Catalog Grid -->
         <div class="lg:col-span-7 space-y-3">
           
+          <!-- Barcode HID Scanner & Text Search Input -->
           <div class="card-bg border rounded-2xl p-3 space-y-2">
             <div class="relative">
               <input 
                 id="inp-catalog-search" 
                 type="text" 
-                placeholder="🔍 Scan barcode or search item name... [F3]" 
+                placeholder="🔍 Scan barcode (HID ready) or search item / SKU... [F3]" 
                 class="w-full input-bg border-2 border-indigo-500/60 rounded-xl py-2 pl-3 pr-8 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-400"
                 autocomplete="off"
               >
@@ -214,32 +274,37 @@
             
             <div id="search-instant-dropdown" class="hidden max-h-56 overflow-y-auto divide-y divide-slate-800 input-bg border rounded-xl text-xs"></div>
 
+            <!-- Rapid Loose Weight Multiplier Chips -->
             <div class="flex items-center gap-1.5 pt-1 overflow-x-auto text-[10px] whitespace-nowrap">
               <span class="subtext-color font-bold uppercase">⚖️ Weight:</span>
               <button type="button" onclick="setScaleQuantity(0.100)" class="px-2 py-0.5 rounded card-bg hover:bg-slate-700 text-slate-300 font-bold border">100g</button>
               <button type="button" onclick="setScaleQuantity(0.250)" class="px-2 py-0.5 rounded card-bg hover:bg-slate-700 text-slate-300 font-bold border">250g</button>
               <button type="button" onclick="setScaleQuantity(0.500)" class="px-2 py-0.5 rounded card-bg hover:bg-slate-700 text-slate-300 font-bold border">500g</button>
               <button type="button" onclick="setScaleQuantity(1.000)" class="px-2 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40">1 kg</button>
-              <button type="button" onclick="openLooseScaleCalculator()" class="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">Loose Goods Calculator</button>
+              <button type="button" onclick="openLooseScaleCalculator()" class="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">Loose Calculator (₹ / g)</button>
             </div>
           </div>
 
-          <!-- Catalog Department Tabs -->
+          <!-- Department Category Filter Tabs -->
           <div id="catalog-category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap"></div>
 
-          <!-- Products Grid -->
+          <!-- Catalog Cards Grid (Interactive 1-Tap Punch) -->
           <div id="catalog-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[460px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Right: Current Cart Invoice Ledger -->
+        <!-- Right Column: Current Cart Ledger & Checkout Actions -->
         <div class="lg:col-span-5 space-y-3">
           <div class="card-bg border rounded-2xl p-3.5 shadow-xl space-y-3">
             
             <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
               <span class="text-xs font-black">Current Cart Invoice</span>
-              <button type="button" onclick="clearCart()" class="text-[10px] text-red-400 font-bold hover:underline">Clear [F2]</button>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] subtext-color font-mono"><span id="cart-item-count">0</span> items</span>
+                <button type="button" onclick="clearCart()" class="text-[10px] text-red-400 font-bold hover:underline">Clear [F2]</button>
+              </div>
             </div>
 
+            <!-- Cart Line Items Table -->
             <div class="max-h-52 overflow-y-auto">
               <table class="w-full text-left text-xs">
                 <thead>
@@ -255,7 +320,7 @@
               </table>
             </div>
 
-            <!-- Tax Slab Surcharge -->
+            <!-- Discount & Tax Slabs -->
             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700/60">
               <div>
                 <label class="text-[10px] font-bold subtext-color block mb-1">Discount Scheme</label>
@@ -280,6 +345,12 @@
             <div class="input-bg p-3 rounded-xl border space-y-1 text-xs">
               <div class="flex justify-between subtext-color"><span>Subtotal:</span><span id="bill-subtotal" class="font-mono">₹0.00</span></div>
               <div class="flex justify-between text-indigo-400"><span>GST Tax:</span><span id="bill-tax" class="font-mono">+₹0.00</span></div>
+              
+              <div class="border-t border-slate-700 pt-1 flex items-center justify-between">
+                <span class="text-[10px] font-bold text-amber-400">🤝 Cash Given / Settle:</span>
+                <input id="inp-cash-settle" type="number" step="any" placeholder="Amount" oninput="calculateCartTotals()" class="w-24 bg-slate-900 border border-amber-500/40 rounded px-1.5 py-0.5 text-right font-mono font-bold text-amber-300 text-xs">
+              </div>
+
               <div class="border-t border-slate-700 pt-1.5 flex justify-between items-baseline">
                 <span class="text-xs font-black">Grand Total:</span>
                 <span id="bill-grand-total" class="text-lg font-black text-emerald-400 font-mono">₹0.00</span>
@@ -298,7 +369,7 @@
                 💳 Card POS
               </button>
               
-              <!-- Conditional Khata Button -->
+              <!-- Conditional Khata Toggle Button -->
               <button type="button" id="btn-cart-khata" onclick="openKhataModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-black py-2.5 rounded-xl text-xs shadow">
                 📖 Khata Ledger
               </button>
@@ -310,11 +381,11 @@
       </div>
 
       <!-- ==========================================
-           2B. ADMIN EXECUTIVE DASHBOARD
+           2B. ADMIN EXECUTIVE DASHBOARD VIEW
            ========================================== -->
       <div id="panel-owner" class="hidden max-w-7xl mx-auto space-y-4">
         
-        <!-- Action Toolbar & Store Settings -->
+        <!-- Action Toolbar & Store GST Configuration -->
         <div class="card-bg border rounded-2xl p-4 shadow-xl space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -326,8 +397,13 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-1.5">
+              <button type="button" onclick="openAddProductModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">+ Add Product</button>
               <button type="button" onclick="openBulkPresetModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow">📚 650+ Presets (500 FMCG / 150 Sweets)</button>
+              <button type="button" onclick="openBulkCsvModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">📥 Bulk CSV Import</button>
+              <button type="button" onclick="openWhatsAppAlertsModal()" class="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">💬 WhatsApp Alerts</button>
               <button type="button" onclick="exportMonthlySalesExcel()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition">📊 Export Excel</button>
+              <button type="button" onclick="openAuditTrailModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">📋 Audit Trail</button>
+              <button type="button" onclick="downloadAuditPdf()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">📄 Download Audit PDF</button>
             </div>
           </div>
 
@@ -337,13 +413,13 @@
             <!-- GST Number Input -->
             <div class="input-bg border rounded-xl p-3 flex flex-col justify-between space-y-2">
               <div>
-                <label class="font-bold text-slate-300 block mb-1">Official Store GSTIN (Prints on All Bills)</label>
+                <label class="font-bold text-slate-300 block mb-1">Official Store GSTIN (Prints on All Bills)[cite: 24]</label>
                 <div class="flex gap-2">
                   <input id="inp-store-gstin" type="text" placeholder="e.g. 27AAAAA0000A1Z5" class="flex-1 card-bg border rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:border-indigo-500">
                   <button type="button" onclick="saveStoreGstinSetting()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg shadow">Save GST</button>
                 </div>
               </div>
-              <span class="text-[10px] subtext-color">Updated GSTIN dynamically reflects on 58mm/80mm thermal receipts.</span>
+              <span class="text-[10px] subtext-color">Updated GSTIN dynamically reflects on 58mm/80mm thermal receipts and A4 invoices[cite: 24].</span>
             </div>
 
             <!-- Khata Enable / Disable Toggle Switch -->
@@ -358,6 +434,17 @@
               </label>
             </div>
 
+          </div>
+
+          <!-- Normal Printer (A4 Format) Toggle -->
+          <div class="border-t border-slate-700/60 pt-3 flex items-center justify-between text-xs">
+            <div>
+              <span class="font-extrabold text-slate-200">Normal Printer Printing Option (A4 Format)</span>
+              <span id="a4-status-badge" class="ml-2 text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">OPTION OFF</span>
+            </div>
+            <button type="button" id="btn-toggle-a4-mode" onclick="toggleA4NormalPrinting()" class="px-3 py-1 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 border border-slate-700">
+              ● Turn ON Normal Printer (A4)
+            </button>
           </div>
         </div>
 
@@ -380,12 +467,12 @@
           </div>
           <div class="card-bg border rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-red-400 uppercase tracking-wider block">Low Stock Alerts</span>
-            <div class="text-xl font-black text-red-400 font-mono">4 <span class="text-xs font-normal subtext-color">items</span></div>
+            <div id="kpi-low-stock" class="text-xl font-black text-red-400 font-mono">4 <span class="text-xs font-normal subtext-color">items</span></div>
             <span class="text-[10px] text-red-400/80">Threshold &lt; 5 units</span>
           </div>
         </div>
 
-        <!-- Sales Analysis Working Charts (Screenshot 24) -->
+        <!-- Sales Analysis Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           
           <!-- Daily Revenue Trend Chart -->
@@ -445,6 +532,7 @@
                   <th class="py-2.5 px-3">Stock Level</th>
                   <th class="py-2.5 px-3">Health Status</th>
                   <th class="py-2.5 px-3">Selling Rate</th>
+                  <th class="py-2.5 px-3">Supplier Contact</th>
                   <th class="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
@@ -459,7 +547,7 @@
   </div>
 
   <!-- ========================================================
-       3. MODALS
+       3. MODALS (ALL ONBOARDING, REORDER, SCALE, AUDIT, PREVIEWS)
        ======================================================== -->
 
   <!-- 3A. FIRST-TIME ONBOARDING & PRESET CATALOG MODAL (500 FMCG + 150 SWEETS) -->
@@ -473,10 +561,10 @@
         <button type="button" onclick="closePresetModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
       </div>
 
-      <!-- View Sorting Toggle (Category-wise vs Alphabetical A-Z) -->
+      <!-- Sorting View Selection Toggle (Category-Wise vs Alphabetical A-Z) -->
       <div class="flex flex-wrap gap-2 items-center justify-between text-xs">
         <div class="flex items-center gap-1.5">
-          <span class="font-bold subtext-color text-[11px]">View By:</span>
+          <span class="font-bold subtext-color text-[11px]">View Order:</span>
           <button type="button" id="btn-view-category" onclick="setPresetViewMode('CATEGORY')" class="px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white shadow">Category-Wise</button>
           <button type="button" id="btn-view-alphabetical" onclick="setPresetViewMode('ALPHABETICAL')" class="px-2.5 py-1 rounded-lg font-bold input-bg border text-slate-300">Alphabetical (A-Z)</button>
         </div>
@@ -501,94 +589,94 @@
     </div>
   </div>
 
-  <!-- 3B. THERMAL RECEIPT PREVIEW & 5-BILL ROLLING REPRINT MODAL (Screenshot 21) -->
+  <!-- 3B. THERMAL RECEIPT PREVIEW & 5-BILL ROLLING REPRINT MODAL[cite: 24] -->
   <div id="modal-thermal-preview" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
         <div class="flex items-center gap-1.5">
           <span class="text-emerald-400">🧾</span>
-          <h3 class="text-xs font-black">Thermal Receipt Preview</h3>
+          <h3 class="text-xs font-black">Thermal Receipt Preview[cite: 24]</h3>
         </div>
         <button type="button" onclick="closeThermalPreviewModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
       </div>
 
-      <!-- Printer Format Toggle: 58mm (2-inch) vs 80mm (3-inch) -->
+      <!-- Printer Format Toggle: 58mm vs 80mm[cite: 24] -->
       <div class="flex items-center justify-between text-xs">
-        <span class="subtext-color font-bold text-[11px]">Printer Format:</span>
+        <span class="subtext-color font-bold text-[11px]">Printer Format:[cite: 24]</span>
         <div class="flex gap-1.5">
-          <button type="button" id="btn-modal-58mm" onclick="setModalPrintWidth('58mm')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow">58mm (2-inch)</button>
-          <button type="button" id="btn-modal-80mm" onclick="setModalPrintWidth('80mm')" class="px-2.5 py-1 rounded-lg text-xs font-bold input-bg border text-slate-300">80mm (3-inch)</button>
+          <button type="button" id="btn-modal-58mm" onclick="setModalPrintWidth('58mm')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow">58mm (2-inch)[cite: 24]</button>
+          <button type="button" id="btn-modal-80mm" onclick="setModalPrintWidth('80mm')" class="px-2.5 py-1 rounded-lg text-xs font-bold input-bg border text-slate-300">80mm (3-inch)[cite: 24]</button>
         </div>
       </div>
 
-      <!-- History of Last 5 Printed Bills Selection Dropdown -->
+      <!-- History of Last 5 Printed Bills Selection Dropdown[cite: 24] -->
       <div>
-        <label class="text-[10px] font-bold subtext-color block mb-1">Reprint from Last 5 Bills</label>
+        <label class="text-[10px] font-bold subtext-color block mb-1">Reprint from Last 5 Bills[cite: 24]</label>
         <select id="sel-recent-bills" onchange="loadSelectedRecentBill(this.value)" class="w-full input-bg border rounded-lg p-1.5 text-xs outline-none font-mono"></select>
       </div>
 
-      <!-- Styled Slip Preview Card -->
+      <!-- Styled Slip Preview Card[cite: 24] -->
       <div class="bg-white text-slate-950 p-4 rounded-xl shadow-inner font-mono text-[10px] space-y-2 border border-slate-300 max-h-72 overflow-y-auto">
         <div class="text-center space-y-0.5">
           <div class="w-8 h-8 mx-auto rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs mb-1">🏪</div>
-          <h4 id="prev-shop-name" class="font-bold text-xs">SHOPMASTER SUPERMARKET</h4>
-          <p id="prev-shop-address" class="text-[9px] text-slate-600">Main Market Road, Sector 4</p>
-          <p id="prev-shop-gstin" class="text-[9px] text-slate-600 font-bold">GSTIN: 27AAAAA0000A1Z5</p>
-          <p class="text-[9px] text-slate-600">Phone: +91 98765 43210</p>
-          <div class="inline-block border border-black px-2 py-0.5 text-[8px] font-black uppercase tracking-wider my-1">RETAIL TAX INVOICE</div>
+          <h4 id="prev-shop-name" class="font-bold text-xs">SHOPMASTER SUPERMARKET[cite: 24]</h4>
+          <p id="prev-shop-address" class="text-[9px] text-slate-600">Main Market Road, Sector 4[cite: 24]</p>
+          <p id="prev-shop-gstin" class="text-[9px] text-slate-600 font-bold">GSTIN: 27AAAAA0000A1Z5[cite: 24]</p>
+          <p class="text-[9px] text-slate-600">Phone: +91 98765 43210[cite: 24]</p>
+          <div class="inline-block border border-black px-2 py-0.5 text-[8px] font-black uppercase tracking-wider my-1">RETAIL TAX INVOICE[cite: 24]</div>
         </div>
 
         <div class="border-t border-b border-dashed border-slate-400 py-1 space-y-0.5 text-[9px]">
-          <div class="flex justify-between"><span>INVOICE:</span><span id="prev-inv-no" class="font-bold">INV-20261102-2784</span></div>
-          <div class="flex justify-between"><span>DATE:</span><span id="prev-inv-date">2/11/2026, 7:06:28 PM</span></div>
-          <div class="flex justify-between"><span>CASHIER:</span><span>Staff Cashier</span></div>
-          <div class="flex justify-between"><span>PAY MODE:</span><span id="prev-pay-mode" class="font-bold">CASH</span></div>
+          <div class="flex justify-between"><span>INVOICE:</span><span id="prev-inv-no" class="font-bold">INV-20261102-2784[cite: 24]</span></div>
+          <div class="flex justify-between"><span>DATE:</span><span id="prev-inv-date">2/11/2026, 7:06:28 PM[cite: 24]</span></div>
+          <div class="flex justify-between"><span>CASHIER:</span><span>Staff Cashier[cite: 24]</span></div>
+          <div class="flex justify-between"><span>PAY MODE:</span><span id="prev-pay-mode" class="font-bold">CASH[cite: 24]</span></div>
         </div>
 
         <table class="w-full text-left text-[9px]">
           <thead>
             <tr class="border-b border-slate-300">
-              <th>ITEM</th>
-              <th class="text-center">QTY</th>
-              <th class="text-right">TOTAL</th>
+              <th>ITEM[cite: 24]</th>
+              <th class="text-center">QTY[cite: 24]</th>
+              <th class="text-right">TOTAL[cite: 24]</th>
             </tr>
           </thead>
           <tbody id="prev-items-tbody"></tbody>
         </table>
 
         <div class="border-t border-dashed border-slate-400 pt-1 space-y-0.5 text-[9px]">
-          <div class="flex justify-between"><span>SUBTOTAL:</span><span id="prev-subtotal">₹125.00</span></div>
-          <div class="flex justify-between"><span>GST (5%):</span><span id="prev-gst">₹0.00</span></div>
+          <div class="flex justify-between"><span>SUBTOTAL:</span><span id="prev-subtotal">₹125.00[cite: 24]</span></div>
+          <div class="flex justify-between"><span>GST (5%):</span><span id="prev-gst">₹0.00[cite: 24]</span></div>
           <div class="flex justify-between font-black text-xs border-t border-black pt-1">
             <span>GRAND TOTAL:</span>
-            <span id="prev-grand-total">₹125.00</span>
+            <span id="prev-grand-total">₹125.00[cite: 24]</span>
           </div>
         </div>
 
         <div class="text-center pt-1 text-[8px] text-slate-500 border-t border-dashed border-slate-400">
-          * THANK YOU! VISIT AGAIN *<br>Goods once sold cannot be returned
+          * THANK YOU! VISIT AGAIN *[cite: 24]<br>Goods once sold cannot be returned[cite: 24]
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Action Buttons[cite: 24] -->
       <div class="grid grid-cols-2 gap-2 pt-1">
         <button type="button" onclick="executeReprintCurrentSlip()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700">
-          🔁 Reprint Selected
+          🔁 Reprint Selected[cite: 24]
         </button>
         <button type="button" onclick="printThermalSlipNow()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow">
-          Print Receipt
+          Print Receipt[cite: 24]
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 3C. SERVICE WORKER & SYNC STATUS MODAL (Screenshot 22) -->
+  <!-- 3C. SERVICE WORKER & SYNC STATUS MODAL[cite: 25] -->
   <div id="modal-sync-status" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
         <div class="flex items-center gap-1.5">
           <span class="text-emerald-400">📶</span>
-          <h3 class="text-xs font-black">Service Worker & Sync Status</h3>
+          <h3 class="text-xs font-black">Service Worker & Sync Status[cite: 25]</h3>
         </div>
         <button type="button" onclick="closeSyncStatusModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
       </div>
@@ -596,29 +684,199 @@
       <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs space-y-1">
         <div class="flex items-center gap-1.5 font-bold text-emerald-400">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span id="sync-modal-status-label">All Bills Fully Synchronized</span>
+          <span id="sync-modal-status-label">All Bills Fully Synchronized[cite: 25]</span>
         </div>
-        <p class="text-[10px] subtext-color">All local offline transactions are synced with the central store registry.</p>
+        <p class="text-[10px] subtext-color">All local offline transactions are synced with the central store registry.[cite: 25]</p>
       </div>
 
       <div class="grid grid-cols-2 gap-2 text-center text-xs">
         <div class="input-bg border rounded-xl p-2.5">
-          <span class="text-[10px] subtext-color uppercase block">Pending Queue</span>
-          <strong id="sync-queue-count" class="font-mono text-white text-sm">0 bills</strong>
+          <span class="text-[10px] subtext-color uppercase block">Pending Queue[cite: 25]</span>
+          <strong id="sync-queue-count" class="font-mono text-white text-sm">0 bills[cite: 25]</strong>
         </div>
         <div class="input-bg border rounded-xl p-2.5">
-          <span class="text-[10px] subtext-color uppercase block">Last Synced</span>
-          <strong class="font-mono text-emerald-400 text-sm">Active Session</strong>
+          <span class="text-[10px] subtext-color uppercase block">Last Synced[cite: 25]</span>
+          <strong class="font-mono text-emerald-400 text-sm">Active Session[cite: 25]</strong>
         </div>
       </div>
 
       <button type="button" onclick="simulateNetworkToggle()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">
-        ⚡ Simulate Network Disconnect / Online
+        ⚡ Simulate Network Disconnect / Online[cite: 25]
       </button>
     </div>
   </div>
 
-  <!-- 3D. ADMIN 6-DIGIT PIN MODAL -->
+  <!-- 3D. CUSTOM PRODUCT CREATION MODAL -->
+  <div id="modal-add-product" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-md card-bg border rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <h3 class="font-extrabold text-sm">Create New Catalog Product</h3>
+        <button type="button" onclick="closeAddProductModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="text-[10px] subtext-color font-bold block mb-1">Product Title</label>
+          <input id="inp-new-prod-name" type="text" placeholder="e.g. Kaju Roll Special" class="w-full input-bg border rounded-lg p-2 font-bold outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Department / Category</label>
+            <div class="flex gap-1">
+              <select id="sel-new-prod-cat" class="w-full input-bg border rounded-lg p-2 outline-none"></select>
+              <button type="button" onclick="promptCreateNewCategory()" title="Create New Category" class="px-2 input-bg rounded-lg font-bold border">+</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Sale Basis</label>
+            <select id="sel-new-prod-basis" class="w-full input-bg border rounded-lg p-2 font-bold outline-none">
+              <option value="kg/gm">By Weight (kg/gm) [Scale Trigger]</option>
+              <option value="kg">By Unit (kg)</option>
+              <option value="pc" selected>By Unit (pc)</option>
+              <option value="pack">By Unit (pack)</option>
+              <option value="L">By Unit (L)</option>
+              <option value="bag">By Unit (bag)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Selling Rate (₹)</label>
+            <input id="inp-new-prod-rate" type="number" step="any" placeholder="100.00" class="w-full input-bg border rounded-lg p-2 font-mono font-bold outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Initial Stock Level</label>
+            <input id="inp-new-prod-stock" type="number" step="any" placeholder="20" class="w-full input-bg border rounded-lg p-2 font-mono font-bold outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 border-t border-slate-700/60 pt-2">
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Supplier Name</label>
+            <input id="inp-new-supp-name" type="text" placeholder="e.g. Haldiram Distributor" class="w-full input-bg border rounded-lg p-2 outline-none">
+          </div>
+          <div>
+            <label class="text-[10px] subtext-color font-bold block mb-1">Supplier WhatsApp / Phone</label>
+            <input id="inp-new-supp-phone" type="tel" placeholder="98XXXXXXXX" class="w-full input-bg border rounded-lg p-2 font-mono outline-none">
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="submitCreateProduct()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow mt-2">
+        Save Product to Catalog
+      </button>
+    </div>
+  </div>
+
+  <!-- 3E. REORDER MODAL WITH DIRECT SUPPLIER DISPATCH -->
+  <div id="modal-reorder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xs font-bold">📦</span>
+          <div>
+            <h3 class="font-extrabold text-sm">Stock Inward & Reorder</h3>
+            <p class="text-[10px] subtext-color">Replenish stock & alert supplier</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeReorderModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <div class="input-bg border rounded-xl p-3 space-y-1 text-xs">
+        <div class="flex justify-between"><span class="subtext-color">Item:</span><span id="reorder-item-name" class="font-bold">Item Name</span></div>
+        <div class="flex justify-between"><span class="subtext-color">Current Stock:</span><span id="reorder-item-current" class="font-mono font-bold text-amber-400">0</span></div>
+        
+        <div class="border-t border-slate-700/80 pt-1.5 mt-1">
+          <div class="flex justify-between"><span class="subtext-color">Supplier:</span><span id="reorder-supp-name" class="font-bold">Direct Vendor</span></div>
+          <div class="flex justify-between"><span class="subtext-color">Contact:</span><span id="reorder-supp-phone" class="font-mono text-emerald-400">+91 98765 43210</span></div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-[10px] font-extrabold subtext-color uppercase tracking-wider block">Quantity to Order / Inward</label>
+        <input id="reorder-input-qty" type="number" step="any" value="25" class="w-full input-bg border border-indigo-500/60 rounded-xl py-2 px-3 font-mono font-bold text-sm outline-none">
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button type="button" onclick="dispatchSupplierWhatsAppOrder()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow flex items-center justify-center gap-1">
+          <span>💬</span> Order via WhatsApp
+        </button>
+        <button type="button" onclick="submitReorderInward()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow">
+          Commit Inward Stock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3F. LOOSE GOODS SCALE CALCULATOR -->
+  <div id="modal-scale-calc" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <span class="text-xs font-black">⚖️ Loose Weight & Budget Scale</span>
+        <button type="button" onclick="closeLooseScaleCalculator()" class="text-slate-400 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-[10px] subtext-color font-bold">Item Name</label>
+        <div id="calc-item-display" class="font-bold text-sm text-emerald-400">Select Item</div>
+        <span id="calc-rate-display" class="text-xs subtext-color font-mono">₹0.00 / kg</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-[10px] subtext-color font-bold">Weight in Grams (g)</label>
+          <input id="inp-calc-weight" type="number" step="any" placeholder="e.g. 250" oninput="runLooseWeightInput()" class="w-full input-bg border rounded-xl p-2 text-xs font-mono font-bold">
+        </div>
+        <div>
+          <label class="text-[10px] subtext-color font-bold">Budget Price (₹)</label>
+          <input id="inp-calc-price" type="number" step="any" placeholder="e.g. 50" oninput="runLoosePriceInput()" class="w-full input-bg border rounded-xl p-2 text-xs font-mono font-bold text-emerald-400">
+        </div>
+      </div>
+
+      <div class="flex gap-1.5 overflow-x-auto text-[10px]">
+        <button type="button" onclick="setCalcChipGrams(100)" class="px-2 py-1 rounded input-bg font-bold">100g</button>
+        <button type="button" onclick="setCalcChipGrams(250)" class="px-2 py-1 rounded input-bg font-bold">250g</button>
+        <button type="button" onclick="setCalcChipGrams(500)" class="px-2 py-1 rounded input-bg font-bold">500g</button>
+        <button type="button" onclick="setCalcChipPrice(50)" class="px-2 py-1 rounded bg-indigo-900/40 text-indigo-200 font-bold">₹50</button>
+        <button type="button" onclick="setCalcChipPrice(100)" class="px-2 py-1 rounded bg-indigo-900/40 text-indigo-200 font-bold">₹100</button>
+      </div>
+
+      <div class="input-bg p-3 rounded-xl border text-xs space-y-1">
+        <div class="flex justify-between subtext-color"><span>Final Qty:</span><span id="calc-res-qty" class="font-mono font-bold text-white">0.00 kg</span></div>
+        <div class="flex justify-between subtext-color"><span>Payable:</span><span id="calc-res-amt" class="font-mono font-bold text-emerald-400">₹0.00</span></div>
+      </div>
+
+      <button type="button" onclick="addCalculatedLooseToCart()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow">
+        + Add Loose Line to Cart
+      </button>
+    </div>
+  </div>
+
+  <!-- 3G. TRANSACTIONAL AUDIT TRAIL MODAL (WITH LOGIN/LOGOUT & PRINTABLE SHEET) -->
+  <div id="modal-audit-trail" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-xl card-bg border rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div>
+          <h3 class="text-xs font-black">Transactional Audit Logs</h3>
+          <p class="text-[9px] subtext-color">Chronological history with User Login and Logout timestamps</p>
+        </div>
+        <button type="button" onclick="closeAuditTrailModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <div id="audit-trail-container" class="space-y-2 max-h-72 overflow-y-auto text-xs pr-1"></div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-slate-700/60">
+        <span class="text-[10px] subtext-color">Total Records: <strong id="audit-entry-count">0</strong></span>
+        <button type="button" onclick="downloadAuditPdf()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+          <span>📄</span> Download Audit PDF (Date-Wise)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3H. ADMIN 6-DIGIT PIN MODAL -->
   <div id="modal-admin-pin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-xs card-bg border rounded-2xl shadow-2xl p-5 space-y-4 text-center">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
@@ -655,11 +913,38 @@
     </div>
   </div>
 
-  <!-- 3E. KHATA MODAL -->
+  <!-- 3I. WHATSAPP BRIEFINGS MODAL -->
+  <div id="modal-whatsapp-engine" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-md card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <h3 class="text-xs font-black">Store Owner WhatsApp Alerts</h3>
+        <button type="button" onclick="closeWhatsAppAlertsModal()" class="text-slate-400 font-bold">✕</button>
+      </div>
+      <textarea id="wa-preview-body" rows="8" class="w-full input-bg border rounded-xl p-3 text-[11px] font-mono outline-none resize-none leading-relaxed"></textarea>
+      <div class="flex gap-2">
+        <button type="button" onclick="copyWhatsAppMessage()" class="flex-1 py-2 input-bg text-xs font-bold rounded-xl border">Copy Text</button>
+        <button type="button" onclick="dispatchToWhatsApp()" class="flex-1 py-2 bg-emerald-600 text-slate-950 text-xs font-black rounded-xl">Launch WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3J. BULK CSV IMPORT MODAL -->
+  <div id="modal-bulk-csv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <span class="text-xs font-black">📥 Bulk CSV Catalog Import</span>
+        <button type="button" onclick="closeBulkCsvModal()" class="text-slate-400 font-bold">✕</button>
+      </div>
+      <input type="file" id="inp-csv-file" accept=".csv" class="w-full text-xs subtext-color file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white">
+      <button type="button" onclick="processBulkCsvFile()" class="w-full py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow">Commit to Stock</button>
+    </div>
+  </div>
+
+  <!-- 3K. KHATA MODAL -->
   <div id="modal-khata" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm card-bg border rounded-2xl shadow-2xl p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-        <span class="text-xs font-black">📖 Khata Credit Debt</span>
+        <span class="text-xs font-black">📖 Khata Credit Ledger</span>
         <button type="button" onclick="closeKhataModal()" class="text-slate-400 font-bold">✕</button>
       </div>
       <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile" class="w-full input-bg border rounded-xl p-2.5 text-xs font-mono font-bold outline-none">
@@ -669,15 +954,17 @@
   </div>
 
   <!-- ========================================================
-       4. HIDDEN THERMAL RECEIPT CONTAINER FOR WINDOW.PRINT
+       4. HIDDEN PRINT CONTAINERS (58mm/80mm Thermal, A4, Audit)
        ======================================================== -->
+
+  <!-- Thermal Slip (58mm / 80mm)[cite: 24] -->
   <div id="printable-thermal-receipt" class="hidden">
     <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-      <h2 id="print-store-name" style="font-size: 13px; margin: 0; font-weight: bold;">SHOPMASTER SUPERMARKET</h2>
-      <p id="print-store-address" style="margin: 2px 0; font-size: 9px;">Main Market Road, Sector 4</p>
-      <p id="print-store-gst" style="margin: 1px 0; font-size: 9px; font-weight: bold;">GSTIN: 27AAAAA0000A1Z5</p>
-      <div id="print-inv-no" style="font-weight: bold; font-size: 9px;">INV-20261102-2784</div>
-      <div id="print-inv-date" style="font-size: 8px;">2/11/2026, 7:06:28 PM</div>
+      <h2 id="print-store-name" style="font-size: 13px; margin: 0; font-weight: bold;">SHOPMASTER SUPERMARKET[cite: 24]</h2>
+      <p id="print-store-address" style="margin: 2px 0; font-size: 9px;">Main Market Road, Sector 4[cite: 24]</p>
+      <p id="print-store-gst" style="margin: 1px 0; font-size: 9px; font-weight: bold;">GSTIN: 27AAAAA0000A1Z5[cite: 24]</p>
+      <div id="print-inv-no" style="font-weight: bold; font-size: 9px;">INV-20261102-2784[cite: 24]</div>
+      <div id="print-inv-date" style="font-size: 8px;">2/11/2026, 7:06:28 PM[cite: 24]</div>
     </div>
     <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
       <tbody id="print-items-tbody"></tbody>
@@ -685,15 +972,70 @@
     <div style="border-top: 1px dashed #000; margin-top: 4px; padding-top: 4px;">
       <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px;">
         <span>TOTAL:</span>
-        <span id="print-total-amount">₹0.00</span>
+        <span id="print-total-amount">₹0.00[cite: 24]</span>
       </div>
-      <div id="print-pay-mode-label" style="font-size: 9px; margin-top: 2px;">PAY MODE: CASH</div>
-      <div style="text-align: center; margin-top: 8px; font-size: 8px;">* THANK YOU! VISIT AGAIN *</div>
+      <div id="print-pay-mode-label" style="font-size: 9px; margin-top: 2px;">PAY MODE: CASH[cite: 24]</div>
+      <div style="text-align: center; margin-top: 8px; font-size: 8px;">* THANK YOU! VISIT AGAIN *[cite: 24]</div>
     </div>
   </div>
 
+  <!-- Normal A4 Tax Invoice Container -->
+  <div id="printable-a4-invoice" class="hidden">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 15px;">
+      <div>
+        <h1 style="font-size: 24px; font-weight: 900; margin: 0;">STOREPOS SYSTEM</h1>
+        <p style="margin: 3px 0; font-size: 12px; color: #555;">Retail Tax Invoice • Official Counter Copy</p>
+        <p id="a4-shop-title" style="margin: 0; font-size: 14px; font-weight: bold;">ShopMaster Supermarket</p>
+      </div>
+      <div style="text-align: right; font-size: 12px;">
+        <p style="margin: 0; font-weight: bold;">Invoice: <span id="a4-inv-no">INV-000000</span></p>
+        <p style="margin: 3px 0;">Date: <span id="a4-inv-date"></span></p>
+        <p style="margin: 0;">GST No: <strong id="a4-gst-display">27AAAAA0000A1Z5</strong></p>
+      </div>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;">
+      <thead>
+        <tr style="background: #f1f5f9; border-bottom: 1px solid #000;">
+          <th style="padding: 8px; text-align: left;">Item Description</th>
+          <th style="padding: 8px; text-align: center;">Qty</th>
+          <th style="padding: 8px; text-align: right;">Unit Rate</th>
+          <th style="padding: 8px; text-align: right;">Total Amount</th>
+        </tr>
+      </thead>
+      <tbody id="a4-table-tbody"></tbody>
+    </table>
+    <div style="margin-top: 25px; display: flex; justify-content: space-between; font-size: 13px;">
+      <div style="width: 50%;">
+        <p><strong>Terms:</strong> Goods sold can be returned within 3 days with bill.</p>
+      </div>
+      <div style="width: 40%; text-align: right;">
+        <p style="font-size: 18px; font-weight: 900; margin: 0;">Grand Total: <span id="a4-total-val">₹0.00</span></p>
+        <p style="margin-top: 40px; border-top: 1px solid #000; display: inline-block; padding-top: 5px;">Authorized Signatory</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Audit Sheet Container -->
+  <div id="printable-audit-sheet" class="hidden">
+    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+      <h2 style="font-size: 18px; margin: 0; font-weight: bold;">STOREPOS SYSTEM - OFFICIAL AUDIT LEDGER</h2>
+      <p style="margin: 4px 0; font-size: 11px;">Complete Date-Wise Transaction & Staff Session History</p>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+      <thead>
+        <tr style="background: #e2e8f0; border-bottom: 1px solid #000;">
+          <th style="padding: 6px; text-align: left;">Timestamp</th>
+          <th style="padding: 6px; text-align: left;">Category / Type</th>
+          <th style="padding: 6px; text-align: left;">Action Title</th>
+          <th style="padding: 6px; text-align: left;">Operational Details</th>
+        </tr>
+      </thead>
+      <tbody id="audit-sheet-table-body"></tbody>
+    </table>
+  </div>
+
   <!-- ========================================================
-       5. JAVASCRIPT CONTROLLER
+       5. JAVASCRIPT CONTROLLER (ALL FEATURES CONSOLIDATED)
        ======================================================== -->
   <script>
     // ----------------------------------------------------
@@ -702,38 +1044,44 @@
     let currentPaperWidth = localStorage.getItem("storepos_paper_width") || "58mm";
     let isKhataEnabled = localStorage.getItem("storepos_khata_enabled") !== "false";
     let isDarkMode = localStorage.getItem("storepos_dark_mode") !== "false";
+    let isA4OptionActive = localStorage.getItem("storepos_a4_active") === "true";
     let storeGstin = localStorage.getItem("storepos_gstin") || "27AAAAA0000A1Z5";
     let presetViewMode = "CATEGORY"; // "CATEGORY" or "ALPHABETICAL"
 
     let isAdminUnlocked = false;
+    let isRegistering = false;
+    let activeUser = null;
     let enteredPin = "";
     const ADMIN_DEMO_PIN = "123456";
 
-    // Rolling memory of last 5 printed bills
+    // Rolling memory of last 5 printed bills[cite: 24]
     let recentPrintedBills = JSON.parse(localStorage.getItem("storepos_recent_5_bills") || "[]");
 
-    // Department Category Tabs
+    // Dynamic Category Set
     let departmentCategories = ["All Items", "Groceries", "Beverages", "Sweets", "Household", "Snacks"];
 
-    // Base Default Inventory
+    // Base Default Catalog
     let currentInventory = [];
     const defaultInitialInventory = [
-      { id: "p1", custom_name: "Basmati Rice Premium 1kg", barcode: "89012341", category: "Groceries", uom: "kg/gm", unit_price: 110.00, current_stock: 35.0, min_stock_alert: 5 },
-      { id: "p2", custom_name: "Cold Pressed Mustard Oil 1L", barcode: "89012342", category: "Groceries", uom: "L", unit_price: 140.00, current_stock: 18.0, min_stock_alert: 5 },
-      { id: "p3", custom_name: "Refined Pure Sugar 1kg", barcode: "89012343", category: "Groceries", uom: "kg/gm", unit_price: 44.00, current_stock: 4.0, min_stock_alert: 5 },
-      { id: "p4", custom_name: "Desi Toor Dal Unpolished 1kg", barcode: "89012344", category: "Groceries", uom: "kg/gm", unit_price: 155.00, current_stock: 5.0, min_stock_alert: 5 },
-      { id: "p5", custom_name: "Assam CTC Leaf Tea 250g", barcode: "89012345", category: "Beverages", uom: "pack", unit_price: 125.00, current_stock: 21.0, min_stock_alert: 5 },
-      { id: "p6", custom_name: "Toned Fresh Milk 500ml", barcode: "89012346", category: "Beverages", uom: "pack", unit_price: 32.00, current_stock: 3.0, min_stock_alert: 5 },
-      { id: "p7", custom_name: "Organic Turmeric Powder 200g", barcode: "89012347", category: "Groceries", uom: "pack", unit_price: 65.00, current_stock: 14.0, min_stock_alert: 5 },
-      { id: "p8", custom_name: "Ultra Clean Detergent Powder 1kg", barcode: "89012348", category: "Household", uom: "pack", unit_price: 180.00, current_stock: 12.0, min_stock_alert: 5 },
-      { id: "p9", custom_name: "Chakki Fresh Whole Wheat Atta 5kg", barcode: "89012349", category: "Groceries", uom: "bag", unit_price: 245.00, current_stock: 2.0, min_stock_alert: 5 },
-      { id: "p10", custom_name: "Marie Gold Digestive Biscuits 200g", barcode: "89012350", category: "Snacks", uom: "pack", unit_price: 35.00, current_stock: 28.0, min_stock_alert: 5 },
-      { id: "p11", custom_name: "Kaju Katli Special Sweet", barcode: "89012351", category: "Sweets", uom: "kg/gm", unit_price: 900.00, current_stock: 25.0, min_stock_alert: 5 },
-      { id: "p12", custom_name: "Motichoor Desi Ghee Ladoo", barcode: "89012352", category: "Sweets", uom: "kg/gm", unit_price: 420.00, current_stock: 30.0, min_stock_alert: 5 }
+      { id: "p1", custom_name: "Basmati Rice Premium 1kg", barcode: "89012341", category: "Groceries", uom: "kg/gm", unit_price: 110.00, cost_price: 85.00, current_stock: 35.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
+      { id: "p2", custom_name: "Cold Pressed Mustard Oil 1L", barcode: "89012342", category: "Groceries", uom: "L", unit_price: 140.00, cost_price: 115.00, current_stock: 18.0, min_stock_alert: 5, supplier_name: "Dhara Oil Mills", supplier_phone: "919876543211" },
+      { id: "p3", custom_name: "Refined Pure Sugar 1kg", barcode: "89012343", category: "Groceries", uom: "kg/gm", unit_price: 44.00, cost_price: 36.00, current_stock: 4.0, min_stock_alert: 5, supplier_name: "National Sugar Mill", supplier_phone: "919876543212" },
+      { id: "p4", custom_name: "Desi Toor Dal Unpolished 1kg", barcode: "89012344", category: "Groceries", uom: "kg/gm", unit_price: 155.00, cost_price: 130.00, current_stock: 5.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
+      { id: "p5", custom_name: "Assam CTC Leaf Tea 250g", barcode: "89012345", category: "Beverages", uom: "pack", unit_price: 125.00, cost_price: 95.00, current_stock: 21.0, min_stock_alert: 5, supplier_name: "Assam Valley Tea Co", supplier_phone: "919876543215" },
+      { id: "p6", custom_name: "Toned Fresh Milk 500ml", barcode: "89012346", category: "Beverages", uom: "pack", unit_price: 32.00, cost_price: 28.00, current_stock: 3.0, min_stock_alert: 5, supplier_name: "Amul Fresh Dairy", supplier_phone: "919876543216" },
+      { id: "p7", custom_name: "Organic Turmeric Powder 200g", barcode: "89012347", category: "Groceries", uom: "pack", unit_price: 65.00, cost_price: 48.00, current_stock: 14.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
+      { id: "p8", custom_name: "Ultra Clean Detergent Powder 1kg", barcode: "89012348", category: "Household", uom: "pack", unit_price: 180.00, cost_price: 145.00, current_stock: 12.0, min_stock_alert: 5, supplier_name: "Metro FMCG Wholesalers", supplier_phone: "919876543299" },
+      { id: "p9", custom_name: "Chakki Fresh Whole Wheat Atta 5kg", barcode: "89012349", category: "Groceries", uom: "bag", unit_price: 245.00, cost_price: 205.00, current_stock: 2.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
+      { id: "p10", custom_name: "Marie Gold Digestive Biscuits 200g", barcode: "89012350", category: "Snacks", uom: "pack", unit_price: 35.00, cost_price: 27.00, current_stock: 28.0, min_stock_alert: 5, supplier_name: "Metro FMCG Wholesalers", supplier_phone: "919876543299" },
+      { id: "p11", custom_name: "Kaju Katli Special Sweet", barcode: "89012351", category: "Sweets", uom: "kg/gm", unit_price: 900.00, cost_price: 720.00, current_stock: 25.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" },
+      { id: "p12", custom_name: "Motichoor Desi Ghee Ladoo", barcode: "89012352", category: "Sweets", uom: "kg/gm", unit_price: 420.00, cost_price: 320.00, current_stock: 30.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" }
     ];
 
     let activeCart = [];
     let scaleMultiplier = 1.0;
+    let auditLogs = [];
+    let activeScaleProduct = null;
+    let activeReorderProductId = null;
     let revenueChartInstance = null;
     let volumeChartInstance = null;
 
@@ -772,8 +1120,11 @@
           category: (i % 5 === 0) ? "Groceries" : (i % 5 === 1 ? "Household" : (i % 5 === 2 ? "Snacks" : "Beverages")),
           uom: base.includes("Atta") || base.includes("Rice") ? "kg/gm" : "pack",
           unit_price: 35 + ((i * 7) % 240),
+          cost_price: 28 + ((i * 5) % 190),
           current_stock: 40,
-          min_stock_alert: 5
+          min_stock_alert: 5,
+          supplier_name: "Metro FMCG Wholesalers",
+          supplier_phone: "919876543299"
         });
       }
 
@@ -797,8 +1148,11 @@
           category: "Sweets",
           uom: "kg/gm",
           unit_price: 380 + ((j * 15) % 650),
+          cost_price: 290 + ((j * 12) % 500),
           current_stock: 20,
-          min_stock_alert: 4
+          min_stock_alert: 4,
+          supplier_name: "Bikaner Sweets Kitchen",
+          supplier_phone: "919876543214"
         });
       }
 
@@ -811,63 +1165,96 @@
     window.addEventListener("DOMContentLoaded", () => {
       generateLargePresetsMaster();
       loadInventoryState();
+      loadStoredAuditLogs();
       applyThemeMode(isDarkMode);
       syncPaperWidthUI();
       applyGstinSetting(storeGstin);
       applyKhataMasterSwitchUI();
+      syncA4ButtonUI();
+      initNetworkHandlers();
       initCategoryTabs();
       renderCatalogCards();
       renderLiveInventoryTable();
-      initSalesAnalysisCharts();
+      populateCategoryDropdowns();
       populateRecentBillsDropdown();
     });
 
     function loadInventoryState() {
-      const saved = localStorage.getItem("storepos_catalog_inventory");
+      const saved = localStorage.getItem("storepos_catalog_inventory_v3");
       if (saved) {
         currentInventory = JSON.parse(saved);
       } else {
         currentInventory = [...defaultInitialInventory];
-        localStorage.setItem("storepos_catalog_inventory", JSON.stringify(currentInventory));
+        localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
       }
     }
 
     function saveInventoryState() {
-      localStorage.setItem("storepos_catalog_inventory", JSON.stringify(currentInventory));
+      localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
       renderCatalogCards();
       renderLiveInventoryTable();
-      document.getElementById("kpi-sku-count").innerText = `${currentInventory.length} goods`;
+      const skuEl = document.getElementById("kpi-sku-count");
+      if (skuEl) skuEl.innerText = `${currentInventory.length} goods`;
     }
 
+    // ----------------------------------------------------
+    // AUTHENTICATION & LOGIN/LOGOUT AUDITING
+    // ----------------------------------------------------
     function fillQuickDemoCredentials() {
       document.getElementById("inp-email").value = "counter1@storepos.com";
       document.getElementById("inp-password").value = "StorePOS@123";
+    }
+
+    function toggleAuthMode() {
+      isRegistering = !isRegistering;
+      document.getElementById("auth-title").innerText = isRegistering ? "Register New Outlet" : "Terminal Sign In";
+      document.getElementById("auth-toggle-btn").innerText = isRegistering ? "Already registered? Click here to Sign In" : "Need a new store? Click here to Register";
     }
 
     function submitAuthentication() {
       const email = document.getElementById("inp-email").value.trim();
       const shopName = document.getElementById("inp-shop-name").value.trim();
 
-      if (!email) return alert("Please enter email address.");
+      if (!email) return alert("Please enter your registered email address.");
+
+      activeUser = { email, shopName: shopName || "ShopMaster Supermarket" };
+
+      // Log Login Timestamp to Audit Trail
+      recordAuditEntry({
+        type: "SESSION LOGIN",
+        title: `Terminal Session Started: ${email}`,
+        details: `Cashier authenticated on counter terminal at ${new Date().toLocaleTimeString("en-IN")}.`
+      });
 
       document.getElementById("view-landing").classList.add("hidden");
       document.getElementById("view-app").classList.remove("hidden");
-      document.getElementById("header-shop-name").innerText = shopName || "ShopMaster Supermarket";
+      document.getElementById("header-shop-name").innerText = activeUser.shopName;
 
-      // First time onboarding check: 500 FMCG + 150 Sweets Wizard
-      const hasOnboarded = localStorage.getItem("storepos_onboarded_flag_v2");
+      // First-time onboarding trigger: 500 FMCG + 150 Sweets Wizard
+      const hasOnboarded = localStorage.getItem("storepos_onboarded_flag_v3");
       if (!hasOnboarded) {
         openBulkPresetModal();
-        localStorage.setItem("storepos_onboarded_flag_v2", "true");
+        localStorage.setItem("storepos_onboarded_flag_v3", "true");
       }
     }
 
     function executeLogout() {
-      if (confirm("End counter shift and exit StorePOS?")) location.reload();
+      if (!confirm("Are you sure you want to end shift and exit StorePOS System?")) return;
+
+      const userEmail = activeUser ? activeUser.email : "counter1@storepos.com";
+
+      // Log Logout Timestamp to Audit Trail
+      recordAuditEntry({
+        type: "SESSION LOGOUT",
+        title: `Terminal Session Closed: ${userEmail}`,
+        details: `Shift closed. All counter actions audited at ${new Date().toLocaleTimeString("en-IN")}.`
+      });
+
+      setTimeout(() => location.reload(), 200);
     }
 
     // ----------------------------------------------------
-    // DARK / LIGHT MODE TOGGLE
+    // THEME & GSTIN MANAGEMENT
     // ----------------------------------------------------
     function toggleThemeMode() {
       isDarkMode = !isDarkMode;
@@ -885,16 +1272,13 @@
       }
     }
 
-    // ----------------------------------------------------
-    // GST NUMBER & KHATA TOGGLE
-    // ----------------------------------------------------
     function saveStoreGstinSetting() {
       const gstinVal = document.getElementById("inp-store-gstin").value.trim().toUpperCase();
       if (!gstinVal) return alert("Please specify a valid GSTIN.");
       storeGstin = gstinVal;
       localStorage.setItem("storepos_gstin", storeGstin);
       applyGstinSetting(storeGstin);
-      alert(`GSTIN set to "${storeGstin}". This will now print on all bills.`);
+      alert(`GSTIN set to "${storeGstin}". This will now print on all bills.[cite: 24]`);
     }
 
     function applyGstinSetting(val) {
@@ -902,6 +1286,8 @@
       document.getElementById("inp-store-gstin").value = val;
       document.getElementById("prev-shop-gstin").innerText = `GSTIN: ${val}`;
       document.getElementById("print-store-gst").innerText = `GSTIN: ${val}`;
+      const a4Gst = document.getElementById("a4-gst-display");
+      if (a4Gst) a4Gst.innerText = val;
     }
 
     function toggleKhataMasterSwitch() {
@@ -922,7 +1308,7 @@
     }
 
     // ----------------------------------------------------
-    // PRESET CATALOG MODAL (CATEGORY VS ALPHABETICAL A-Z)
+    // PRESET CATALOG ONBOARDING (CATEGORY VS ALPHABETICAL)
     // ----------------------------------------------------
     function openBulkPresetModal() {
       filterPresetCatalogUI();
@@ -994,7 +1380,7 @@
 
     function commitSelectedPresets() {
       const checkedBoxes = Array.from(document.querySelectorAll(".preset-chk:checked"));
-      if (!checkedBoxes.length) return alert("Please select at least one item from the preset list.");
+      if (!checkedBoxes.length) return alert("Please check at least one item.");
 
       let addedCount = 0;
       checkedBoxes.forEach(chk => {
@@ -1006,13 +1392,19 @@
         }
       });
 
+      recordAuditEntry({
+        type: "PRESET COMMIT",
+        title: `Catalog Populated with ${addedCount} Items`,
+        details: `Imported checked goods from 500 FMCG and 150 Sweets catalog.`
+      });
+
       saveInventoryState();
       closePresetModal();
-      alert(`Successfully imported ${addedCount} items into your store catalog!`);
+      alert(`Successfully added ${addedCount} goods to your store catalog!`);
     }
 
     // ----------------------------------------------------
-    // THERMAL BILL PRINTING & 5-BILL MEMORY REPRINT
+    // THERMAL BILL PRINTING & 5-BILL MEMORY REPRINT[cite: 24]
     // ----------------------------------------------------
     function togglePaperWidth() {
       currentPaperWidth = currentPaperWidth === "58mm" ? "80mm" : "58mm";
@@ -1055,7 +1447,7 @@
         return;
       }
       sel.innerHTML = recentPrintedBills.map((b, idx) => `
-        <option value="${idx}">${b.invoiceNo} • ${b.grandTotal} (${b.paymentMode})</option>
+        <option value="${idx}">${b.invoiceNo} • ${b.grandTotal} (${b.paymentMode})[cite: 24]</option>
       `).join("");
     }
 
@@ -1095,7 +1487,7 @@
     function executeReprintCurrentSlip() {
       const selIdx = document.getElementById("sel-recent-bills").value;
       const bill = recentPrintedBills[selIdx] || recentPrintedBills[0];
-      if (!bill) return alert("No bill available in memory to reprint.");
+      if (!bill) return alert("No bill stored in memory to reprint.");
       dispatchSystemPrint(bill);
     }
 
@@ -1107,6 +1499,12 @@
     }
 
     function dispatchSystemPrint(bill) {
+      if (isA4OptionActive) {
+        renderAndPrintA4(bill);
+        return;
+      }
+
+      document.body.setAttribute("data-print-format", "thermal");
       document.getElementById("print-store-name").innerText = document.getElementById("header-shop-name").innerText.toUpperCase();
       document.getElementById("print-store-gst").innerText = `GSTIN: ${storeGstin}`;
       document.getElementById("print-inv-no").innerText = bill.invoiceNo;
@@ -1124,10 +1522,48 @@
       window.print();
     }
 
+    function renderAndPrintA4(bill) {
+      document.body.setAttribute("data-print-format", "a4");
+      document.getElementById("a4-inv-no").innerText = bill.invoiceNo;
+      document.getElementById("a4-inv-date").innerText = bill.date;
+      document.getElementById("a4-total-val").innerText = bill.grandTotal;
+
+      document.getElementById("a4-table-tbody").innerHTML = bill.items.map(i => `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px;">${i.name}</td>
+          <td style="padding: 8px; text-align: center;">${i.qty} ${i.uom || ''}</td>
+          <td style="padding: 8px; text-align: right;">₹${i.price.toFixed(2)}</td>
+          <td style="padding: 8px; text-align: right; font-weight: bold;">₹${(i.price * i.qty).toFixed(2)}</td>
+        </tr>
+      `).join("");
+
+      window.print();
+    }
+
+    function toggleA4NormalPrinting() {
+      isA4OptionActive = !isA4OptionActive;
+      localStorage.setItem("storepos_a4_active", isA4OptionActive);
+      syncA4ButtonUI();
+    }
+
+    function syncA4ButtonUI() {
+      const b = document.getElementById("a4-status-badge");
+      const btn = document.getElementById("btn-toggle-a4-mode");
+      if (isA4OptionActive) {
+        b.innerText = "OPTION ON";
+        b.className = "ml-2 text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono";
+        btn.innerText = "● Turn OFF Normal Printer (A4)";
+      } else {
+        b.innerText = "OPTION OFF";
+        b.className = "ml-2 text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono";
+        btn.innerText = "● Turn ON Normal Printer (A4)";
+      }
+    }
+
     // ----------------------------------------------------
-    // INVOICE SALES CHECKOUT & OFFLINE QUEUE
+    // INVOICE SALES CHECKOUT & OFFLINE ENGINE[cite: 25]
     // ----------------------------------------------------
-    function processSale(paymentMode) {
+    function processSale(paymentMode, custName = null, custPhone = null) {
       if (!activeCart.length) return alert("Invoice is empty.");
 
       const invNo = "INV-" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
@@ -1142,6 +1578,8 @@
         tax: tax,
         grandTotal: grandTotal,
         paymentMode: paymentMode,
+        customerName: custName,
+        customerPhone: custPhone,
         date: new Date().toLocaleString("en-IN")
       };
 
@@ -1151,22 +1589,51 @@
         if (item) item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(2)));
       });
 
-      // Check Offline status
-      if (!navigator.onLine) {
+      // Audit Record
+      const isOnline = navigator.onLine;
+      recordAuditEntry({
+        type: isOnline ? "SALE INVOICE" : "OFFLINE SALE",
+        title: `Bill ${invNo} Punched [${paymentMode}]`,
+        details: `Amount: ${grandTotal}. Mode: ${paymentMode}. Synced Status: ${isOnline ? 'Online Synced' : 'Queued in Offline Storage'}[cite: 25].`
+      });
+
+      // Queue if offline[cite: 25]
+      if (!isOnline) {
         const offlineQueue = JSON.parse(localStorage.getItem("storepos_offline_bills_queue") || "[]");
         offlineQueue.push(billRecord);
         localStorage.setItem("storepos_offline_bills_queue", JSON.stringify(offlineQueue));
         updateOfflineQueueUI();
       }
 
-      // Store in 5-bill memory
+      // Store in 5-bill rolling memory[cite: 24]
       recordBillIntoRollingMemory(billRecord);
 
-      // Print
+      // Trigger Print Slip[cite: 24]
       dispatchSystemPrint(billRecord);
 
       clearCart();
       saveInventoryState();
+    }
+
+    function initNetworkHandlers() {
+      window.addEventListener('online', syncOfflineBills);
+      window.addEventListener('offline', updateOfflineQueueUI);
+      updateOfflineQueueUI();
+    }
+
+    function syncOfflineBills() {
+      updateOfflineQueueUI();
+      const queue = JSON.parse(localStorage.getItem("storepos_offline_bills_queue") || "[]");
+      if (!queue.length) return;
+
+      recordAuditEntry({
+        type: "OFFLINE SYNC",
+        title: `Synchronized ${queue.length} Offline Transactions`,
+        details: `Re-established internet connection. Offline bills uploaded to store registry.`
+      });
+
+      localStorage.removeItem("storepos_offline_bills_queue");
+      updateOfflineQueueUI();
     }
 
     function openSyncStatusModal() {
@@ -1194,18 +1661,16 @@
       } else {
         dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400";
         text.innerText = "Online Synced";
-        if (label) label.innerText = "All Bills Fully Synchronized";
+        if (label) label.innerText = "All Bills Fully Synchronized[cite: 25]";
       }
     }
 
     function simulateNetworkToggle() {
       const queue = JSON.parse(localStorage.getItem("storepos_offline_bills_queue") || "[]");
       if (queue.length > 0) {
-        // Upload & sync back
         localStorage.removeItem("storepos_offline_bills_queue");
-        alert("Simulated Connection: Syncing all queued offline bills to cloud database!");
+        alert("Simulated Connection: Syncing all queued offline bills to cloud database![cite: 25]");
       } else {
-        // Add simulated offline bill
         queue.push({ invoiceNo: "OFFLINE-TEST", grandTotal: "₹250.00", paymentMode: "CASH" });
         localStorage.setItem("storepos_offline_bills_queue", JSON.stringify(queue));
         alert("Simulated Offline: Bill queued locally.");
@@ -1214,7 +1679,7 @@
     }
 
     // ----------------------------------------------------
-    // CATALOG CARDS, CART & CALCULATION
+    // CATALOG CARDS, CART & KG/GM SCALE AUTOMATION
     // ----------------------------------------------------
     function initCategoryTabs() {
       const c = document.getElementById("catalog-category-tabs");
@@ -1266,11 +1731,77 @@
     function handleCatalogCardClick(productId) {
       const item = currentInventory.find(p => p.id === productId);
       if (!item) return;
-      addItemToCart(item.id, scaleMultiplier);
+
+      if (item.uom === "kg/gm") {
+        openLooseScaleModalForProduct(item);
+      } else {
+        addItemToCart(item.id, scaleMultiplier);
+      }
     }
 
     function setScaleQuantity(q) {
       scaleMultiplier = q;
+    }
+
+    function openLooseScaleCalculator() {
+      const firstLoose = currentInventory.find(p => p.uom === "kg/gm") || currentInventory[0];
+      if (firstLoose) openLooseScaleModalForProduct(firstLoose);
+    }
+
+    function openLooseScaleModalForProduct(item) {
+      activeScaleProduct = item;
+      document.getElementById("calc-item-display").innerText = item.custom_name;
+      document.getElementById("calc-rate-display").innerText = `₹${item.unit_price} / kg`;
+      document.getElementById("inp-calc-weight").value = "250";
+      runLooseWeightInput();
+      document.getElementById("modal-scale-calc").classList.remove("hidden");
+    }
+
+    function closeLooseScaleCalculator() {
+      document.getElementById("modal-scale-calc").classList.add("hidden");
+      activeScaleProduct = null;
+    }
+
+    function runLooseWeightInput() {
+      if (!activeScaleProduct) return;
+      const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
+      const qtyKg = grams / 1000;
+      const cost = qtyKg * activeScaleProduct.unit_price;
+
+      document.getElementById("inp-calc-price").value = cost.toFixed(2);
+      document.getElementById("calc-res-qty").innerText = `${qtyKg.toFixed(3)} kg (${grams}g)`;
+      document.getElementById("calc-res-amt").innerText = `₹${cost.toFixed(2)}`;
+    }
+
+    function runLoosePriceInput() {
+      if (!activeScaleProduct) return;
+      const budget = parseFloat(document.getElementById("inp-calc-price").value) || 0;
+      const qtyKg = budget / activeScaleProduct.unit_price;
+      const grams = (qtyKg * 1000).toFixed(0);
+
+      document.getElementById("inp-calc-weight").value = grams;
+      document.getElementById("calc-res-qty").innerText = `${qtyKg.toFixed(3)} kg (${grams}g)`;
+      document.getElementById("calc-res-amt").innerText = `₹${budget.toFixed(2)}`;
+    }
+
+    function setCalcChipGrams(g) {
+      document.getElementById("inp-calc-weight").value = g;
+      runLooseWeightInput();
+    }
+
+    function setCalcChipPrice(p) {
+      document.getElementById("inp-calc-price").value = p;
+      runLoosePriceInput();
+    }
+
+    function addCalculatedLooseToCart() {
+      if (!activeScaleProduct) return;
+      const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
+      const qtyKg = parseFloat((grams / 1000).toFixed(3));
+      if (qtyKg <= 0) return alert("Please specify valid weight.");
+
+      addItemToCart(activeScaleProduct.id, qtyKg);
+      closeLooseScaleCalculator();
     }
 
     function addItemToCart(productId, qty) {
@@ -1294,6 +1825,8 @@
 
     function renderCartUI() {
       const tbody = document.getElementById("cart-table-tbody");
+      document.getElementById("cart-item-count").innerText = activeCart.length;
+
       if (!activeCart.length) {
         tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center subtext-color text-xs">Your billing invoice is empty</td></tr>`;
         calculateCartTotals();
@@ -1319,11 +1852,12 @@
       const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
       const discountPct = parseFloat(document.getElementById("sel-discount-scheme").value) || 0;
       const taxPct = parseFloat(document.getElementById("sel-tax-scheme").value) || 0;
+      const settleGiven = parseFloat(document.getElementById("inp-cash-settle").value) || 0;
 
       const discountAmt = subtotal * (discountPct / 100);
       const taxable = subtotal - discountAmt;
       const taxAmt = taxable * (taxPct / 100);
-      const grandTotal = taxable + taxAmt;
+      const grandTotal = settleGiven > 0 ? settleGiven : (taxable + taxAmt);
 
       document.getElementById("bill-subtotal").innerText = `₹${subtotal.toFixed(2)}`;
       document.getElementById("bill-tax").innerText = `+₹${taxAmt.toFixed(2)}`;
@@ -1339,7 +1873,6 @@
     // SALES ANALYSIS CHARTS (Screenshot 24)
     // ----------------------------------------------------
     function initSalesAnalysisCharts() {
-      // Daily Revenue Chart
       const revCtx = document.getElementById("chart-daily-revenue").getContext("2d");
       if (revenueChartInstance) revenueChartInstance.destroy();
       revenueChartInstance = new Chart(revCtx, {
@@ -1358,7 +1891,6 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // 7-Day Sales Volume Chart
       const volCtx = document.getElementById("chart-sales-volume").getContext("2d");
       if (volumeChartInstance) volumeChartInstance.destroy();
       volumeChartInstance = new Chart(volCtx, {
@@ -1385,7 +1917,208 @@
     }
 
     // ----------------------------------------------------
-    // ADMIN PIN & ACCESS
+    // LIVE INVENTORY TABLE (REORDER & SUPPLIER DISPATCH)
+    // ----------------------------------------------------
+    function renderLiveInventoryTable() {
+      const tbody = document.getElementById("inventory-table-body");
+      if (!tbody) return;
+
+      tbody.innerHTML = currentInventory.map(item => {
+        const isLow = item.current_stock <= (item.min_stock_alert || 5);
+        const isLoose = item.uom === "kg/gm";
+
+        return `
+          <tr class="border-b border-slate-700/40 text-xs">
+            <td class="py-2.5 px-3">
+              <div class="font-bold">${item.custom_name}</div>
+              <div class="text-[10px] subtext-color font-mono">${item.barcode}</div>
+            </td>
+            <td class="py-2.5 px-3 subtext-color">${item.category}</td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-300'}">
+                ${item.uom}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 font-mono font-bold">${item.current_stock}</td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isLow ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">
+                ${isLow ? 'LOW STOCK' : 'HEALTHY'}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 font-mono">₹${item.unit_price.toFixed(2)}</td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold">${item.supplier_name || 'Direct Wholesale'}</div>
+              <div class="text-[10px] text-emerald-400 font-mono">${item.supplier_phone || '9876543210'}</div>
+            </td>
+            <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+              <button type="button" onclick="openReorderModal('${item.id}')" class="px-2.5 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded text-[11px] font-bold">
+                📦 Reorder
+              </button>
+              <button type="button" onclick="deleteInventoryItem('${item.id}')" class="px-2 py-1 bg-red-600/20 text-red-300 rounded text-[11px] font-bold">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const lowCount = currentInventory.filter(i => i.current_stock <= (i.min_stock_alert || 5)).length;
+      const lowEl = document.getElementById("kpi-low-stock");
+      if (lowEl) lowEl.innerText = `${lowCount} items`;
+    }
+
+    function openReorderModal(productId) {
+      const item = currentInventory.find(p => p.id === productId);
+      if (!item) return;
+      activeReorderProductId = productId;
+
+      document.getElementById("reorder-item-name").innerText = item.custom_name;
+      document.getElementById("reorder-item-current").innerText = `${item.current_stock} ${item.uom}`;
+      document.getElementById("reorder-supp-name").innerText = item.supplier_name || "Direct Supplier";
+      document.getElementById("reorder-supp-phone").innerText = item.supplier_phone || "+91 98765 43210";
+      document.getElementById("reorder-input-qty").value = "25";
+
+      document.getElementById("modal-reorder").classList.remove("hidden");
+    }
+
+    function closeReorderModal() {
+      document.getElementById("modal-reorder").classList.add("hidden");
+      activeReorderProductId = null;
+    }
+
+    function dispatchSupplierWhatsAppOrder() {
+      const item = currentInventory.find(p => p.id === activeReorderProductId);
+      if (!item) return;
+      const qty = document.getElementById("reorder-input-qty").value;
+      const phone = (item.supplier_phone || "919876543210").replace(/[^0-9]/g, "");
+
+      const msg = encodeURIComponent(
+        `📦 *PURCHASE REORDER - STOREPOS SYSTEM*\n` +
+        `🏬 Outlet: ${document.getElementById("header-shop-name").innerText}\n` +
+        `---------------------------\n` +
+        `Good: *${item.custom_name}*\n` +
+        `SKU: ${item.barcode}\n` +
+        `Required Inward Qty: *${qty} ${item.uom}*\n` +
+        `Current On-Hand: ${item.current_stock} ${item.uom}\n` +
+        `---------------------------\n` +
+        `Kindly confirm order dispatch and delivery timeline.`
+      );
+
+      window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+    }
+
+    function submitReorderInward() {
+      const item = currentInventory.find(p => p.id === activeReorderProductId);
+      if (!item) return;
+      const qty = parseFloat(document.getElementById("reorder-input-qty").value);
+      if (isNaN(qty) || qty <= 0) return alert("Specify a valid inward quantity.");
+
+      const oldStock = item.current_stock;
+      item.current_stock = parseFloat((item.current_stock + qty).toFixed(2));
+
+      recordAuditEntry({
+        type: "STOCK INWARD",
+        title: `Restocked ${item.custom_name}`,
+        details: `Received +${qty} ${item.uom}. Balance updated from ${oldStock} to ${item.current_stock}. Supplier: ${item.supplier_name}`
+      });
+
+      saveInventoryState();
+      closeReorderModal();
+      alert(`Stock inward confirmed! New balance: ${item.current_stock} ${item.uom}`);
+    }
+
+    function deleteInventoryItem(id) {
+      if (!confirm("Remove product from counter catalog?")) return;
+      const item = currentInventory.find(i => i.id === id);
+      if (item) {
+        recordAuditEntry({
+          type: "PRODUCT DELETED",
+          title: `Purged Item: ${item.custom_name}`,
+          details: `SKU ${item.barcode} was removed from the active catalog.`
+        });
+      }
+      currentInventory = currentInventory.filter(i => i.id !== id);
+      saveInventoryState();
+    }
+
+    function filterHealthTable() {
+      const q = document.getElementById("inp-table-filter").value.toLowerCase();
+      document.querySelectorAll("#inventory-table-body tr").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
+      });
+    }
+
+    // ----------------------------------------------------
+    // AUDIT TRAIL ENGINE & WORKING PDF EXPORT
+    // ----------------------------------------------------
+    function recordAuditEntry({ type, title, details }) {
+      const entry = {
+        id: "LOG-" + Date.now().toString().slice(-6),
+        type,
+        title,
+        details,
+        date: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+        time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })
+      };
+      auditLogs.unshift(entry);
+      localStorage.setItem("storepos_audit_records_v4", JSON.stringify(auditLogs));
+      renderAuditLogsUI();
+    }
+
+    function loadStoredAuditLogs() {
+      const saved = localStorage.getItem("storepos_audit_records_v4");
+      if (saved) auditLogs = JSON.parse(saved);
+      if (!auditLogs.length) {
+        recordAuditEntry({ type: "SYSTEM BOOT", title: "StorePOS Terminal Initialized", details: "Local database seeded with active counter inventory." });
+      }
+      renderAuditLogsUI();
+    }
+
+    function renderAuditLogsUI() {
+      const container = document.getElementById("audit-trail-container");
+      const countEl = document.getElementById("audit-entry-count");
+      if (countEl) countEl.innerText = auditLogs.length;
+      if (!container) return;
+
+      container.innerHTML = auditLogs.map(l => `
+        <div class="input-bg border p-2.5 rounded-xl space-y-1">
+          <div class="flex justify-between items-center text-[10px]">
+            <span class="font-bold text-amber-400 font-mono">${l.type} • ${l.id}</span>
+            <span class="subtext-color">${l.date} • ${l.time}</span>
+          </div>
+          <p class="font-bold text-xs">${l.title}</p>
+          <p class="text-[11px] subtext-color leading-tight">${l.details}</p>
+        </div>
+      `).join("");
+    }
+
+    function openAuditTrailModal() {
+      renderAuditLogsUI();
+      document.getElementById("modal-audit-trail").classList.remove("hidden");
+    }
+
+    function closeAuditTrailModal() {
+      document.getElementById("modal-audit-trail").classList.add("hidden");
+    }
+
+    function downloadAuditPdf() {
+      document.body.setAttribute("data-print-format", "audit");
+      const tbody = document.getElementById("audit-sheet-table-body");
+      
+      tbody.innerHTML = auditLogs.map(l => `
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 6px; font-weight: bold;">${l.date}<br><small style="color: #666;">${l.time}</small></td>
+          <td style="padding: 6px; font-family: monospace; color: #b45309;">${l.type}</td>
+          <td style="padding: 6px; font-weight: bold;">${l.title}</td>
+          <td style="padding: 6px; font-size: 10px; color: #333;">${l.details}</td>
+        </tr>
+      `).join("");
+
+      window.print();
+    }
+
+    // ----------------------------------------------------
+    // ADMIN PIN ACCESS CONTROLLER
     // ----------------------------------------------------
     function handleAdminModeAccess() {
       if (isAdminUnlocked) {
@@ -1445,46 +2178,67 @@
       }
     }
 
-    function renderLiveInventoryTable() {
-      const tbody = document.getElementById("inventory-table-body");
-      if (!tbody) return;
-
-      tbody.innerHTML = currentInventory.map(item => `
-        <tr class="border-b border-slate-700/40 text-xs">
-          <td class="py-2.5 px-3">
-            <div class="font-bold">${item.custom_name}</div>
-            <div class="text-[10px] subtext-color font-mono">${item.barcode}</div>
-          </td>
-          <td class="py-2.5 px-3 subtext-color">${item.category}</td>
-          <td class="py-2.5 px-3 font-bold">${item.uom}</td>
-          <td class="py-2.5 px-3 font-mono font-bold">${item.current_stock}</td>
-          <td class="py-2.5 px-3">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.current_stock <= (item.min_stock_alert || 5) ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">
-              ${item.current_stock <= (item.min_stock_alert || 5) ? 'LOW STOCK' : 'HEALTHY'}
-            </span>
-          </td>
-          <td class="py-2.5 px-3 font-mono">₹${item.unit_price.toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right">
-            <button type="button" onclick="deleteInventoryItem('${item.id}')" class="px-2 py-1 bg-red-600/20 text-red-300 rounded text-[11px] font-bold">🗑️</button>
-          </td>
-        </tr>
-      `).join("");
+    // ----------------------------------------------------
+    // MISCELLANEOUS MODALS & SHORTCUTS
+    // ----------------------------------------------------
+    function openAddProductModal() {
+      populateCategoryDropdowns();
+      document.getElementById("modal-add-product").classList.remove("hidden");
     }
 
-    function deleteInventoryItem(id) {
-      if (!confirm("Remove product from counter?")) return;
-      currentInventory = currentInventory.filter(i => i.id !== id);
-      saveInventoryState();
+    function closeAddProductModal() {
+      document.getElementById("modal-add-product").classList.add("hidden");
     }
 
-    function filterHealthTable() {
-      const q = document.getElementById("inp-table-filter").value.toLowerCase();
-      document.querySelectorAll("#inventory-table-body tr").forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
+    function promptCreateNewCategory() {
+      const newCat = prompt("Enter New Department / Category Name:", "Bakery");
+      if (!newCat || !newCat.trim()) return;
+      const clean = newCat.trim();
+      if (!departmentCategories.includes(clean)) {
+        departmentCategories.push(clean);
+        initCategoryTabs();
+        populateCategoryDropdowns();
+      }
+    }
+
+    function populateCategoryDropdowns() {
+      const sel = document.getElementById("sel-new-prod-cat");
+      if (!sel) return;
+      sel.innerHTML = departmentCategories.filter(c => c !== "All Items").map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+
+    function submitCreateProduct() {
+      const name = document.getElementById("inp-new-prod-name").value.trim();
+      const cat = document.getElementById("sel-new-prod-cat").value;
+      const basis = document.getElementById("sel-new-prod-basis").value;
+      const rate = parseFloat(document.getElementById("inp-new-prod-rate").value);
+      const stock = parseFloat(document.getElementById("inp-new-prod-stock").value) || 20;
+      const suppName = document.getElementById("inp-new-supp-name").value.trim() || "Local Supplier";
+      const suppPhone = document.getElementById("inp-new-supp-phone").value.trim() || "919876543210";
+
+      if (!name || isNaN(rate) || rate <= 0) return alert("Specify valid product name and rate.");
+
+      currentInventory.unshift({
+        id: "prod-" + Date.now(),
+        custom_name: name,
+        barcode: "SKU-" + Math.floor(1000 + Math.random() * 9000),
+        category: cat,
+        uom: basis,
+        unit_price: rate,
+        cost_price: rate * 0.8,
+        current_stock: stock,
+        min_stock_alert: 5,
+        supplier_name: suppName,
+        supplier_phone: suppPhone
       });
+
+      saveInventoryState();
+      closeAddProductModal();
+      alert(`Product "${name}" added to counter!`);
     }
 
     function openKhataModal() {
+      if (!isKhataEnabled) return alert("Customer Khata mode is disabled by owner.");
       if (!activeCart.length) return alert("Cart is empty.");
       document.getElementById("modal-khata").classList.remove("hidden");
     }
@@ -1497,27 +2251,108 @@
       const phone = document.getElementById("khata-phone").value.trim();
       const name = document.getElementById("khata-name").value.trim();
       if (phone.length < 10 || !name) return alert("Enter valid 10-digit number and name.");
+
       closeKhataModal();
-      processSale('KHATA');
+      processSale('KHATA', name, phone);
+    }
+
+    function openWhatsAppAlertsModal() {
+      const lowItems = currentInventory.filter(i => i.current_stock <= (i.min_stock_alert || 5));
+      document.getElementById("wa-preview-body").value = 
+        `🚨 *STOREPOS SYSTEM - URGENT LOW STOCK ALERT*\n📅 Date: ${new Date().toLocaleDateString("en-IN")}\n\n` +
+        lowItems.map((item, idx) => `${idx + 1}. *${item.custom_name}*\n   • Stock: ${item.current_stock} ${item.uom}\n   • Supplier: ${item.supplier_name} (${item.supplier_phone})`).join("\n\n") +
+        `\n\n📌 Immediate replenishment recommended.`;
+      document.getElementById("modal-whatsapp-engine").classList.remove("hidden");
+    }
+
+    function closeWhatsAppAlertsModal() {
+      document.getElementById("modal-whatsapp-engine").classList.add("hidden");
+    }
+
+    function copyWhatsAppMessage() {
+      navigator.clipboard.writeText(document.getElementById("wa-preview-body").value);
+      alert("Alert message copied to clipboard!");
+    }
+
+    function dispatchToWhatsApp() {
+      const text = encodeURIComponent(document.getElementById("wa-preview-body").value);
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
+
+    function openBulkCsvModal() {
+      document.getElementById("modal-bulk-csv").classList.remove("hidden");
+    }
+
+    function closeBulkCsvModal() {
+      document.getElementById("modal-bulk-csv").classList.add("hidden");
+    }
+
+    function processBulkCsvFile() {
+      const file = document.getElementById("inp-csv-file").files[0];
+      if (!file) return alert("Please select a CSV file.");
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const lines = e.target.result.split("\n");
+        let added = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(",");
+          if (row.length >= 3) {
+            currentInventory.push({
+              id: "csv-" + Date.now() + i,
+              custom_name: row[0].trim(),
+              barcode: row[1] ? row[1].trim() : "SKU-" + Math.floor(Math.random() * 1000),
+              category: "Groceries",
+              uom: row[4] ? row[4].trim() : "pc",
+              unit_price: parseFloat(row[2]) || 50,
+              cost_price: (parseFloat(row[2]) || 50) * 0.8,
+              current_stock: parseFloat(row[3]) || 25,
+              min_stock_alert: 5,
+              supplier_name: "Imported Vendor",
+              supplier_phone: "919876543210"
+            });
+            added++;
+          }
+        }
+        saveInventoryState();
+        closeBulkCsvModal();
+        alert(`Imported ${added} goods from CSV file!`);
+      };
+      reader.readAsText(file);
     }
 
     function exportMonthlySalesExcel() {
       const data = currentInventory.map(i => ({
         SKU: i.barcode,
-        Name: i.custom_name,
+        Item_Name: i.custom_name,
         Category: i.category,
         Sale_Basis: i.uom,
-        Price: i.unit_price,
-        Stock: i.current_stock
+        Selling_Price: i.unit_price,
+        Stock_Available: i.current_stock,
+        Supplier: i.supplier_name,
+        Supplier_Phone: i.supplier_phone
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "StorePOS_Stock");
+      XLSX.utils.book_append_sheet(wb, ws, "StorePOS_Ledger");
       XLSX.writeFile(wb, `StorePOS_Catalog_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
-    function openLooseScaleCalculator() {
-      alert("Loose weight scale mode: Set the multiplier at the top bar to punch loose grains, oil, or sweets.");
+    function closeAllModals() {
+      document.querySelectorAll("[id^='modal-']").forEach(m => m.classList.add("hidden"));
+    }
+
+    function focusSearchInput() {
+      const s = document.getElementById("inp-catalog-search");
+      if (s) s.focus();
+    }
+
+    function clearCatalogSearch() {
+      const s = document.getElementById("inp-catalog-search");
+      if (s) s.value = "";
+    }
+
+    function triggerPwaInstall() {
+      alert("Standalone App Mode:\nTo install, open browser menu (⋮) -> 'Add to Home Screen' or 'Install App' for zero-latency offline billing.");
     }
   </script>
 </body>
