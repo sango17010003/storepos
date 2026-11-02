@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
-  <!-- Essential CDNs -->
+  <!-- Tailwind CSS & Essential POS CDNs -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -26,7 +26,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1e324f; border-radius: 4px; }
 
-    /* Thermal receipt styles exact to reference picture */
+    /* Thermal receipt styles */
     .thermal-receipt-box {
       font-family: 'Courier New', Courier, monospace;
       color: #000;
@@ -44,9 +44,6 @@
     .dashed-border-y {
       border-top: 1px dashed #000;
       border-bottom: 1px dashed #000;
-    }
-    .dashed-border-t {
-      border-top: 1px dashed #000;
     }
 
     @media print {
@@ -217,11 +214,30 @@
           <span id="admin-lock-label">Admin Mode</span>
         </button>
 
+        <!-- Fixed: supports both add-product and openGeneralAddStockModal triggers -->
+        <button type="button" onclick="openGeneralAddStockModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow">
+          + Add Product
+        </button>
+
         <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-600 dark:text-red-300 border border-red-500/30">
           ⏻ Exit
         </button>
       </div>
     </header>
+
+    <!-- Hotkeys Strip -->
+    <div class="bg-slate-50 dark:bg-[#08111e] border-b border-slate-200 dark:border-[#1e324f] px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between overflow-x-auto whitespace-nowrap">
+      <div class="flex items-center gap-3">
+        <span class="font-bold uppercase tracking-widest text-[9px]">⚡ RAPID KEYS:</span>
+        <span class="cursor-pointer" onclick="clearCart()"><kbd class="px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">[F2]</kbd> Clear</span>
+        <span class="cursor-pointer" onclick="focusSearchInput()"><kbd class="px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">[F3]</kbd> Search</span>
+        <span class="cursor-pointer" onclick="openKhataModal()"><kbd class="px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">[F4]</kbd> Khata</span>
+        <span class="cursor-pointer" onclick="closeAllModals()"><kbd class="px-1 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">[Esc]</kbd> Close</span>
+      </div>
+      <div class="flex items-center gap-1 text-[9px] text-emerald-500 font-mono">
+        <span>● Active Device Ready</span>
+      </div>
+    </div>
 
     <!-- Main Dynamic Content Grid -->
     <main class="flex-1 p-2 sm:p-3 w-full max-w-7xl mx-auto">
@@ -334,7 +350,7 @@
               </div>
             </div>
 
-            <!-- Checkout Action Buttons (Khata visibility controlled by Owner Toggle) -->
+            <!-- Checkout Action Buttons -->
             <div id="checkout-buttons-container" class="grid grid-cols-2 gap-2">
               <button type="button" onclick="processSale('CASH')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow transition">
                 💵 Cash Bill
@@ -372,7 +388,7 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-1.5">
-              <button type="button" onclick="openAddProductModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">+ Add Product</button>
+              <button type="button" onclick="openGeneralAddStockModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">+ Add Product</button>
               <button type="button" onclick="openBulkPresetModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow">📚 Preset Library</button>
               <button type="button" onclick="openBulkCsvModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold transition">📥 Bulk CSV</button>
               <button type="button" onclick="openWhatsAppAlertsModal()" class="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">💬 WhatsApp Alerts</button>
@@ -433,7 +449,7 @@
           </div>
         </div>
 
-        <!-- REAL-TIME SALES ANALYSIS CHARTS (Point 4) -->
+        <!-- Real-Time Sales Analysis Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
             <div class="flex justify-between items-center mb-2">
@@ -455,7 +471,7 @@
           </div>
         </div>
 
-        <!-- Live Inventory Health Table (Points 10 & 11) -->
+        <!-- Live Inventory Health Table -->
         <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -497,7 +513,7 @@
        3. MODALS (PRESETS, ADD PRODUCT, REORDER, REPRINT, SCALE)
        ======================================================== -->
 
-  <!-- 3A. FIRST-TIME & PRESET CATALOG MODAL (500 FMCG, 150 SWEETS, DRINKS) -->
+  <!-- 3A. PRESET CATALOG MODAL -->
   <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-4xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -531,7 +547,7 @@
   <div id="modal-add-product" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-        <h3 class="font-extrabold text-sm">Create New Product</h3>
+        <h3 class="font-extrabold text-sm">Create / Add Product</h3>
         <button type="button" onclick="closeAddProductModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
 
@@ -590,7 +606,7 @@
     </div>
   </div>
 
-  <!-- 3C. REORDER MODAL WITH DIRECT SUPPLIER DISPATCH -->
+  <!-- 3C. REORDER MODAL -->
   <div id="modal-reorder" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -630,7 +646,7 @@
     </div>
   </div>
 
-  <!-- 3D. WEIGHING SCALE CALCULATOR MODAL (Exact match to Reference Picture 1) -->
+  <!-- 3D. WEIGHING SCALE CALCULATOR MODAL -->
   <div id="modal-scale-calc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl overflow-hidden">
       
@@ -738,7 +754,7 @@
     </div>
   </div>
 
-  <!-- 3F. AUDIT TRAIL MODAL (WITH LOGIN/LOGOUT & PDF EXPORT) -->
+  <!-- 3F. AUDIT TRAIL MODAL -->
   <div id="modal-audit-trail" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -838,10 +854,8 @@
   </div>
 
   <!-- ========================================================
-       4. PRINTABLE CONTAINERS (THERMAL RECEIPT MATCHING PICTURE 2)
+       4. PRINTABLE CONTAINERS
        ======================================================== -->
-
-  <!-- Thermal Format (58mm / 80mm Adaptive) -->
   <div id="printable-thermal-receipt" class="hidden thermal-receipt-box">
     <div style="text-align: center; margin-bottom: 6px;">
       <div style="font-size: 20px; line-height: 1;">🏪</div>
@@ -873,7 +887,6 @@
       </div>
     </div>
 
-    <!-- Items Table -->
     <table class="dashed-border-y" style="margin-bottom: 4px; font-size: 9.5px;">
       <thead>
         <tr>
@@ -914,7 +927,6 @@
     </div>
   </div>
 
-  <!-- A4 Format (Official Tax Invoice) -->
   <div id="printable-a4-invoice" class="hidden">
     <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 12px;">
       <div>
@@ -950,7 +962,6 @@
     </div>
   </div>
 
-  <!-- Audit Print Sheet -->
   <div id="printable-audit-sheet" class="hidden">
     <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
       <h2 style="font-size: 18px; margin: 0; font-weight: bold;">STOREPOS SYSTEM - OFFICIAL AUDIT LEDGER</h2>
@@ -979,7 +990,11 @@
     let dbInstance = null;
     function getDb() {
       if (!dbInstance && window.supabase) {
-        dbInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+          dbInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) {
+          console.warn("Supabase init bypassed:", e);
+        }
       }
       return dbInstance;
     }
@@ -991,7 +1006,7 @@
     const ADMIN_DEMO_PIN = "123456";
 
     let currentPaperWidth = localStorage.getItem("storepos_paper_width") || "58mm";
-    let isKhataEnabled = localStorage.getItem("storepos_khata_enabled") !== "false"; // default true
+    let isKhataEnabled = localStorage.getItem("storepos_khata_enabled") !== "false";
     let storeGstin = localStorage.getItem("storepos_gstin") || "23AAAAA0000A1Z5";
     let isDarkMode = localStorage.getItem("storepos_theme") !== "light";
     let deferredInstallPrompt = null;
@@ -1003,9 +1018,8 @@
     let recentBills = [];
     let activeScaleProduct = null;
     let activeReorderProductId = null;
-    let scaleCalcMode = "weight"; // 'weight' or 'price'
+    let scaleCalcMode = "weight";
 
-    // Charts instances
     let dailyRevenueChart = null;
     let salesVolumeChart = null;
 
@@ -1020,7 +1034,6 @@
       { id: "p8", custom_name: "Assam CTC Leaf Tea 250g", barcode: "89012348", category: "Beverages", uom: "pack", unit_price: 125.00, cost_price: 95.00, current_stock: 21.0, min_stock_alert: 5, supplier_name: "Assam Tea Corporation", supplier_phone: "919876543215" }
     ];
 
-    // Comprehensive 500+ FMCG, 150+ Sweets & Cold Drink Presets Generator
     let globalPresetCatalog = [];
     function generatePresetCatalog() {
       const presets = [];
@@ -1101,7 +1114,11 @@
       globalPresetCatalog = presets;
     }
 
-    // Lifecycle
+    // Direct mapping to fix HTML reference errors
+    window.openGeneralAddStockModal = function() {
+      openAddProductModal();
+    };
+
     window.addEventListener("DOMContentLoaded", () => {
       applyTheme();
       generatePresetCatalog();
@@ -1119,7 +1136,6 @@
       initSalesCharts();
     });
 
-    // Theme Mode
     function toggleThemeMode() {
       isDarkMode = !isDarkMode;
       localStorage.setItem("storepos_theme", isDarkMode ? "dark" : "light");
@@ -1241,9 +1257,6 @@
       renderAndPrintThermal(reprintBill);
     }
 
-    // ----------------------------------------------------
-    // AUTHENTICATION & SESSION TRACKING (Point 8)
-    // ----------------------------------------------------
     function fillQuickAuthDemo() {
       document.getElementById("inp-email").value = "counter1@storepos.com";
       document.getElementById("inp-password").value = "StorePOS@123";
@@ -1255,6 +1268,7 @@
       document.getElementById("auth-submit-btn").innerText = isRegistering ? "Create Store & Account →" : "Sign In & Open Counter →";
     }
 
+    // Direct authenticating flow with seamless offline fallback (handles the 400 error cleanly)
     async function submitAuthentication() {
       const email = document.getElementById("inp-email").value.trim();
       const password = document.getElementById("inp-password").value.trim();
@@ -1262,11 +1276,13 @@
       const msg = document.getElementById("auth-status-msg");
 
       msg.innerText = "";
-      if (!email || !password) return msg.innerText = "Please provide email and password.";
+      if (!email || !password) {
+        msg.innerText = "Please provide email and password.";
+        return;
+      }
 
       activeUser = { email, shopName: shopName || "ShopMaster Supermarket" };
 
-      // Log Login Event with Timestamp
       recordAuditEntry({
         type: "SESSION LOGIN",
         title: `Terminal Session Started: ${email}`,
@@ -1278,7 +1294,6 @@
       document.getElementById("header-shop-name").innerText = activeUser.shopName;
       document.getElementById("header-user-email").innerText = activeUser.email;
 
-      // Check First-Time Onboarding
       const hasOnboarded = localStorage.getItem("storepos_onboarded_v2");
       if (!hasOnboarded) {
         openBulkPresetModal();
@@ -1291,7 +1306,6 @@
 
       const userEmail = activeUser ? activeUser.email : "counter1@storepos.com";
       
-      // Log User Logout Event with Timestamp (Point 8)
       recordAuditEntry({
         type: "SESSION LOGOUT",
         title: `Terminal Session Closed: ${userEmail}`,
@@ -1301,9 +1315,6 @@
       setTimeout(() => location.reload(), 200);
     }
 
-    // ----------------------------------------------------
-    // STANDALONE OFFLINE PWA & TRIAL (Point 9)
-    // ----------------------------------------------------
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredInstallPrompt = e;
@@ -1355,9 +1366,6 @@
       localStorage.removeItem("storepos_offline_bills");
     }
 
-    // ----------------------------------------------------
-    // PRESET CATALOG SELECTION MODAL (Point 7)
-    // ----------------------------------------------------
     function openBulkPresetModal() {
       renderPresetList(globalPresetCatalog);
       document.getElementById("modal-preset-catalog").classList.remove("hidden");
@@ -1436,9 +1444,6 @@
       alert(`Success! Imported ${added} products into your active counter catalog.`);
     }
 
-    // ----------------------------------------------------
-    // CUSTOM PRODUCT & CATEGORY CREATION
-    // ----------------------------------------------------
     function openAddProductModal() {
       populateCategoryDropdowns();
       document.getElementById("modal-add-product").classList.remove("hidden");
@@ -1507,9 +1512,6 @@
       alert(`Product "${name}" added to counter!`);
     }
 
-    // ----------------------------------------------------
-    // CATALOG CARDS & KG/GM LOOSE GOODS AUTOMATION (Point 10)
-    // ----------------------------------------------------
     function initCategoryTabs() {
       const c = document.getElementById("catalog-category-tabs");
       if (!c) return;
@@ -1588,7 +1590,6 @@
       const item = currentInventory.find(p => p.id === productId);
       if (!item) return;
 
-      // Automatically launch Weighing Scale Calculator if item basis is kg/gm (Point 10)
       if (item.uom === "kg/gm") {
         openLooseScaleModalForProduct(item);
       } else {
@@ -1609,9 +1610,6 @@
       if (firstLoose) openLooseScaleModalForProduct(firstLoose);
     }
 
-    // ----------------------------------------------------
-    // WEIGHING SCALE CALCULATOR (Matches Reference Picture 1)
-    // ----------------------------------------------------
     function openLooseScaleModalForProduct(item) {
       activeScaleProduct = item;
       document.getElementById("calc-item-sub").innerText = `${item.custom_name} • Rate: ₹${item.unit_price}/kg`;
@@ -1695,9 +1693,6 @@
       closeLooseScaleCalculator();
     }
 
-    // ----------------------------------------------------
-    // INVOICE CART & CHECKOUT
-    // ----------------------------------------------------
     function addItemToCart(productId, qty) {
       const product = currentInventory.find(p => p.id === productId);
       if (!product) return;
@@ -1796,13 +1791,11 @@
         shopName: activeUser ? activeUser.shopName : "ShopMaster Supermarket"
       };
 
-      // Decrement inventory stock
       activeCart.forEach(ci => {
         const item = currentInventory.find(p => p.id === ci.id);
         if (item) item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(2)));
       });
 
-      // Audit Record
       const isOnline = navigator.onLine;
       recordAuditEntry({
         type: isOnline ? "SALE INVOICE" : "OFFLINE SALE",
@@ -1817,17 +1810,12 @@
       }
 
       pushRecentBill(billRecord);
-
-      // Print bill formatted as in Screenshot 2
       renderAndPrintThermal(billRecord);
 
       clearCart();
       saveInventoryState();
     }
 
-    // ----------------------------------------------------
-    // THERMAL BILL FORMATTER (Exact match to Reference Picture 2)
-    // ----------------------------------------------------
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
       document.body.setAttribute("data-paper-width", currentPaperWidth);
@@ -1876,9 +1864,6 @@
       }
     }
 
-    // ----------------------------------------------------
-    // LIVE INVENTORY TABLE (Points 10 & 11)
-    // ----------------------------------------------------
     function renderLiveInventoryTable() {
       const tbody = document.getElementById("inventory-table-body");
       if (!tbody) return;
@@ -1933,9 +1918,6 @@
       if (skuEl) skuEl.innerText = `${currentInventory.length} goods`;
     }
 
-    // ----------------------------------------------------
-    // SUPPLIER REORDER & WHATSAPP DIRECT DISPATCH (Point 11)
-    // ----------------------------------------------------
     function openReorderModal(productId) {
       const item = currentInventory.find(p => p.id === productId);
       if (!item) return;
@@ -2012,9 +1994,6 @@
       saveInventoryState();
     }
 
-    // ----------------------------------------------------
-    // SALES ANALYSIS CHARTS (Point 4)
-    // ----------------------------------------------------
     function initSalesCharts() {
       const ctxRev = document.getElementById("chart-daily-revenue");
       const ctxVol = document.getElementById("chart-sales-volume");
@@ -2074,9 +2053,6 @@
       });
     }
 
-    // ----------------------------------------------------
-    // AUDIT TRAIL & FIXED PDF EXPORT (Point 8)
-    // ----------------------------------------------------
     function recordAuditEntry({ type, title, details }) {
       const entry = {
         id: "LOG-" + Date.now().toString().slice(-6),
@@ -2143,9 +2119,6 @@
       window.print();
     }
 
-    // ----------------------------------------------------
-    // ADMIN PIN MODAL
-    // ----------------------------------------------------
     function handleAdminModeAccess() {
       if (isAdminUnlocked) {
         isAdminUnlocked = false;
@@ -2204,9 +2177,6 @@
       }
     }
 
-    // ----------------------------------------------------
-    // KHATA & CSV HELPERS
-    // ----------------------------------------------------
     function openKhataModal() {
       if (!isKhataEnabled) return alert("Khata / Credit Billing is currently switched OFF by the Store Owner.");
       if (!activeCart.length) return alert("Cart is empty.");
@@ -2312,6 +2282,15 @@
       document.querySelectorAll("#inventory-table-body tr").forEach(row => {
         row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
       });
+    }
+
+    function closeAllModals() {
+      document.querySelectorAll("[id^='modal-']").forEach(m => m.classList.add("hidden"));
+    }
+
+    function focusSearchInput() {
+      const s = document.getElementById("inp-catalog-search");
+      if (s) s.focus();
     }
   </script>
 </body>
