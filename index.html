@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>StorePOS System - Smart Retail & Weight-Scale Counter</title>
   
-  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#060d17">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
   <!-- Tailwind CSS & Essential POS CDNs -->
@@ -214,7 +213,6 @@
           <span id="admin-lock-label">Admin Mode</span>
         </button>
 
-        <!-- Fixed: supports both add-product and openGeneralAddStockModal triggers -->
         <button type="button" onclick="openGeneralAddStockModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow">
           + Add Product
         </button>
@@ -225,7 +223,7 @@
       </div>
     </header>
 
-    <!-- Hotkeys Strip -->
+    <!-- Rapid Keys Strip -->
     <div class="bg-slate-50 dark:bg-[#08111e] border-b border-slate-200 dark:border-[#1e324f] px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-between overflow-x-auto whitespace-nowrap">
       <div class="flex items-center gap-3">
         <span class="font-bold uppercase tracking-widest text-[9px]">⚡ RAPID KEYS:</span>
@@ -239,7 +237,7 @@
       </div>
     </div>
 
-    <!-- Main Dynamic Content Grid -->
+    <!-- Main Content Area -->
     <main class="flex-1 p-2 sm:p-3 w-full max-w-7xl mx-auto">
       
       <!-- ==========================================
@@ -274,7 +272,7 @@
             </div>
           </div>
 
-          <!-- Department Category Filter Tabs -->
+          <!-- Dynamic Department Category Filter Tabs -->
           <div id="catalog-category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap"></div>
 
           <!-- Catalog Cards Grid -->
@@ -398,7 +396,7 @@
             </div>
           </div>
 
-          <!-- Store GST Number & Khata Toggle Control Strip -->
+          <!-- Store GST Number & Khata Toggle Strip -->
           <div class="border-t border-slate-200 dark:border-slate-800 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
             
             <!-- GST Number Input -->
@@ -425,7 +423,7 @@
           </div>
         </div>
 
-        <!-- KPI Executive Cards -->
+        <!-- KPI Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Revenue</span>
@@ -449,7 +447,7 @@
           </div>
         </div>
 
-        <!-- Real-Time Sales Analysis Charts -->
+        <!-- Sales Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
             <div class="flex justify-between items-center mb-2">
@@ -510,7 +508,7 @@
   </div>
 
   <!-- ========================================================
-       3. MODALS (PRESETS, ADD PRODUCT, REORDER, REPRINT, SCALE)
+       3. MODALS
        ======================================================== -->
 
   <!-- 3A. PRESET CATALOG MODAL -->
@@ -543,7 +541,7 @@
     </div>
   </div>
 
-  <!-- 3B. ADD PRODUCT / CREATE CUSTOM PRODUCT & CATEGORY MODAL -->
+  <!-- 3B. ADD PRODUCT MODAL -->
   <div id="modal-add-product" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -650,7 +648,6 @@
   <div id="modal-scale-calc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl overflow-hidden">
       
-      <!-- Orange Banner Header -->
       <div class="bg-amber-600 px-4 py-3 flex justify-between items-center text-white">
         <div class="flex items-center gap-2">
           <span class="text-xl">⚖️</span>
@@ -666,7 +663,6 @@
       </div>
 
       <div class="p-4 space-y-4 text-xs">
-        <!-- Mode Switcher Tabs -->
         <div class="grid grid-cols-2 gap-2">
           <button type="button" id="tab-scale-wt" onclick="setScaleCalcMode('weight')" class="py-2 rounded-xl font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center gap-1">
             <span>⚖️</span> Enter Weight → Price
@@ -676,7 +672,6 @@
           </button>
         </div>
 
-        <!-- Weight Input Block -->
         <div id="block-input-weight" class="space-y-1">
           <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <span>Enter Exact Weight (in Grams):</span>
@@ -688,7 +683,6 @@
           </div>
         </div>
 
-        <!-- Price Input Block -->
         <div id="block-input-price" class="hidden space-y-1">
           <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
             <span>Enter Desired Budget / Price (₹):</span>
@@ -700,7 +694,6 @@
           </div>
         </div>
 
-        <!-- Quick Presets Grid -->
         <div>
           <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Quick Presets:</span>
           <div class="grid grid-cols-4 gap-1.5 text-[11px] font-bold">
@@ -715,7 +708,6 @@
           </div>
         </div>
 
-        <!-- Live Invoice Item Preview Box -->
         <div class="bg-slate-900 text-white p-3 rounded-xl space-y-1">
           <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Live Invoice Item Preview:</span>
           <div class="flex justify-between items-center text-xs">
@@ -728,7 +720,6 @@
           </div>
         </div>
 
-        <!-- Actions -->
         <div class="grid grid-cols-2 gap-2 pt-1">
           <button type="button" onclick="closeLooseScaleCalculator()" class="py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">
             Cancel
@@ -840,7 +831,7 @@
     </div>
   </div>
 
-  <!-- 3J. KHATA CUSTOMER DETAILS MODAL -->
+  <!-- 3J. KHATA CUSTOMER MODAL -->
   <div id="modal-khata" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -981,7 +972,7 @@
   </div>
 
   <!-- ========================================================
-       5. JAVASCRIPT POS CONTROLLER
+       5. JAVASCRIPT CONTROLLER (ALL FUNCTIONS INCLUDED)
        ======================================================== -->
   <script>
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
@@ -1114,7 +1105,6 @@
       globalPresetCatalog = presets;
     }
 
-    // Direct mapping to fix HTML reference errors
     window.openGeneralAddStockModal = function() {
       openAddProductModal();
     };
@@ -1134,6 +1124,7 @@
       renderLiveInventoryTable();
       populateCategoryDropdowns();
       initSalesCharts();
+      renderCartUI();
     });
 
     function toggleThemeMode() {
@@ -1268,7 +1259,6 @@
       document.getElementById("auth-submit-btn").innerText = isRegistering ? "Create Store & Account →" : "Sign In & Open Counter →";
     }
 
-    // Direct authenticating flow with seamless offline fallback (handles the 400 error cleanly)
     async function submitAuthentication() {
       const email = document.getElementById("inp-email").value.trim();
       const password = document.getElementById("inp-password").value.trim();
@@ -1676,25 +1666,8 @@
       runLooseWeightInput();
     }
 
-    function addCalculatedLooseToCart() {
-      if (!activeScaleProduct) return;
-      let qtyKg = 0;
-      if (scaleCalcMode === "weight") {
-        const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
-        qtyKg = parseFloat((grams / 1000).toFixed(3));
-      } else {
-        const price = parseFloat(document.getElementById("inp-calc-price").value) || 0;
-        qtyKg = parseFloat((price / activeScaleProduct.unit_price).toFixed(3));
-      }
-
-      if (qtyKg <= 0) return alert("Please specify a valid weight/amount.");
-
-      addItemToCart(activeScaleProduct.id, qtyKg);
-      closeLooseScaleCalculator();
-    }
-
     // ----------------------------------------------------
-    // STRICT INVENTORY VALIDATION & LOW-STOCK THRESHOLD LOCK
+    // CART ENGINE WITH STRICT NEGATIVE THRESHOLD (CLAMPING)
     // ----------------------------------------------------
     function addItemToCart(productId, qty) {
       const product = currentInventory.find(p => p.id === productId);
@@ -1709,14 +1682,15 @@
       const currentCartQty = existing ? existing.qty : 0;
       const requestedTotalQty = parseFloat((currentCartQty + qty).toFixed(3));
 
+      // Threshold check: Strict Clamp
       if (requestedTotalQty > product.current_stock) {
         const allowedAdd = parseFloat((product.current_stock - currentCartQty).toFixed(3));
         
         if (allowedAdd <= 0) {
           alert(
             `⛔ Stock Limit Reached!\n\n` +
-            `Only ${product.current_stock} ${product.uom} available in stock for "${product.custom_name}".\n` +
-            `You already have ${currentCartQty} ${product.uom} in your cart. Cannot add more.`
+            `Only ${product.current_stock} ${product.uom} available for "${product.custom_name}".\n` +
+            `You already have ${currentCartQty} ${product.uom} in cart.`
           );
           return;
         }
@@ -1735,7 +1709,7 @@
 
         alert(
           `⚠️ Stock Limit Applied!\n\n` +
-          `Requested quantity exceeded available stock.\n` +
+          `Requested quantity exceeded inventory.\n` +
           `Added the maximum remaining amount: ${product.current_stock} ${product.uom}.`
         );
       } else {
@@ -1794,6 +1768,68 @@
 
       addItemToCart(activeScaleProduct.id, qtyKg);
       closeLooseScaleCalculator();
+    }
+
+    function renderCartUI() {
+      const tbody = document.getElementById("cart-table-tbody");
+      const countEl = document.getElementById("cart-item-count");
+      if (countEl) countEl.innerText = activeCart.length;
+      if (!tbody) return;
+
+      if (!activeCart.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">Your billing invoice is empty<br><span class="text-[10px]">Select items from catalog</span></td></tr>`;
+        calculateCartTotals();
+        return;
+      }
+
+      tbody.innerHTML = activeCart.map((item, idx) => {
+        const lineTotal = item.price * item.qty;
+        return `
+          <tr class="border-b border-slate-200 dark:border-slate-800/40">
+            <td class="py-2 font-bold text-[11px]">${item.name}</td>
+            <td class="py-2 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">${item.qty} ${item.uom}</td>
+            <td class="py-2 text-right font-mono text-[11px]">₹${item.price}</td>
+            <td class="py-2 text-right font-mono font-black text-emerald-600 dark:text-emerald-400 text-[11px]">₹${lineTotal.toFixed(2)}</td>
+            <td class="py-2 text-center">
+              <button type="button" onclick="removeCartLine(${idx})" class="text-red-500 font-bold">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      calculateCartTotals();
+    }
+
+    function removeCartLine(idx) {
+      activeCart.splice(idx, 1);
+      renderCartUI();
+    }
+
+    function clearCart() {
+      activeCart = [];
+      renderCartUI();
+    }
+
+    function calculateCartTotals() {
+      const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discountPct = parseFloat(document.getElementById("sel-discount-scheme").value) || 0;
+      const taxPct = parseFloat(document.getElementById("sel-tax-scheme").value) || 0;
+      const settle = parseFloat(document.getElementById("inp-cash-settle").value) || 0;
+
+      const discountAmount = subtotal * (discountPct / 100);
+      const taxable = subtotal - discountAmount;
+      const taxAmount = taxable * (taxPct / 100);
+      const grandTotal = settle > 0 ? settle : (taxable + taxAmount);
+
+      const subtotalEl = document.getElementById("bill-subtotal");
+      const discountEl = document.getElementById("bill-discount");
+      const taxEl = document.getElementById("bill-tax");
+      const totalEl = document.getElementById("bill-grand-total");
+
+      if (subtotalEl) subtotalEl.innerText = `₹${subtotal.toFixed(2)}`;
+      if (discountEl) discountEl.innerText = `-₹${discountAmount.toFixed(2)}`;
+      if (taxEl) taxEl.innerText = `+₹${taxAmount.toFixed(2)}`;
+      if (totalEl) totalEl.innerText = `₹${grandTotal.toFixed(2)}`;
     }
 
     function processSale(paymentMode, custName = null, custPhone = null) {
@@ -1862,8 +1898,6 @@
       clearCart();
       saveInventoryState();
     }
-    
-
 
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
@@ -2001,7 +2035,7 @@
         `Required Inward Qty: *${qty} ${item.uom}*\n` +
         `Current On-Hand Stock: ${item.current_stock} ${item.uom}\n` +
         `---------------------------\n` +
-        `Kindly dispatch at wholesale rate and share courier/challan details.`
+        `Kindly dispatch at wholesale rate and share delivery timeline.`
       );
 
       window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
