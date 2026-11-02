@@ -1187,14 +1187,16 @@
     }
 
     function loadInventoryState() {
-      const saved = localStorage.getItem("storepos_custom_inventory");
-      if (saved) {
-        currentInventory = JSON.parse(saved);
-      } else {
-        currentInventory = [...defaultInitialInventory];
-        localStorage.setItem("storepos_custom_inventory", JSON.stringify(currentInventory));
-      }
-    }
+  const saved = localStorage.getItem("storepos_catalog_inventory_v3");
+  if (saved) {
+    currentInventory = JSON.parse(saved);
+  } else {
+    // Only use default items if user has never onboarded
+    const hasOnboarded = localStorage.getItem("storepos_onboarded_flag_v3");
+    currentInventory = hasOnboarded ? [] : [...defaultInitialInventory];
+    localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
+  }
+}
 
     function saveInventoryState() {
       localStorage.setItem("storepos_custom_inventory", JSON.stringify(currentInventory));
@@ -1411,28 +1413,34 @@
     }
 
     function commitSelectedPresets() {
-      const selectedIds = Array.from(document.querySelectorAll(".preset-checkbox:checked")).map(c => c.dataset.presetId);
-      if (!selectedIds.length) return alert("Please check at least one product.");
+  const checkedBoxes = Array.from(document.querySelectorAll(".preset-chk:checked"));
+  if (!checkedBoxes.length) return alert("Please check at least one item.");
 
-      let added = 0;
-      selectedIds.forEach(id => {
-        const item = globalPresetCatalog.find(p => p.id === id);
-        if (item && !currentInventory.some(ci => ci.custom_name === item.custom_name)) {
-          currentInventory.push({ ...item });
-          added++;
-        }
-      });
+  // 1. Clear out default demo items so ONLY checked items are saved
+  currentInventory = [];
 
-      recordAuditEntry({
-        type: "PRESET COMMIT",
-        title: `Catalog Populated with ${added} Products`,
-        details: `Imported categorized items from FMCG, Sweets and Soft Drinks preset master.`
-      });
-
-      saveInventoryState();
-      closePresetModal();
-      alert(`Success! Imported ${added} products into your active counter catalog.`);
+  // 2. Add ONLY the checked items
+  checkedBoxes.forEach(chk => {
+    const id = chk.dataset.presetId;
+    const presetItem = globalPresetsList.find(p => p.id === id);
+    if (presetItem) {
+      currentInventory.push({ ...presetItem });
     }
+  });
+
+  // 3. Save to localStorage and re-render
+  saveInventoryState();
+  closePresetModal();
+
+  // 4. Record to Audit Trail
+  recordAuditEntry({
+    type: "PRESET COMMIT",
+    title: `Catalog Initialized with ${currentInventory.length} Selected Items`,
+    details: `Imported strictly user-selected goods. Default placeholder items cleared.`
+  });
+
+  alert(`Success! Loaded only your ${currentInventory.length} selected products into your catalog.`);
+}
 
     function openAddProductModal() {
       populateCategoryDropdowns();
