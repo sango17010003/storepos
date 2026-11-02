@@ -10,19 +10,45 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
-  <!-- Tailwind CSS & Essential POS CDNs -->
+  <!-- Essential CDNs -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   
   <style id="pos-print-styles">
     ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: #08111e; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1e324f; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #2d4a75; }
 
-    /* Dynamic Print Formats */
+    /* Thermal receipt styles exact to reference picture */
+    .thermal-receipt-box {
+      font-family: 'Courier New', Courier, monospace;
+      color: #000;
+      background: #fff;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+    .thermal-receipt-box table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .thermal-receipt-box th, .thermal-receipt-box td {
+      padding: 2px 0;
+    }
+    .dashed-border-y {
+      border-top: 1px dashed #000;
+      border-bottom: 1px dashed #000;
+    }
+    .dashed-border-t {
+      border-top: 1px dashed #000;
+    }
+
     @media print {
       body * { visibility: hidden !important; }
       
@@ -40,27 +66,30 @@
       }
 
       body[data-paper-width="58mm"] #printable-thermal-receipt {
+        display: block !important;
         position: absolute; left: 0; top: 0; width: 58mm; max-width: 58mm;
-        margin: 0; padding: 4px; font-family: monospace; font-size: 10px; color: #000; background: #fff;
+        margin: 0; padding: 4px 6px; font-size: 10px;
       }
       body[data-paper-width="80mm"] #printable-thermal-receipt {
+        display: block !important;
         position: absolute; left: 0; top: 0; width: 80mm; max-width: 80mm;
-        margin: 0; padding: 8px; font-family: monospace; font-size: 12px; color: #000; background: #fff;
+        margin: 0; padding: 8px 10px; font-size: 12px;
       }
       #printable-a4-invoice {
+        display: block !important;
         position: absolute; left: 0; top: 0; width: 100%;
-        margin: 0; padding: 20mm; font-family: sans-serif; color: #000; background: #fff;
+        margin: 0; padding: 15mm; font-family: sans-serif; color: #000; background: #fff;
       }
       #printable-audit-sheet {
+        display: block !important;
         position: absolute; left: 0; top: 0; width: 100%;
         margin: 0; padding: 15mm; font-family: monospace; color: #000; background: #fff;
       }
+      @page { margin: 0; size: auto; }
     }
-
-    @page { margin: 0; size: auto; }
   </style>
 </head>
-<body data-paper-width="58mm" data-print-format="thermal" class="bg-[#060d17] text-slate-100 min-h-screen font-sans selection:bg-indigo-600 selection:text-white flex flex-col justify-between">
+<body data-paper-width="58mm" data-print-format="thermal" class="dark bg-slate-100 dark:bg-[#060d17] text-slate-900 dark:text-slate-100 min-h-screen font-sans selection:bg-indigo-600 selection:text-white flex flex-col justify-between transition-colors duration-200">
 
   <!-- ========================================================
        1. AUTHENTICATION VIEW
@@ -69,65 +98,65 @@
     <div class="space-y-6 pt-6">
       
       <div class="flex flex-col items-center justify-center text-center space-y-2">
-        <div class="w-16 h-16 rounded-2xl bg-[#0e1a2b] border border-[#1e324f] flex items-center justify-center text-emerald-400 text-3xl shadow-xl">
+        <div class="w-16 h-16 rounded-2xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] flex items-center justify-center text-emerald-500 text-3xl shadow-xl">
           🏪
         </div>
-        <h1 class="text-2xl font-black tracking-tight text-white">StorePOS <span class="text-emerald-400">System</span></h1>
-        <p class="text-xs text-slate-400">Smart Retail & Loose Goods Weight-Scale POS</p>
+        <h1 class="text-2xl font-black tracking-tight">StorePOS <span class="text-emerald-500">System</span></h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Smart Retail & Loose Goods Weight-Scale POS</p>
       </div>
 
-      <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <span id="auth-title" class="font-extrabold text-sm text-slate-100">Store Authentication</span>
-          <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">
+      <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+          <span id="auth-title" class="font-extrabold text-sm">Store Authentication</span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">
             🛡️ Secure Cloud Sync
           </span>
         </div>
 
         <div id="field-shop-name" class="space-y-1">
-          <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Shop / Store Name</label>
-          <input id="inp-shop-name" type="text" value="StorePOS Supermarket & Sweets" placeholder="e.g. Mahalakshmi Kirana" class="w-full bg-[#08111e] border border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
+          <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Shop / Store Name</label>
+          <input id="inp-shop-name" type="text" value="ShopMaster Supermarket" placeholder="e.g. Mahalakshmi Kirana" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
         </div>
 
         <div class="space-y-1">
-          <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Registered Store Email</label>
-          <input id="inp-email" type="email" placeholder="owner@storepos.com" class="w-full bg-[#08111e] border border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
+          <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Registered Store Email</label>
+          <input id="inp-email" type="email" placeholder="owner@storepos.com" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
         </div>
 
         <div class="space-y-1">
-          <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Password</label>
-          <input id="inp-password" type="password" placeholder="••••••••" class="w-full bg-[#08111e] border border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
+          <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Password</label>
+          <input id="inp-password" type="password" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
         </div>
 
         <div class="flex items-center justify-between text-xs pt-1">
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" id="chk-remember" checked class="rounded bg-slate-900 border-slate-800 text-emerald-500">
-            <span class="text-[11px] text-slate-400">Remember session</span>
+            <input type="checkbox" id="chk-remember" checked class="rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-800 text-emerald-500">
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Remember session</span>
           </label>
-          <button type="button" onclick="fillQuickAuthDemo()" class="text-[11px] text-emerald-400 font-bold hover:underline">✨ Demo Credentials</button>
+          <button type="button" onclick="fillQuickAuthDemo()" class="text-[11px] text-emerald-500 font-bold hover:underline">✨ Demo Credentials</button>
         </div>
 
-        <button type="button" onclick="submitAuthentication()" id="auth-submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-950 flex items-center justify-center gap-2">
+        <button type="button" onclick="submitAuthentication()" id="auth-submit-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
           <span>Sign In & Open Counter</span>
           <span>→</span>
         </button>
 
-        <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="w-full text-center text-[11px] text-slate-400 hover:text-emerald-400 font-bold block transition">
+        <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="w-full text-center text-[11px] text-slate-500 dark:text-slate-400 hover:text-emerald-500 font-bold block transition">
           Need a new store? Click here to Register
         </button>
 
-        <div id="auth-status-msg" class="text-xs text-red-400 text-center font-semibold"></div>
+        <div id="auth-status-msg" class="text-xs text-red-500 text-center font-semibold"></div>
       </div>
     </div>
 
     <!-- Standalone Offline App Download with 3-Day Free Trial -->
-    <div class="bg-[#0e1a2b] border border-[#1e324f] p-3.5 rounded-2xl flex items-center justify-between shadow-xl my-4">
+    <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] p-3.5 rounded-2xl flex items-center justify-between shadow-xl my-4">
       <div>
         <div class="flex items-center gap-1.5">
-          <p class="font-extrabold text-xs text-white">Standalone App (Offline PWA)</p>
-          <span class="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded border border-amber-500/30">3-Day Free Trial</span>
+          <p class="font-extrabold text-xs">Standalone App (Offline PWA)</p>
+          <span class="text-[9px] bg-amber-500/20 text-amber-600 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded border border-amber-500/30">3-Day Free Trial</span>
         </div>
-        <p class="text-[10px] text-slate-400">Run zero-latency billing without internet</p>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400">Run zero-latency billing without internet</p>
       </div>
       <button type="button" onclick="triggerPwaInstall()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition">
         Install App
@@ -141,126 +170,113 @@
   <div id="view-app" class="hidden min-h-screen flex flex-col justify-between w-full">
     
     <!-- Top System Header -->
-    <header class="bg-[#0b1523] border-b border-[#1e324f] sticky top-0 z-30 px-3 py-2 flex flex-wrap justify-between items-center gap-2 shadow-md">
+    <header class="bg-white dark:bg-[#0b1523] border-b border-slate-200 dark:border-[#1e324f] sticky top-0 z-30 px-3 py-2 flex flex-wrap justify-between items-center gap-2 shadow-md">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-black text-sm">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-black text-sm">
           🏪
         </div>
         <div>
           <div class="flex items-center gap-1.5">
-            <h2 id="header-shop-name" class="text-xs font-black text-white leading-none">StorePOS Supermarket</h2>
-            <span id="role-pill-badge" class="text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold border border-slate-700">Staff Mode</span>
+            <h2 id="header-shop-name" class="text-xs font-black leading-none">ShopMaster Supermarket</h2>
+            <span id="role-pill-badge" class="text-[9px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded font-bold border border-slate-300 dark:border-slate-700">Staff Mode</span>
           </div>
-          <span id="header-user-email" class="text-[9px] text-slate-400 font-mono">counter1@storepos.com</span>
+          <div class="flex items-center gap-2">
+            <span id="header-user-email" class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">counter1@storepos.com</span>
+            <span id="header-gst-badge" class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 font-bold hidden">GST: <span id="header-gst-val"></span></span>
+          </div>
         </div>
       </div>
 
       <div class="flex items-center gap-1.5 flex-wrap">
-        <span id="network-badge" class="text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+        <!-- Online/Offline Badge -->
+        <span id="network-badge" onclick="openNetworkStatusModal()" class="cursor-pointer text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           <span>Online Synced</span>
         </span>
 
-        <button type="button" id="btn-paper-width-toggle" onclick="togglePaperWidth()" class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[#08111e] hover:bg-slate-800 border border-[#1e324f] text-slate-200">
+        <!-- Dark Mode Toggle -->
+        <button type="button" onclick="toggleThemeMode()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-[#08111e] hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-[#1e324f] text-slate-700 dark:text-slate-200">
+          <span id="theme-toggle-icon">🌙</span>
+        </button>
+
+        <!-- Paper Width Toggle (58mm / 80mm) -->
+        <button type="button" id="btn-paper-width-toggle" onclick="togglePaperWidth()" class="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-[#08111e] hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-[#1e324f] text-slate-700 dark:text-slate-200">
           <span>🖨️</span>
           <span id="paper-width-text">58mm</span>
-          <span id="paper-roll-badge" class="text-[8px] bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded border border-amber-500/30">ROLL</span>
+          <span id="paper-roll-badge" class="text-[8px] bg-amber-500/20 text-amber-600 dark:text-amber-300 px-1 py-0.2 rounded border border-amber-500/30">ROLL</span>
         </button>
 
-        <button type="button" onclick="reprintLastBill()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-[#08111e] hover:bg-slate-800 border border-[#1e324f] text-slate-200 flex items-center gap-1">
+        <!-- Last 5 Bills Reprint Menu -->
+        <button type="button" onclick="openRecentBillsModal()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-[#08111e] hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-300 dark:border-[#1e324f] text-slate-700 dark:text-slate-200 flex items-center gap-1">
           <span>🔁</span>
-          <span>Reprint</span>
+          <span>Reprint (Last 5)</span>
         </button>
 
-        <button type="button" id="btn-admin-toggle" onclick="handleAdminModeAccess()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+        <button type="button" id="btn-admin-toggle" onclick="handleAdminModeAccess()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1">
           <span id="admin-lock-icon">🔒</span>
-          <span id="admin-lock-label">Unlock Admin</span>
+          <span id="admin-lock-label">Admin Mode</span>
         </button>
 
-        <button type="button" onclick="openAddProductModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow">
-          + Add Product
-        </button>
-
-        <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30">
+        <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-600 dark:text-red-300 border border-red-500/30">
           ⏻ Exit
         </button>
       </div>
     </header>
 
-    <!-- Hotkeys Strip -->
-    <div class="bg-[#08111e] border-b border-[#1e324f] px-3 py-1 text-[10px] text-slate-400 flex items-center justify-between overflow-x-auto whitespace-nowrap">
-      <div class="flex items-center gap-3">
-        <span class="font-bold text-slate-500 uppercase tracking-widest text-[9px]">⚡ RAPID KEYS:</span>
-        <span class="cursor-pointer" onclick="clearCart()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F2]</kbd> Clear</span>
-        <span class="cursor-pointer" onclick="focusSearchInput()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F3]</kbd> Search</span>
-        <span class="cursor-pointer" onclick="openKhataModal()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[F4]</kbd> Khata</span>
-        <span class="cursor-pointer" onclick="closeAllModals()"><kbd class="px-1 rounded bg-slate-800 text-slate-300 font-mono">[Esc]</kbd> Close</span>
-      </div>
-      <div class="flex items-center gap-1 text-[9px] text-emerald-400 font-mono">
-        <span>● Active Device Ready</span>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <main class="flex-1 p-2 sm:p-3 w-full">
+    <!-- Main Dynamic Content Grid -->
+    <main class="flex-1 p-2 sm:p-3 w-full max-w-7xl mx-auto">
       
       <!-- ==========================================
            2A. STAFF BILLING TERMINAL
            ========================================== -->
-      <div id="panel-staff" class="grid grid-cols-1 lg:grid-cols-12 gap-3 max-w-7xl mx-auto">
+      <div id="panel-staff" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
         
-        <!-- Left: Search, Scale Bar, Catalog Grid -->
+        <!-- Left: Search, Quick Chips, Catalog Cards -->
         <div class="lg:col-span-7 space-y-3">
           
-          <!-- Barcode HID & Catalog Search -->
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3 space-y-2">
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3 space-y-2 shadow-sm">
             <div class="relative">
               <input 
                 id="inp-catalog-search" 
                 type="text" 
                 placeholder="🔍 Scan barcode or search item / SKU... [F3]" 
-                class="w-full bg-[#08111e] border-2 border-indigo-500/60 rounded-xl py-2 pl-3 pr-8 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-indigo-400"
+                class="w-full bg-slate-50 dark:bg-[#08111e] border-2 border-indigo-500/60 rounded-xl py-2 pl-3 pr-8 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-400"
                 autocomplete="off"
+                oninput="handleLiveCatalogSearch(this.value)"
               >
-              <button type="button" onclick="clearCatalogSearch()" class="absolute right-3 top-2 text-slate-400 hover:text-white font-bold text-xs">✕</button>
+              <button type="button" onclick="clearCatalogSearch()" class="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
             </div>
-            
-            <div id="search-instant-dropdown" class="hidden max-h-56 overflow-y-auto divide-y divide-slate-800 bg-[#08111e] border border-slate-700 rounded-xl text-xs"></div>
 
-            <!-- Weight Scale Rapid Chips -->
+            <!-- Weight Scale Quick Weight Preset Buttons -->
             <div class="flex items-center gap-1.5 pt-1 overflow-x-auto text-[10px]">
-              <span class="text-slate-400 font-bold uppercase">⚖️ Loose:</span>
-              <button type="button" onclick="setScaleQuantity(0.100)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-slate-700">100g</button>
-              <button type="button" onclick="setScaleQuantity(0.250)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-slate-700">250g</button>
-              <button type="button" onclick="setScaleQuantity(0.500)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-slate-700">500g</button>
-              <button type="button" onclick="setScaleQuantity(1.000)" class="px-2 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40">1 kg / 1 pc</button>
-              <button type="button" onclick="openLooseScaleCalculator()" class="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">⚖️ Scale Calculator (₹ / g)</button>
+              <span class="text-slate-500 dark:text-slate-400 font-bold uppercase whitespace-nowrap">⚖️ Loose Weight Presets:</span>
+              <button type="button" onclick="openLooseScaleForWeight(100)" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold border border-slate-300 dark:border-slate-700">100g</button>
+              <button type="button" onclick="openLooseScaleForWeight(250)" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold border border-slate-300 dark:border-slate-700">250g</button>
+              <button type="button" onclick="openLooseScaleForWeight(500)" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold border border-slate-300 dark:border-slate-700">500g</button>
+              <button type="button" onclick="openLooseScaleForWeight(1000)" class="px-2 py-0.5 rounded bg-indigo-600/20 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-500/30">1 kg</button>
+              <button type="button" onclick="openLooseScaleCalculator()" class="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30 whitespace-nowrap">⚖️ Weight Scale Calculator</button>
             </div>
           </div>
 
-          <!-- Dynamic Department Category Filter Tabs -->
-          <div id="catalog-category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap">
-            <!-- Dynamically rendered -->
-          </div>
+          <!-- Department Category Filter Tabs -->
+          <div id="catalog-category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap"></div>
 
           <!-- Catalog Cards Grid -->
-          <div id="catalog-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[460px] overflow-y-auto pr-1">
-            <!-- Cards rendered dynamically -->
-          </div>
+          <div id="catalog-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[470px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Right: Invoice Ledger & Billing Actions -->
+        <!-- Right: Current Cart Invoice Ledger -->
         <div class="lg:col-span-5 space-y-3">
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3.5 shadow-xl space-y-3">
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 shadow-xl space-y-3">
             
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
               <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xs font-bold">🛒</span>
-                <span class="text-xs font-black text-slate-100">Current Cart Invoice</span>
+                <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">🛒</span>
+                <span class="text-xs font-black">Current Cart Invoice</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-400 font-mono"><span id="cart-item-count">0</span> items</span>
-                <button type="button" onclick="clearCart()" class="text-[10px] text-red-400 font-bold hover:underline">Clear [F2]</button>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono"><span id="cart-item-count">0</span> items</span>
+                <button type="button" onclick="clearCart()" class="text-[10px] text-red-500 font-bold hover:underline">Clear [F2]</button>
               </div>
             </div>
 
@@ -268,7 +284,7 @@
             <div class="max-h-52 overflow-y-auto">
               <table class="w-full text-left text-xs">
                 <thead>
-                  <tr class="text-slate-400 text-[10px] border-b border-slate-800">
+                  <tr class="text-slate-500 dark:text-slate-400 text-[10px] border-b border-slate-200 dark:border-slate-800">
                     <th class="py-1">Good</th>
                     <th class="py-1 text-center">Qty</th>
                     <th class="py-1 text-right">Rate</th>
@@ -276,23 +292,23 @@
                     <th class="py-1 text-center"></th>
                   </tr>
                 </thead>
-                <tbody id="cart-table-tbody" class="divide-y divide-slate-800/60 font-medium text-slate-200"></tbody>
+                <tbody id="cart-table-tbody" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-medium"></tbody>
               </table>
             </div>
 
             <!-- Tax & Discount Schemes -->
-            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
               <div>
-                <label class="text-[10px] font-bold text-slate-400 block mb-1">🏷️ Discount Scheme</label>
-                <select id="sel-discount-scheme" onchange="calculateCartTotals()" class="w-full bg-[#08111e] border border-slate-800 rounded-lg p-1.5 text-xs text-slate-200 outline-none">
+                <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mb-1">🏷️ Discount Scheme</label>
+                <select id="sel-discount-scheme" onchange="calculateCartTotals()" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none">
                   <option value="0">No Discount (0%)</option>
                   <option value="5" selected>Regular Customer (5%)</option>
                   <option value="10">Festival Offer (10%)</option>
                 </select>
               </div>
               <div>
-                <label class="text-[10px] font-bold text-slate-400 block mb-1">% Tax Scheme (GST)</label>
-                <select id="sel-tax-scheme" onchange="calculateCartTotals()" class="w-full bg-[#08111e] border border-slate-800 rounded-lg p-1.5 text-xs text-slate-200 outline-none">
+                <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mb-1">% Tax Scheme (GST)</label>
+                <select id="sel-tax-scheme" onchange="calculateCartTotals()" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-lg p-1.5 text-xs outline-none">
                   <option value="0">0% GST (Exempt)</option>
                   <option value="5" selected>5% GST (Standard Grocery)</option>
                   <option value="12">12% GST (Processed Foods)</option>
@@ -302,25 +318,25 @@
             </div>
 
             <!-- Calculation Box -->
-            <div class="bg-[#08111e] p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
-              <div class="flex justify-between text-slate-400"><span>Subtotal:</span><span id="bill-subtotal" class="font-mono">₹0.00</span></div>
-              <div class="flex justify-between text-emerald-400"><span>Discount:</span><span id="bill-discount" class="font-mono">-₹0.00</span></div>
-              <div class="flex justify-between text-indigo-400"><span>Tax (GST):</span><span id="bill-tax" class="font-mono">+₹0.00</span></div>
+            <div class="bg-slate-50 dark:bg-[#08111e] p-3 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-500 dark:text-slate-400"><span>Subtotal:</span><span id="bill-subtotal" class="font-mono">₹0.00</span></div>
+              <div class="flex justify-between text-emerald-600 dark:text-emerald-400"><span>Discount:</span><span id="bill-discount" class="font-mono">-₹0.00</span></div>
+              <div class="flex justify-between text-indigo-600 dark:text-indigo-400"><span>Tax (GST):</span><span id="bill-tax" class="font-mono">+₹0.00</span></div>
               
-              <div class="border-t border-slate-800 pt-1 flex items-center justify-between">
-                <span class="text-[10px] font-bold text-amber-400">🤝 Cash Given / Settle:</span>
-                <input id="inp-cash-settle" type="number" step="any" placeholder="Amount" oninput="calculateCartTotals()" class="w-24 bg-slate-900 border border-amber-500/40 rounded px-1.5 py-0.5 text-right font-mono font-bold text-amber-300 text-xs">
+              <div class="border-t border-slate-200 dark:border-slate-800 pt-1 flex items-center justify-between">
+                <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400">🤝 Cash Given / Settle:</span>
+                <input id="inp-cash-settle" type="number" step="any" placeholder="Amount" oninput="calculateCartTotals()" class="w-24 bg-white dark:bg-slate-900 border border-amber-500/40 rounded px-1.5 py-0.5 text-right font-mono font-bold text-amber-600 dark:text-amber-300 text-xs">
               </div>
 
-              <div class="border-t border-slate-800 pt-1.5 flex justify-between items-baseline">
-                <span class="text-xs font-black text-white">Grand Total:</span>
-                <span id="bill-grand-total" class="text-lg font-black text-emerald-400 font-mono">₹0.00</span>
+              <div class="border-t border-slate-200 dark:border-slate-800 pt-1.5 flex justify-between items-baseline">
+                <span class="text-xs font-black">Grand Total:</span>
+                <span id="bill-grand-total" class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">₹0.00</span>
               </div>
             </div>
 
-            <!-- Action Buttons Grid -->
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="processSale('CASH')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow transition">
+            <!-- Checkout Action Buttons (Khata visibility controlled by Owner Toggle) -->
+            <div id="checkout-buttons-container" class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="processSale('CASH')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow transition">
                 💵 Cash Bill
               </button>
               <button type="button" onclick="processSale('UPI')" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
@@ -329,7 +345,7 @@
               <button type="button" onclick="processSale('CARD')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
                 💳 Card POS
               </button>
-              <button type="button" onclick="openKhataModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
+              <button type="button" id="btn-khata-checkout" onclick="openKhataModal()" class="bg-amber-600 hover:bg-amber-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
                 📖 Khata Ledger
               </button>
             </div>
@@ -342,95 +358,132 @@
       <!-- ==========================================
            2B. ADMIN EXECUTIVE DASHBOARD
            ========================================== -->
-      <div id="panel-owner" class="hidden max-w-7xl mx-auto space-y-4">
+      <div id="panel-owner" class="hidden space-y-4">
         
-        <!-- Action Toolbar -->
-        <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-4 shadow-xl space-y-3">
+        <!-- Action & Configuration Toolbar -->
+        <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow-xl space-y-4">
           <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-base font-black text-white">Admin Master Dashboard</h2>
-                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30">Master Access</span>
+                <h2 class="text-base font-black">Admin Master Dashboard</h2>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30">Master Access</span>
               </div>
-              <p class="text-[11px] text-slate-400">Inventory controls, custom catalog creation, price margins, and audit trail.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Inventory controls, GST configuration, Khata toggle, audit trail, and analytics.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-1.5">
               <button type="button" onclick="openAddProductModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">+ Add Product</button>
-              <button type="button" onclick="openBulkPresetModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow">📚 1000+ FMCG Presets</button>
-              <button type="button" onclick="openBulkCsvModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">📥 Bulk CSV Import</button>
+              <button type="button" onclick="openBulkPresetModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow">📚 Preset Library</button>
+              <button type="button" onclick="openBulkCsvModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold transition">📥 Bulk CSV</button>
               <button type="button" onclick="openWhatsAppAlertsModal()" class="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">💬 WhatsApp Alerts</button>
               <button type="button" onclick="exportMonthlySalesExcel()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition">📊 Export Excel</button>
-              <button type="button" onclick="openAuditTrailModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition">📋 Audit Trail</button>
+              <button type="button" onclick="openAuditTrailModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold transition">📋 Audit Trail</button>
               <button type="button" onclick="downloadAuditPdf()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">📄 Download Audit PDF</button>
             </div>
           </div>
 
-          <!-- Normal Printer (A4) Toggle -->
-          <div class="border-t border-slate-800 pt-3 flex items-center justify-between text-xs">
-            <div>
-              <span class="font-extrabold text-slate-200">Normal Printer Printing Option (A4 Format)</span>
-              <span id="a4-status-badge" class="ml-2 text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">OPTION OFF</span>
+          <!-- Store GST Number & Khata Toggle Control Strip -->
+          <div class="border-t border-slate-200 dark:border-slate-800 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            
+            <!-- GST Number Input -->
+            <div class="flex items-center gap-2 bg-slate-50 dark:bg-[#08111e] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div class="flex-1">
+                <label class="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 block">Store GSTIN (Printed on Bills)</label>
+                <input id="inp-store-gstin" type="text" placeholder="e.g. 23AAAAA0000A1Z5" class="w-full bg-transparent font-mono text-xs font-bold outline-none text-emerald-600 dark:text-emerald-400 uppercase" oninput="saveStoreGstin(this.value)">
+              </div>
+              <span class="text-xs">🧾</span>
             </div>
-            <button type="button" id="btn-toggle-a4-mode" onclick="toggleA4NormalPrinting()" class="px-3 py-1 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 border border-slate-700">
-              ● Turn ON Normal Printer (A4)
-            </button>
+
+            <!-- Khata Payment On/Off Toggle -->
+            <div class="flex items-center justify-between bg-slate-50 dark:bg-[#08111e] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div>
+                <span class="text-xs font-bold block">Khata / Credit Billing</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Enable or disable customer ledger at checkout</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="chk-khata-toggle" class="sr-only peer" onchange="handleKhataToggleChange(this.checked)">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+            </div>
+
           </div>
         </div>
 
         <!-- KPI Executive Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
-            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Total Revenue</span>
-            <div id="kpi-revenue" class="text-xl font-black text-emerald-400 font-mono">₹3,227.38</div>
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
+            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Revenue</span>
+            <div id="kpi-revenue" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">₹3,227.38</div>
             <span class="text-[10px] text-emerald-500 font-medium">↗ Real-time Audited</span>
           </div>
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
-            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Units Dispatched</span>
-            <div id="kpi-units" class="text-xl font-black text-slate-100 font-mono">37 <span class="text-xs font-normal text-slate-400">units</span></div>
-            <span class="text-[10px] text-slate-400">Across active catalog</span>
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
+            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Units Dispatched</span>
+            <div id="kpi-units" class="text-xl font-black font-mono">37 <span class="text-xs font-normal text-slate-400">units</span></div>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400">Across active catalog</span>
           </div>
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
-            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Catalog SKUs</span>
-            <div id="kpi-sku-count" class="text-xl font-black text-indigo-400 font-mono">12 <span class="text-xs font-normal text-slate-400">goods</span></div>
-            <span class="text-[10px] text-indigo-300">Active retail stock</span>
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
+            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Catalog SKUs</span>
+            <div id="kpi-sku-count" class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">12 <span class="text-xs font-normal text-slate-400">goods</span></div>
+            <span class="text-[10px] text-indigo-500 dark:text-indigo-300">Active retail stock</span>
           </div>
-          <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
-            <span class="text-[10px] font-extrabold text-red-400 uppercase tracking-wider block">Low Stock Alerts</span>
-            <div id="kpi-low-stock" class="text-xl font-black text-red-400 font-mono">4 <span class="text-xs font-normal text-slate-400">items</span></div>
-            <span class="text-[10px] text-red-400/80">Threshold &lt; 5 units</span>
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
+            <span class="text-[10px] font-extrabold text-red-500 uppercase tracking-wider block">Low Stock Alerts</span>
+            <div id="kpi-low-stock" class="text-xl font-black text-red-500 font-mono">4 <span class="text-xs font-normal text-slate-400">items</span></div>
+            <span class="text-[10px] text-red-400">Threshold &lt; 5 units</span>
           </div>
         </div>
 
-        <!-- Live Inventory Health Table -->
-        <div class="bg-[#0e1a2b] border border-[#1e324f] rounded-2xl p-4 shadow space-y-3">
+        <!-- REAL-TIME SALES ANALYSIS CHARTS (Point 4) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-xs font-black">📈 Daily Revenue Trend</h3>
+              <span class="text-[10px] text-slate-400 font-mono">Current Week</span>
+            </div>
+            <div class="h-56">
+              <canvas id="chart-daily-revenue"></canvas>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="text-xs font-black">📊 7-Day Sales Volume</h3>
+              <span class="text-[10px] text-slate-400 font-mono">Dispatched Units</span>
+            </div>
+            <div class="h-56">
+              <canvas id="chart-sales-volume"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Inventory Health Table (Points 10 & 11) -->
+        <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow space-y-3">
           <div class="flex flex-wrap justify-between items-center gap-2">
             <div>
-              <h3 class="text-xs font-extrabold text-slate-100 flex items-center gap-1.5">
+              <h3 class="text-xs font-extrabold flex items-center gap-1.5">
                 <span>📦</span> Live Inventory Health Table
               </h3>
-              <p class="text-[10px] text-slate-400">Highlighted orange badges denote <strong>Loose (kg/gm)</strong> goods that auto-trigger the weight scale.</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400">Orange badges indicate <strong>kg/gm loose weight goods</strong> with automated scale triggers.</p>
             </div>
-            <div class="flex items-center gap-2">
-              <input id="inp-table-filter" type="text" placeholder="Search SKU or item..." oninput="filterHealthTable()" class="bg-[#08111e] border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 outline-none">
+            <div>
+              <input id="inp-table-filter" type="text" placeholder="Search SKU or item..." oninput="filterHealthTable()" class="bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 text-xs rounded-lg px-2.5 py-1.5 outline-none">
             </div>
           </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
               <thead>
-                <tr class="text-slate-400 text-[10px] border-b border-slate-800 bg-[#08111e]/50">
+                <tr class="text-slate-500 dark:text-slate-400 text-[10px] border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#08111e]/50">
                   <th class="py-2.5 px-3">Product / SKU</th>
                   <th class="py-2.5 px-3">Category</th>
-                  <th class="py-2.5 px-3">Sale Basis (Weight/Unit)</th>
+                  <th class="py-2.5 px-3">Sale Basis</th>
                   <th class="py-2.5 px-3">Stock Level</th>
                   <th class="py-2.5 px-3">Health Status</th>
                   <th class="py-2.5 px-3">Selling Rate</th>
-                  <th class="py-2.5 px-3">Supplier Name & Contact</th>
+                  <th class="py-2.5 px-3">Supplier Details</th>
                   <th class="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="inventory-table-body" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
+              <tbody id="inventory-table-body" class="divide-y divide-slate-200 dark:divide-slate-800/60"></tbody>
             </table>
           </div>
         </div>
@@ -441,35 +494,33 @@
   </div>
 
   <!-- ========================================================
-       3. MODALS (ALL ONBOARDING, REORDER, SCALE, AUDIT)
+       3. MODALS (PRESETS, ADD PRODUCT, REORDER, REPRINT, SCALE)
        ======================================================== -->
 
-  <!-- 3A. FIRST-TIME ONBOARDING & PRESET CATALOG MODAL -->
-  <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-4xl bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+  <!-- 3A. FIRST-TIME & PRESET CATALOG MODAL (500 FMCG, 150 SWEETS, DRINKS) -->
+  <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-4xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
         <div>
-          <h3 class="font-extrabold text-sm text-white">Select Your Initial Store Inventory</h3>
-          <p class="text-[11px] text-slate-400">Choose from 1,000+ FMCG, 150+ Sweets (*mithai*), and soft drinks to populate your catalog.</p>
+          <h3 class="font-extrabold text-sm">Preset Product Master Library</h3>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Select FMCG, Sweets (Mithai), and Soft Drinks to populate into your active store inventory.</p>
         </div>
-        <button type="button" onclick="closePresetModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+        <button type="button" onclick="closePresetModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-between text-xs">
-        <input id="inp-preset-search" type="text" placeholder="Search FMCG, Cold Drink, Sweets..." oninput="filterPresetList()" class="bg-[#08111e] border border-slate-700 rounded-xl px-3 py-1.5 text-white outline-none w-64">
+        <input id="inp-preset-search" type="text" placeholder="Search FMCG, Cold Drink, Sweets..." oninput="filterPresetList()" class="bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 outline-none w-64">
         <div class="space-x-2">
-          <button type="button" onclick="toggleSelectAllPresets(true)" class="px-2.5 py-1 bg-slate-800 text-slate-300 font-bold rounded-lg border border-slate-700 text-xs">Select All</button>
-          <button type="button" onclick="toggleSelectAllPresets(false)" class="px-2.5 py-1 bg-slate-800 text-slate-300 font-bold rounded-lg border border-slate-700 text-xs">Deselect All</button>
+          <button type="button" onclick="toggleSelectAllPresets(true)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Select All</button>
+          <button type="button" onclick="toggleSelectAllPresets(false)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Deselect All</button>
         </div>
       </div>
 
-      <div id="preset-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-800 border border-slate-800 rounded-xl p-2 bg-[#08111e] space-y-1">
-        <!-- Preset categorized lines rendered here -->
-      </div>
+      <div id="preset-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50 dark:bg-[#08111e] space-y-1"></div>
 
-      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-        <span class="text-xs text-slate-400"><strong id="preset-selected-count" class="text-emerald-400">0</strong> products selected</span>
-        <button type="button" onclick="commitSelectedPresets()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black rounded-xl text-xs shadow">
+      <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800">
+        <span class="text-xs text-slate-500 dark:text-slate-400"><strong id="preset-selected-count" class="text-emerald-500">0</strong> products selected</span>
+        <button type="button" onclick="commitSelectedPresets()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-xl text-xs shadow">
           Import Selected Products to Catalog →
         </button>
       </div>
@@ -478,31 +529,30 @@
 
   <!-- 3B. ADD PRODUCT / CREATE CUSTOM PRODUCT & CATEGORY MODAL -->
   <div id="modal-add-product" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <h3 class="font-extrabold text-sm text-white">Create New Catalog Product</h3>
-        <button type="button" onclick="closeAddProductModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <h3 class="font-extrabold text-sm">Create New Product</h3>
+        <button type="button" onclick="closeAddProductModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
 
       <div class="space-y-2 text-xs">
         <div>
-          <label class="text-[10px] text-slate-400 font-bold block mb-1">Product Title</label>
-          <input id="inp-new-prod-name" type="text" placeholder="e.g. Kaju Roll Special" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white font-bold outline-none">
+          <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Product Title</label>
+          <input id="inp-new-prod-name" type="text" placeholder="e.g. Kaju Roll Special" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-bold outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Department / Category</label>
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Department / Category</label>
             <div class="flex gap-1">
-              <select id="sel-new-prod-cat" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white outline-none"></select>
-              <button type="button" onclick="promptCreateNewCategory()" title="Create New Category" class="px-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold border border-slate-700">+</button>
+              <select id="sel-new-prod-cat" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 outline-none"></select>
+              <button type="button" onclick="promptCreateNewCategory()" title="Create New Category" class="px-2 bg-slate-200 dark:bg-slate-800 rounded-lg font-bold border border-slate-300 dark:border-slate-700">+</button>
             </div>
           </div>
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Sale Basis</label>
-            <select id="sel-new-prod-basis" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white font-bold outline-none">
-              <option value="kg/gm">By Weight (kg/gm) [Scale Trigger]</option>
-              <option value="kg">By Unit (kg)</option>
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Sale Basis</label>
+            <select id="sel-new-prod-basis" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-bold outline-none">
+              <option value="kg/gm" class="text-amber-500">By Weight (kg/gm) [Scale Trigger]</option>
               <option value="pc" selected>By Unit (pc)</option>
               <option value="pack">By Unit (pack)</option>
               <option value="L">By Unit (L)</option>
@@ -513,23 +563,23 @@
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Selling Rate (₹)</label>
-            <input id="inp-new-prod-rate" type="number" step="any" placeholder="100.00" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white font-mono font-bold outline-none">
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Selling Rate (₹)</label>
+            <input id="inp-new-prod-rate" type="number" step="any" placeholder="100.00" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-mono font-bold outline-none">
           </div>
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Initial Stock Level</label>
-            <input id="inp-new-prod-stock" type="number" step="any" placeholder="20" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white font-mono font-bold outline-none">
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Initial Stock Level</label>
+            <input id="inp-new-prod-stock" type="number" step="any" placeholder="20" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-mono font-bold outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 border-t border-slate-800 pt-2">
+        <div class="grid grid-cols-2 gap-2 border-t border-slate-200 dark:border-slate-800 pt-2">
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Supplier Name</label>
-            <input id="inp-new-supp-name" type="text" placeholder="e.g. Haldiram Distributor" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white outline-none">
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Supplier Name</label>
+            <input id="inp-new-supp-name" type="text" placeholder="e.g. Haldiram Distributor" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 outline-none">
           </div>
           <div>
-            <label class="text-[10px] text-slate-400 font-bold block mb-1">Supplier WhatsApp / Phone</label>
-            <input id="inp-new-supp-phone" type="tel" placeholder="98XXXXXXXX" class="w-full bg-[#08111e] border border-slate-700 rounded-lg p-2 text-white font-mono outline-none">
+            <label class="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mb-1">Supplier WhatsApp / Phone</label>
+            <input id="inp-new-supp-phone" type="tel" placeholder="98XXXXXXXX" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-lg p-2 font-mono outline-none">
           </div>
         </div>
       </div>
@@ -542,36 +592,35 @@
 
   <!-- 3C. REORDER MODAL WITH DIRECT SUPPLIER DISPATCH -->
   <div id="modal-reorder" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+    <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
         <div class="flex items-center gap-2">
-          <span class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center text-xs font-bold">📦</span>
+          <span class="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">📦</span>
           <div>
-            <h3 class="font-extrabold text-sm text-white">Stock Inward & Reorder</h3>
-            <p class="text-[10px] text-slate-400">Replenish stock & alert supplier</p>
+            <h3 class="font-extrabold text-sm">Stock Inward & Reorder</h3>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">Replenish stock & alert supplier directly</p>
           </div>
         </div>
-        <button type="button" onclick="closeReorderModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+        <button type="button" onclick="closeReorderModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold">✕</button>
       </div>
 
-      <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3 space-y-1 text-xs">
-        <div class="flex justify-between"><span class="text-slate-400">Item:</span><span id="reorder-item-name" class="font-bold text-white">Item Name</span></div>
-        <div class="flex justify-between"><span class="text-slate-400">Current Stock:</span><span id="reorder-item-current" class="font-mono font-bold text-amber-400">0</span></div>
+      <div class="bg-slate-50 dark:bg-[#08111e] border border-slate-200 dark:border-slate-800 rounded-xl p-3 space-y-1 text-xs">
+        <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Item:</span><span id="reorder-item-name" class="font-bold">Item Name</span></div>
+        <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Current Stock:</span><span id="reorder-item-current" class="font-mono font-bold text-amber-500">0</span></div>
         
-        <!-- Supplier Details -->
-        <div class="border-t border-slate-800/80 pt-1.5 mt-1">
-          <div class="flex justify-between"><span class="text-slate-400">Supplier:</span><span id="reorder-supp-name" class="font-bold text-slate-200">Direct Vendor</span></div>
-          <div class="flex justify-between"><span class="text-slate-400">Contact:</span><span id="reorder-supp-phone" class="font-mono text-emerald-400">+91 98765 43210</span></div>
+        <div class="border-t border-slate-200 dark:border-slate-800/80 pt-1.5 mt-1">
+          <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Supplier:</span><span id="reorder-supp-name" class="font-bold">Direct Vendor</span></div>
+          <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Contact:</span><span id="reorder-supp-phone" class="font-mono text-emerald-500">+91 98765 43210</span></div>
         </div>
       </div>
 
       <div class="space-y-2">
-        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Quantity to Order / Inward</label>
-        <input id="reorder-input-qty" type="number" step="any" value="20" class="w-full bg-[#08111e] border border-indigo-500/60 rounded-xl py-2 px-3 text-white font-mono font-bold text-sm outline-none">
+        <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Quantity to Order / Inward</label>
+        <input id="reorder-input-qty" type="number" step="any" value="20" class="w-full bg-slate-50 dark:bg-[#08111e] border border-indigo-500/60 rounded-xl py-2 px-3 font-mono font-bold text-sm outline-none">
       </div>
 
       <div class="grid grid-cols-2 gap-2 pt-2">
-        <button type="button" onclick="dispatchSupplierWhatsAppOrder()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow flex items-center justify-center gap-1">
+        <button type="button" onclick="dispatchSupplierWhatsAppOrder()" class="py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow flex items-center justify-center gap-1">
           <span>💬</span> Order via WhatsApp
         </button>
         <button type="button" onclick="submitReorderInward()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow">
@@ -581,65 +630,129 @@
     </div>
   </div>
 
-  <!-- 3D. LOOSE GOODS SCALE CALCULATOR -->
+  <!-- 3D. WEIGHING SCALE CALCULATOR MODAL (Exact match to Reference Picture 1) -->
   <div id="modal-scale-calc" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-xs font-black text-white">⚖️ Loose Weight & Budget Scale</span>
-        <button type="button" onclick="closeLooseScaleCalculator()" class="text-slate-400 font-bold">✕</button>
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-[10px] text-slate-400 font-bold">Item Name</label>
-        <div id="calc-item-display" class="font-bold text-sm text-emerald-400">Select Item</div>
-        <span id="calc-rate-display" class="text-xs text-slate-400 font-mono">₹0.00 / kg</span>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[10px] text-slate-400 font-bold">Weight in Grams (g)</label>
-          <input id="inp-calc-weight" type="number" step="any" placeholder="e.g. 250" oninput="runLooseWeightInput()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 text-xs font-mono font-bold text-white">
+    <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl overflow-hidden">
+      
+      <!-- Orange Banner Header -->
+      <div class="bg-amber-600 px-4 py-3 flex justify-between items-center text-white">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚖️</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-extrabold text-sm leading-tight">Weighing Scale Calculator</h3>
+              <span class="text-[9px] bg-white/20 font-bold px-1.5 py-0.2 rounded uppercase">LOOSE / SWEETS</span>
+            </div>
+            <p id="calc-item-sub" class="text-[11px] text-amber-100">Kaju Katli Special Sweet • Rate: ₹900/kg</p>
+          </div>
         </div>
+        <button type="button" onclick="closeLooseScaleCalculator()" class="text-white hover:text-amber-200 font-bold text-sm">✕</button>
+      </div>
+
+      <div class="p-4 space-y-4 text-xs">
+        <!-- Mode Switcher Tabs -->
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" id="tab-scale-wt" onclick="setScaleCalcMode('weight')" class="py-2 rounded-xl font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center gap-1">
+            <span>⚖️</span> Enter Weight → Price
+          </button>
+          <button type="button" id="tab-scale-pr" onclick="setScaleCalcMode('price')" class="py-2 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-1">
+            <span>₹</span> Enter Price → Weight
+          </button>
+        </div>
+
+        <!-- Weight Input Block -->
+        <div id="block-input-weight" class="space-y-1">
+          <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <span>Enter Exact Weight (in Grams):</span>
+            <span id="calc-kg-equiv" class="font-mono text-amber-600 dark:text-amber-400">≈ 0.25 kg</span>
+          </div>
+          <div class="relative">
+            <input id="inp-calc-weight" type="number" step="any" value="250" oninput="runLooseWeightInput()" class="w-full bg-slate-50 dark:bg-[#08111e] border-2 border-amber-500/60 rounded-xl py-2 px-3 text-center text-lg font-black font-mono outline-none">
+            <span class="absolute right-3 top-3 text-[10px] font-bold text-slate-400">grams</span>
+          </div>
+        </div>
+
+        <!-- Price Input Block -->
+        <div id="block-input-price" class="hidden space-y-1">
+          <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <span>Enter Desired Budget / Price (₹):</span>
+            <span id="calc-gm-equiv" class="font-mono text-amber-600 dark:text-amber-400">≈ 250 g</span>
+          </div>
+          <div class="relative">
+            <input id="inp-calc-price" type="number" step="any" value="225" oninput="runLoosePriceInput()" class="w-full bg-slate-50 dark:bg-[#08111e] border-2 border-amber-500/60 rounded-xl py-2 px-3 text-center text-lg font-black font-mono text-emerald-500 outline-none">
+            <span class="absolute right-3 top-3 text-[10px] font-bold text-slate-400">INR (₹)</span>
+          </div>
+        </div>
+
+        <!-- Quick Presets Grid -->
         <div>
-          <label class="text-[10px] text-slate-400 font-bold">Budget Price (₹)</label>
-          <input id="inp-calc-price" type="number" step="any" placeholder="e.g. 50" oninput="runLoosePriceInput()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 text-xs font-mono font-bold text-emerald-400">
+          <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Quick Presets:</span>
+          <div class="grid grid-cols-4 gap-1.5 text-[11px] font-bold">
+            <button type="button" onclick="setCalcPresetGrams(100)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">100g</button>
+            <button type="button" onclick="setCalcPresetGrams(250)" class="py-1.5 rounded-lg bg-amber-600 text-white">250g</button>
+            <button type="button" onclick="setCalcPresetGrams(500)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">500g</button>
+            <button type="button" onclick="setCalcPresetGrams(750)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">750g</button>
+            <button type="button" onclick="setCalcPresetGrams(1000)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">1 kg</button>
+            <button type="button" onclick="setCalcPresetGrams(1500)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">1.5 kg</button>
+            <button type="button" onclick="setCalcPresetGrams(2000)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">2 kg</button>
+            <button type="button" onclick="setCalcPresetGrams(5000)" class="py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 border border-slate-300 dark:border-slate-700">5 kg</button>
+          </div>
+        </div>
+
+        <!-- Live Invoice Item Preview Box -->
+        <div class="bg-slate-900 text-white p-3 rounded-xl space-y-1">
+          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Live Invoice Item Preview:</span>
+          <div class="flex justify-between items-center text-xs">
+            <span id="calc-preview-name" class="font-bold">Kaju Katli Special Sweet</span>
+            <span id="calc-preview-rate" class="text-slate-400 font-mono">250g @ ₹900/kg</span>
+          </div>
+          <div class="flex justify-between items-baseline pt-1 border-t border-slate-800">
+            <span class="text-xs text-slate-400">Computed Line Total:</span>
+            <span id="calc-preview-total" class="text-lg font-black text-emerald-400 font-mono">₹225.00</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" onclick="closeLooseScaleCalculator()" class="py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs">
+            Cancel
+          </button>
+          <button type="button" onclick="addCalculatedLooseToCart()" id="btn-scale-submit" class="py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-xl text-xs shadow">
+            ✓ Add 250g (₹225.00)
+          </button>
         </div>
       </div>
-
-      <div class="flex gap-1.5 overflow-x-auto text-[10px]">
-        <button type="button" onclick="setCalcChipGrams(100)" class="px-2 py-1 rounded bg-slate-800 text-slate-200 font-bold">100g</button>
-        <button type="button" onclick="setCalcChipGrams(250)" class="px-2 py-1 rounded bg-slate-800 text-slate-200 font-bold">250g</button>
-        <button type="button" onclick="setCalcChipGrams(500)" class="px-2 py-1 rounded bg-slate-800 text-slate-200 font-bold">500g</button>
-        <button type="button" onclick="setCalcChipPrice(50)" class="px-2 py-1 rounded bg-indigo-900 text-indigo-200 font-bold">₹50</button>
-        <button type="button" onclick="setCalcChipPrice(100)" class="px-2 py-1 rounded bg-indigo-900 text-indigo-200 font-bold">₹100</button>
-      </div>
-
-      <div class="bg-[#08111e] p-3 rounded-xl border border-slate-800 text-xs space-y-1">
-        <div class="flex justify-between text-slate-400"><span>Final Qty:</span><span id="calc-res-qty" class="font-mono font-bold text-white">0.00 kg</span></div>
-        <div class="flex justify-between text-slate-400"><span>Payable:</span><span id="calc-res-amt" class="font-mono font-bold text-emerald-400">₹0.00</span></div>
-      </div>
-
-      <button type="button" onclick="addCalculatedLooseToCart()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow">
-        + Add Loose Line to Cart
-      </button>
     </div>
   </div>
 
-  <!-- 3E. AUDIT TRAIL MODAL (WITH LOGIN/LOGOUT & PDF FIX) -->
+  <!-- 3E. REPRINT LAST 5 BILLS MODAL -->
+  <div id="modal-recent-bills" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <span class="text-xs font-black">🔁 Last 5 Printed Invoices</span>
+        <button type="button" onclick="closeRecentBillsModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
+      </div>
+      <p class="text-[10px] text-slate-500 dark:text-slate-400">Directly reprint any recent bill in case of paper jam or hardware issues.</p>
+      
+      <div id="recent-bills-container" class="space-y-2 max-h-64 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- 3F. AUDIT TRAIL MODAL (WITH LOGIN/LOGOUT & PDF EXPORT) -->
   <div id="modal-audit-trail" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-xl bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+    <div class="w-full max-w-xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
         <div>
-          <h3 class="text-xs font-black text-white">Transactional Audit Logs</h3>
-          <p class="text-[9px] text-slate-400">Chronological history with User Login and Logout timestamps</p>
+          <h3 class="text-xs font-black">Transactional Audit Logs</h3>
+          <p class="text-[9px] text-slate-500 dark:text-slate-400">Complete timestamp history with User Login and Logout sessions</p>
         </div>
-        <button type="button" onclick="closeAuditTrailModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+        <button type="button" onclick="closeAuditTrailModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
 
       <div id="audit-trail-container" class="space-y-2 max-h-72 overflow-y-auto text-xs pr-1"></div>
 
-      <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-        <span class="text-[10px] text-slate-400">Total Audit Records: <strong id="audit-entry-count">0</strong></span>
+      <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800">
+        <span class="text-[10px] text-slate-500 dark:text-slate-400">Total Audit Records: <strong id="audit-entry-count">0</strong></span>
         <button type="button" onclick="downloadAuditPdf()" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
           <span>📄</span> Download Audit PDF (Date-Wise)
         </button>
@@ -647,14 +760,14 @@
     </div>
   </div>
 
-  <!-- 3F. ADMIN 6-DIGIT PIN KEYPAD MODAL -->
+  <!-- 3G. ADMIN 6-DIGIT PIN KEYPAD MODAL -->
   <div id="modal-admin-pin" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-xs bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-center">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-xs font-black text-slate-200">Admin Authentication</span>
-        <button type="button" onclick="closeAdminPinModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    <div class="w-full max-w-xs bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-center">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <span class="text-xs font-black">Admin Authentication</span>
+        <button type="button" onclick="closeAdminPinModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
-      <p class="text-[10px] text-slate-400">Enter 6-digit security PIN</p>
+      <p class="text-[10px] text-slate-500 dark:text-slate-400">Enter 6-digit security PIN</p>
       
       <div class="flex justify-center gap-2 py-1">
         <div class="pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent"></div>
@@ -665,123 +778,179 @@
         <div class="pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent"></div>
       </div>
 
-      <div class="text-[10px] text-amber-400 font-mono">Demo PIN: 123456</div>
+      <div class="text-[10px] text-amber-500 font-mono">Demo PIN: 123456</div>
 
       <div class="grid grid-cols-3 gap-2 pt-1">
-        <button type="button" onclick="pressPinDigit('1')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">1</button>
-        <button type="button" onclick="pressPinDigit('2')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">2</button>
-        <button type="button" onclick="pressPinDigit('3')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">3</button>
-        <button type="button" onclick="pressPinDigit('4')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">4</button>
-        <button type="button" onclick="pressPinDigit('5')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">5</button>
-        <button type="button" onclick="pressPinDigit('6')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">6</button>
-        <button type="button" onclick="pressPinDigit('7')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">7</button>
-        <button type="button" onclick="pressPinDigit('8')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">8</button>
-        <button type="button" onclick="pressPinDigit('9')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">9</button>
-        <button type="button" onclick="clearPinInput()" class="py-2.5 bg-red-950/40 text-red-300 font-bold rounded-xl text-xs">Clear</button>
-        <button type="button" onclick="pressPinDigit('0')" class="py-2.5 bg-slate-800 text-white font-bold rounded-xl text-sm">0</button>
+        <button type="button" onclick="pressPinDigit('1')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">1</button>
+        <button type="button" onclick="pressPinDigit('2')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">2</button>
+        <button type="button" onclick="pressPinDigit('3')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">3</button>
+        <button type="button" onclick="pressPinDigit('4')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">4</button>
+        <button type="button" onclick="pressPinDigit('5')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">5</button>
+        <button type="button" onclick="pressPinDigit('6')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">6</button>
+        <button type="button" onclick="pressPinDigit('7')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">7</button>
+        <button type="button" onclick="pressPinDigit('8')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">8</button>
+        <button type="button" onclick="pressPinDigit('9')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">9</button>
+        <button type="button" onclick="clearPinInput()" class="py-2.5 bg-red-100 dark:bg-red-950/40 text-red-600 font-bold rounded-xl text-xs">Clear</button>
+        <button type="button" onclick="pressPinDigit('0')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">0</button>
         <button type="button" onclick="submitPinAuthentication()" class="py-2.5 bg-indigo-600 text-white font-bold rounded-xl text-xs">Unlock</button>
       </div>
     </div>
   </div>
 
-  <!-- 3G. WHATSAPP ENGINE MODAL -->
+  <!-- 3H. WHATSAPP ENGINE MODAL -->
   <div id="modal-whatsapp-engine" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <h3 class="text-xs font-black text-white">Store Owner WhatsApp Briefings</h3>
+    <div class="w-full max-w-md bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <h3 class="text-xs font-black">Store Owner WhatsApp Briefings</h3>
         <button type="button" onclick="closeWhatsAppAlertsModal()" class="text-slate-400 font-bold">✕</button>
       </div>
-      <textarea id="wa-preview-body" rows="8" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-3 text-[11px] font-mono text-slate-200 outline-none resize-none leading-relaxed"></textarea>
+      <textarea id="wa-preview-body" rows="8" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-[11px] font-mono outline-none resize-none leading-relaxed"></textarea>
       <div class="flex gap-2">
-        <button type="button" onclick="copyWhatsAppMessage()" class="flex-1 py-2 bg-slate-800 text-slate-200 text-xs font-bold rounded-xl">Copy Text</button>
-        <button type="button" onclick="dispatchToWhatsApp()" class="flex-1 py-2 bg-emerald-600 text-slate-950 text-xs font-black rounded-xl">Launch WhatsApp</button>
+        <button type="button" onclick="copyWhatsAppMessage()" class="flex-1 py-2 bg-slate-200 dark:bg-slate-800 text-xs font-bold rounded-xl">Copy Text</button>
+        <button type="button" onclick="dispatchToWhatsApp()" class="flex-1 py-2 bg-emerald-500 text-slate-950 text-xs font-black rounded-xl">Launch WhatsApp</button>
       </div>
     </div>
   </div>
 
-  <!-- 3H. BULK CSV IMPORT -->
+  <!-- 3I. BULK CSV IMPORT -->
   <div id="modal-bulk-csv" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-xs font-black text-white">📥 Bulk CSV Catalog Import</span>
+    <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <span class="text-xs font-black">📥 Bulk CSV Catalog Import</span>
         <button type="button" onclick="closeBulkCsvModal()" class="text-slate-400 font-bold">✕</button>
       </div>
-      <input type="file" id="inp-csv-file" accept=".csv" class="w-full text-xs text-slate-400 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white">
+      <input type="file" id="inp-csv-file" accept=".csv" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white">
       <button type="button" onclick="processBulkCsvFile()" class="w-full py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow">Commit to Stock</button>
     </div>
   </div>
 
-  <!-- 3I. KHATA MODAL -->
+  <!-- 3J. KHATA CUSTOMER DETAILS MODAL -->
   <div id="modal-khata" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-        <span class="text-xs font-black text-white">📖 Khata Credit Debt</span>
+    <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
+        <span class="text-xs font-black">📖 Khata Credit Customer</span>
         <button type="button" onclick="closeKhataModal()" class="text-slate-400 font-bold">✕</button>
       </div>
-      <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile" class="w-full bg-[#08111e] border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono font-bold outline-none">
-      <input id="khata-name" type="text" placeholder="Customer Name" class="w-full bg-[#08111e] border border-slate-800 rounded-xl p-2.5 text-xs text-white font-semibold outline-none">
+      <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-mono font-bold outline-none">
+      <input id="khata-name" type="text" placeholder="Customer Name" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-semibold outline-none">
       <button type="button" onclick="confirmKhataCheckout()" class="w-full py-2.5 bg-amber-600 text-white font-black text-xs rounded-xl shadow">Confirm Credit Bill</button>
     </div>
   </div>
 
   <!-- ========================================================
-       4. PRINT CONTAINERS
+       4. PRINTABLE CONTAINERS (THERMAL RECEIPT MATCHING PICTURE 2)
        ======================================================== -->
-  <div id="printable-thermal-receipt" class="hidden">
-    <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-      <h2 style="font-size: 14px; margin: 0; font-weight: bold;">STOREPOS SYSTEM</h2>
-      <p id="prn-shop-name" style="margin: 2px 0; font-size: 10px;">Smart Retail Counter</p>
-      <div id="prn-inv-no" style="font-weight: bold; font-size: 10px;">INV-000000</div>
-      <div id="prn-date" style="font-size: 8px;"></div>
+
+  <!-- Thermal Format (58mm / 80mm Adaptive) -->
+  <div id="printable-thermal-receipt" class="hidden thermal-receipt-box">
+    <div style="text-align: center; margin-bottom: 6px;">
+      <div style="font-size: 20px; line-height: 1;">🏪</div>
+      <h2 id="prn-shop-name" style="font-size: 13px; font-weight: bold; margin: 3px 0 1px 0;">SHOPMASTER SUPERMARKET</h2>
+      <p id="prn-store-address" style="margin: 0; font-size: 9px;">Main Market Road, Sector 4</p>
+      <p id="prn-gst-line" style="margin: 0; font-size: 9px;">GSTIN: 23AAAAA0000A1Z5</p>
+      <p style="margin: 0; font-size: 9px;">Phone: +91 98765 43210</p>
+      <div style="border: 1px solid #000; display: inline-block; padding: 1px 6px; margin-top: 4px; font-size: 9px; font-weight: bold;">
+        RETAIL TAX INVOICE
+      </div>
     </div>
-    <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
+
+    <div style="font-size: 9px; margin-bottom: 4px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>INVOICE:</span>
+        <strong id="prn-inv-no">INV-20261102-2784</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>DATE:</span>
+        <span id="prn-date">02/11/2026, 7:06:28 pm</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>CASHIER:</span>
+        <span id="prn-cashier">Staff Cashier</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>PAY MODE:</span>
+        <strong id="prn-pay-mode">CASH</strong>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <table class="dashed-border-y" style="margin-bottom: 4px; font-size: 9.5px;">
+      <thead>
+        <tr>
+          <th style="text-align: left; width: 55%;">ITEM</th>
+          <th style="text-align: center; width: 15%;">QTY</th>
+          <th style="text-align: right; width: 30%;">TOTAL</th>
+        </tr>
+      </thead>
       <tbody id="prn-thermal-items"></tbody>
     </table>
-    <div style="border-top: 1px dashed #000; margin-top: 4px; padding-top: 4px;">
-      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px;">
-        <span>TOTAL:</span>
-        <span id="prn-total-val">₹0.00</span>
+
+    <div style="font-size: 9.5px; margin-bottom: 4px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>SUBTOTAL:</span>
+        <span id="prn-subtotal">₹125.00</span>
       </div>
-      <div id="prn-payment-desc" style="font-size: 9px; margin-top: 2px;"></div>
-      <div style="text-align: center; margin-top: 8px; font-size: 9px;">* Thank You! Visit Again *</div>
+      <div style="display: flex; justify-content: space-between;">
+        <span id="prn-gst-rate-label">GST (0%):</span>
+        <span id="prn-tax">+₹0.00</span>
+      </div>
+      <div class="dashed-border-y" style="display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; padding: 3px 0; margin-top: 2px;">
+        <span>GRAND TOTAL:</span>
+        <span id="prn-grand-total">₹125.00</span>
+      </div>
+    </div>
+
+    <div style="font-size: 9px; margin-bottom: 6px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>Item Count:</span>
+        <span id="prn-item-count">1 items (1 units)</span>
+      </div>
+    </div>
+
+    <div style="text-align: center; font-size: 8.5px; border-top: 1px dashed #000; padding-top: 4px;">
+      <p id="prn-footer-barcode" style="margin: 0; font-family: monospace;">* INV-20261102-2784 *</p>
+      <p style="margin: 2px 0 0 0; font-weight: bold;">THANK YOU! VISIT AGAIN!</p>
+      <p style="margin: 1px 0 0 0; color: #333;">Goods once sold cannot be returned</p>
     </div>
   </div>
 
+  <!-- A4 Format (Official Tax Invoice) -->
   <div id="printable-a4-invoice" class="hidden">
-    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 12px;">
       <div>
-        <h1 style="font-size: 24px; font-weight: 900; margin: 0;">STOREPOS SYSTEM</h1>
-        <p style="margin: 3px 0; font-size: 12px; color: #555;">Retail Tax Invoice • Official Counter Copy</p>
-        <p id="a4-shop-title" style="margin: 0; font-size: 14px; font-weight: bold;">Main Outlet</p>
+        <h1 id="a4-shop-title" style="font-size: 22px; font-weight: 900; margin: 0;">SHOPMASTER SUPERMARKET</h1>
+        <p style="margin: 3px 0; font-size: 11px; color: #555;">Retail Tax Invoice • Official Counter Copy</p>
+        <p id="a4-gst-line" style="margin: 0; font-size: 11px; font-weight: bold;">GSTIN: 23AAAAA0000A1Z5</p>
       </div>
-      <div style="text-align: right; font-size: 12px;">
+      <div style="text-align: right; font-size: 11px;">
         <p style="margin: 0; font-weight: bold;">Invoice: <span id="a4-inv-no">INV-000000</span></p>
         <p style="margin: 3px 0;">Date: <span id="a4-inv-date"></span></p>
-        <p style="margin: 0;">GST No: <strong>23AAAAA0000A1Z5</strong></p>
+        <p style="margin: 0;">Pay Mode: <strong id="a4-inv-mode">CASH</strong></p>
       </div>
     </div>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px;">
       <thead>
         <tr style="background: #f1f5f9; border-bottom: 1px solid #000;">
-          <th style="padding: 8px; text-align: left;">Item Description</th>
-          <th style="padding: 8px; text-align: center;">Qty</th>
-          <th style="padding: 8px; text-align: right;">Unit Rate</th>
-          <th style="padding: 8px; text-align: right;">Total Amount</th>
+          <th style="padding: 6px; text-align: left;">Item Description</th>
+          <th style="padding: 6px; text-align: center;">Qty</th>
+          <th style="padding: 6px; text-align: right;">Unit Rate</th>
+          <th style="padding: 6px; text-align: right;">Total Amount</th>
         </tr>
       </thead>
       <tbody id="a4-table-tbody"></tbody>
     </table>
-    <div style="margin-top: 25px; display: flex; justify-content: space-between; font-size: 13px;">
+    <div style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 12px;">
       <div style="width: 50%;">
-        <p><strong>Terms:</strong> Goods sold can be returned within 3 days with bill.</p>
+        <p><strong>Terms:</strong> Goods sold can be returned within 3 days with original bill.</p>
       </div>
       <div style="width: 40%; text-align: right;">
-        <p style="font-size: 18px; font-weight: 900; margin: 0;">Grand Total: <span id="a4-total-val">₹0.00</span></p>
-        <p style="margin-top: 40px; border-top: 1px solid #000; display: inline-block; padding-top: 5px;">Authorized Signatory</p>
+        <p style="font-size: 16px; font-weight: 900; margin: 0;">Grand Total: <span id="a4-total-val">₹0.00</span></p>
+        <p style="margin-top: 35px; border-top: 1px solid #000; display: inline-block; padding-top: 4px;">Authorized Signatory</p>
       </div>
     </div>
   </div>
 
+  <!-- Audit Print Sheet -->
   <div id="printable-audit-sheet" class="hidden">
     <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
       <h2 style="font-size: 18px; margin: 0; font-weight: bold;">STOREPOS SYSTEM - OFFICIAL AUDIT LEDGER</h2>
@@ -801,12 +970,9 @@
   </div>
 
   <!-- ========================================================
-       5. JAVASCRIPT CONTROLLER
+       5. JAVASCRIPT POS CONTROLLER
        ======================================================== -->
   <script>
-    // ----------------------------------------------------
-    // BASE STATE & STORAGE
-    // ----------------------------------------------------
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
 
@@ -825,125 +991,193 @@
     const ADMIN_DEMO_PIN = "123456";
 
     let currentPaperWidth = localStorage.getItem("storepos_paper_width") || "58mm";
-    let isA4OptionActive = localStorage.getItem("storepos_a4_active") === "true";
+    let isKhataEnabled = localStorage.getItem("storepos_khata_enabled") !== "false"; // default true
+    let storeGstin = localStorage.getItem("storepos_gstin") || "23AAAAA0000A1Z5";
+    let isDarkMode = localStorage.getItem("storepos_theme") !== "light";
     let deferredInstallPrompt = null;
 
-    // Custom Category Set
     let departmentCategories = ["All Items", "Groceries", "Beverages", "Sweets", "Household", "Snacks"];
-
-    // Base Inventory (Stored in LocalStorage)
     let currentInventory = [];
+    let activeCart = [];
+    let auditLogs = [];
+    let recentBills = [];
+    let activeScaleProduct = null;
+    let activeReorderProductId = null;
+    let scaleCalcMode = "weight"; // 'weight' or 'price'
+
+    // Charts instances
+    let dailyRevenueChart = null;
+    let salesVolumeChart = null;
+
     const defaultInitialInventory = [
       { id: "p1", custom_name: "Basmati Rice Premium", barcode: "89012341", category: "Groceries", uom: "kg/gm", unit_price: 110.00, cost_price: 85.00, current_stock: 35.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
       { id: "p2", custom_name: "Cold Pressed Mustard Oil 1L", barcode: "89012342", category: "Groceries", uom: "L", unit_price: 140.00, cost_price: 115.00, current_stock: 18.0, min_stock_alert: 5, supplier_name: "Dhara Oil Mills", supplier_phone: "919876543211" },
-      { id: "p3", custom_name: "Refined Pure Sugar", barcode: "89012343", category: "Groceries", uom: "kg/gm", unit_price: 44.00, cost_price: 36.00, current_stock: 4.0, min_stock_alert: 5, supplier_name: "National Sugar Mill", supplier_phone: "919876543212" },
-      { id: "p4", custom_name: "Desi Toor Dal Unpolished", barcode: "89012344", category: "Groceries", uom: "kg/gm", unit_price: 155.00, cost_price: 130.00, current_stock: 5.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
+      { id: "p3", custom_name: "Refined Pure Sugar 1kg", barcode: "89012343", category: "Groceries", uom: "kg", unit_price: 44.00, cost_price: 36.00, current_stock: 4.0, min_stock_alert: 5, supplier_name: "National Sugar Mill", supplier_phone: "919876543212" },
+      { id: "p4", custom_name: "Desi Toor Dal Unpolished 1kg", barcode: "89012344", category: "Groceries", uom: "kg", unit_price: 155.00, cost_price: 130.00, current_stock: 5.0, min_stock_alert: 5, supplier_name: "Kisan Agro Wholesalers", supplier_phone: "919876543210" },
       { id: "p5", custom_name: "Coca Cola Bottle 750ml", barcode: "89012345", category: "Beverages", uom: "pc", unit_price: 40.00, cost_price: 32.00, current_stock: 24.0, min_stock_alert: 5, supplier_name: "Hindustan Coca-Cola", supplier_phone: "919876543213" },
-      { id: "p6", custom_name: "Kaju Katli Special Sweets", barcode: "89012346", category: "Sweets", uom: "kg/gm", unit_price: 950.00, cost_price: 750.00, current_stock: 15.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" },
-      { id: "p7", custom_name: "Motichoor Desi Ghee Laddu", barcode: "89012347", category: "Sweets", uom: "kg/gm", unit_price: 480.00, cost_price: 360.00, current_stock: 20.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" },
-      { id: "p8", custom_name: "Thums Up Can 300ml", barcode: "89012348", category: "Beverages", uom: "pc", unit_price: 35.00, cost_price: 28.00, current_stock: 30.0, min_stock_alert: 5, supplier_name: "Hindustan Coca-Cola", supplier_phone: "919876543213" }
+      { id: "p6", custom_name: "Kaju Katli Special Sweet", barcode: "89012346", category: "Sweets", uom: "kg/gm", unit_price: 900.00, cost_price: 720.00, current_stock: 25.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" },
+      { id: "p7", custom_name: "Motichoor Desi Ghee Ladoo", barcode: "89012347", category: "Sweets", uom: "kg/gm", unit_price: 420.00, cost_price: 310.00, current_stock: 30.0, min_stock_alert: 5, supplier_name: "Bikaner Sweets Kitchen", supplier_phone: "919876543214" },
+      { id: "p8", custom_name: "Assam CTC Leaf Tea 250g", barcode: "89012348", category: "Beverages", uom: "pack", unit_price: 125.00, cost_price: 95.00, current_stock: 21.0, min_stock_alert: 5, supplier_name: "Assam Tea Corporation", supplier_phone: "919876543215" }
     ];
 
-    let activeCart = [];
-    let scaleMultiplier = 1.0;
-    let auditLogs = [];
-    let activeScaleProduct = null;
-    let activeReorderProductId = null;
-
-    // ----------------------------------------------------
-    // PRESET CATALOG GENERATOR (1000 FMCG, 150 SWEETS & DRINKS)
-    // ----------------------------------------------------
+    // Comprehensive 500+ FMCG, 150+ Sweets & Cold Drink Presets Generator
     let globalPresetCatalog = [];
     function generatePresetCatalog() {
       const presets = [];
-      const fmcgItems = [
-        "Aashirvaad Shudh Chakki Atta", "Tata Salt Iodized", "Fortune Sunlite Sunflower Oil", "Maggi 2-Minute Masala Noodles",
-        "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash Detergent",
-        "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth Toothpaste", "Dettol Original Soap",
-        "Lifebuoy Total Soap", "Head & Shoulders Anti-Dandruff Shampoo", "Sunsilk Black Shine Shampoo", "Patanjali Dant Kanti",
+      const fmcgBases = [
+        "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2-Minute Masala Noodles",
+        "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
+        "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth", "Dettol Original Soap",
+        "Lifebuoy Total Soap", "Head & Shoulders Shampoo", "Sunsilk Black Shine", "Patanjali Dant Kanti",
         "Haldiram's Bhujia Sev", "Haldiram's Khatta Meetha", "Kurkure Masala Munch", "Lay's India's Magic Masala",
-        "Cadbury Dairy Milk Chocolate", "Nestle KitKat 4 Finger", "Tata Tea Gold Leaf", "Red Label Natural Care Tea",
-        "Bru Instant Coffee", "Nescafe Classic Coffee", "Kissan Mixed Fruit Jam", "Kissan Fresh Tomato Ketchup"
+        "Cadbury Dairy Milk", "Nestle KitKat", "Tata Tea Gold", "Red Label Natural Care", "Bru Instant Coffee",
+        "Nescafe Classic", "Kissan Mixed Fruit Jam", "Kissan Tomato Ketchup", "Everest Garam Masala",
+        "Catch Sabzi Masala", "MDH Deggi Mirch", "Saffola Gold Pro Healthy", "Pillsbury Chakki Fresh"
       ];
 
-      fmcgItems.forEach((name, i) => {
+      for (let i = 0; i < 500; i++) {
+        const base = fmcgBases[i % fmcgBases.length];
+        const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
+        const isWeightLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
         presets.push({
-          id: `fmcg-${i}`,
-          custom_name: name,
-          barcode: `890${1000 + i}`,
-          category: "Groceries",
-          uom: name.includes("Atta") || name.includes("Salt") ? "kg/gm" : "pack",
-          unit_price: 45 + (i * 5),
-          cost_price: 38 + (i * 4),
+          id: `fmcg-preset-${i}`,
+          custom_name: `${base} ${weightTag} #${i + 1}`,
+          barcode: `890${10000 + i}`,
+          category: i % 2 === 0 ? "Groceries" : "Snacks",
+          uom: isWeightLoose ? "kg/gm" : "pack",
+          unit_price: 30 + (i % 40) * 10,
+          cost_price: 24 + (i % 40) * 8,
           current_stock: 40,
           min_stock_alert: 5,
           supplier_name: "Metro FMCG Wholesalers",
           supplier_phone: "919876543299"
         });
-      });
+      }
 
-      const sweetsList = [
-        "Kaju Katli Special", "Motichoor Laddu Desi Ghee", "Gulab Jamun Soft", "Rasgulla Kolkata Style",
-        "Besan Laddu Premium", "Milk Cake Alwar", "Kaju Roll Pista", "Dodha Barfi Desi", "Soan Papdi Ghee",
-        "Dry Fruit Halwa", "Peda Mathura Special", "Rasmalai Saffron", "Cham Cham Bengali", "Kaju Barfi Pure"
+      const sweetBases = [
+        "Kaju Katli Special", "Motichoor Laddu Desi Ghee", "Gulab Jamun Soft", "Rasgulla Kolkata",
+        "Besan Laddu Dryfruit", "Milk Cake Alwar", "Kaju Roll Pista", "Dodha Barfi Desi", "Soan Papdi Ghee",
+        "Dry Fruit Halwa", "Peda Mathura", "Rasmalai Saffron", "Cham Cham Bengali", "Kaju Barfi Pure"
       ];
-
-      sweetsList.forEach((name, i) => {
+      for (let i = 0; i < 150; i++) {
+        const sweet = sweetBases[i % sweetBases.length];
         presets.push({
-          id: `sweet-${i}`,
-          custom_name: name,
-          barcode: `891${2000 + i}`,
+          id: `sweet-preset-${i}`,
+          custom_name: `${sweet} Batch #${i + 1}`,
+          barcode: `891${20000 + i}`,
           category: "Sweets",
           uom: "kg/gm",
-          unit_price: 400 + (i * 35),
-          cost_price: 320 + (i * 28),
-          current_stock: 15,
-          min_stock_alert: 3,
+          unit_price: 380 + (i % 20) * 30,
+          cost_price: 300 + (i % 20) * 24,
+          current_stock: 20,
+          min_stock_alert: 4,
           supplier_name: "Raj Sweets Manufacturing",
           supplier_phone: "919876543288"
         });
-      });
+      }
 
-      const drinksList = [
-        "Coca Cola Bottle 750ml", "Thums Up Bottle 750ml", "Sprite Bottle 750ml", "Limca Lime Drink 750ml",
-        "Frooti Mango Drink 600ml", "Maaza Mango Drink 600ml", "Red Bull Energy Drink Can", "Sting Energy Drink 250ml",
-        "Amul Kool Kesar Badam", "Bisleri Mineral Water 1L", "Aquafina Water 1L", "Kinley Soda Bottle 750ml"
+      const drinkBases = [
+        "Coca Cola Bottle 750ml", "Thums Up Bottle 750ml", "Sprite Bottle 750ml", "Limca Lime 750ml",
+        "Frooti Mango Drink 600ml", "Maaza Mango 600ml", "Red Bull Energy Can", "Sting Energy 250ml",
+        "Amul Kool Kesar Badam", "Bisleri Mineral Water 1L", "Aquafina 1L", "Kinley Club Soda"
       ];
-
-      drinksList.forEach((name, i) => {
+      for (let i = 0; i < 50; i++) {
+        const drink = drinkBases[i % drinkBases.length];
         presets.push({
-          id: `drink-${i}`,
-          custom_name: name,
-          barcode: `892${3000 + i}`,
+          id: `drink-preset-${i}`,
+          custom_name: `${drink} (Chilled) #${i + 1}`,
+          barcode: `892${30000 + i}`,
           category: "Beverages",
           uom: "pc",
-          unit_price: 20 + (i * 6),
-          cost_price: 15 + (i * 5),
-          current_stock: 30,
+          unit_price: 20 + (i % 10) * 5,
+          cost_price: 15 + (i % 10) * 4,
+          current_stock: 35,
           min_stock_alert: 6,
           supplier_name: "Apex Cold Drink Agency",
           supplier_phone: "919876543277"
         });
-      });
+      }
 
       globalPresetCatalog = presets;
     }
 
-    // ----------------------------------------------------
-    // INITIALIZATION & LIFECYCLE
-    // ----------------------------------------------------
+    // Lifecycle
     window.addEventListener("DOMContentLoaded", () => {
+      applyTheme();
       generatePresetCatalog();
       loadInventoryState();
       loadStoredAuditLogs();
+      loadStoredRecentBills();
+      syncGstinUI();
+      syncKhataUI();
       syncPaperWidthUI();
-      syncA4ButtonUI();
       initNetworkHandlers();
       initCategoryTabs();
       renderCatalogCards();
       renderLiveInventoryTable();
       populateCategoryDropdowns();
+      initSalesCharts();
     });
+
+    // Theme Mode
+    function toggleThemeMode() {
+      isDarkMode = !isDarkMode;
+      localStorage.setItem("storepos_theme", isDarkMode ? "dark" : "light");
+      applyTheme();
+    }
+
+    function applyTheme() {
+      const html = document.documentElement;
+      const body = document.body;
+      const icon = document.getElementById("theme-toggle-icon");
+      if (isDarkMode) {
+        html.classList.add("dark");
+        body.classList.add("dark");
+        if (icon) icon.innerText = "🌙";
+      } else {
+        html.classList.remove("dark");
+        body.classList.remove("dark");
+        if (icon) icon.innerText = "☀️";
+      }
+      if (dailyRevenueChart) initSalesCharts();
+    }
+
+    function syncGstinUI() {
+      const el = document.getElementById("inp-store-gstin");
+      if (el) el.value = storeGstin;
+      const badge = document.getElementById("header-gst-badge");
+      const val = document.getElementById("header-gst-val");
+      if (badge && val && storeGstin) {
+        val.innerText = storeGstin;
+        badge.classList.remove("hidden");
+      }
+    }
+
+    function saveStoreGstin(val) {
+      storeGstin = val.trim().toUpperCase();
+      localStorage.setItem("storepos_gstin", storeGstin);
+      syncGstinUI();
+    }
+
+    function syncKhataUI() {
+      const chk = document.getElementById("chk-khata-toggle");
+      if (chk) chk.checked = isKhataEnabled;
+      const khataBtn = document.getElementById("btn-khata-checkout");
+      if (khataBtn) {
+        khataBtn.style.display = isKhataEnabled ? "block" : "none";
+      }
+    }
+
+    function handleKhataToggleChange(enabled) {
+      isKhataEnabled = enabled;
+      localStorage.setItem("storepos_khata_enabled", isKhataEnabled);
+      syncKhataUI();
+      recordAuditEntry({
+        type: "CONFIG CHANGE",
+        title: `Khata Ledger Feature ${isKhataEnabled ? 'Enabled' : 'Disabled'}`,
+        details: `Store owner toggled Khata credit option for counter checkout.`
+      });
+    }
 
     function loadInventoryState() {
       const saved = localStorage.getItem("storepos_custom_inventory");
@@ -962,8 +1196,53 @@
       updateKpis();
     }
 
+    function loadStoredRecentBills() {
+      const saved = localStorage.getItem("storepos_recent_bills_v2");
+      if (saved) recentBills = JSON.parse(saved);
+    }
+
+    function pushRecentBill(bill) {
+      recentBills.unshift(bill);
+      if (recentBills.length > 5) recentBills.pop();
+      localStorage.setItem("storepos_recent_bills_v2", JSON.stringify(recentBills));
+    }
+
+    function openRecentBillsModal() {
+      const c = document.getElementById("recent-bills-container");
+      if (!c) return;
+      if (!recentBills.length) {
+        c.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">No recent bills found.</div>`;
+      } else {
+        c.innerHTML = recentBills.map((b, idx) => `
+          <div class="bg-slate-50 dark:bg-[#08111e] border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
+            <div>
+              <div class="font-bold font-mono">${b.invoiceNo}</div>
+              <div class="text-[10px] text-slate-400">${b.date} • ${b.paymentMode}</div>
+              <div class="font-black text-emerald-500">${b.grandTotal} (${b.items.length} items)</div>
+            </div>
+            <button type="button" onclick="printBillDirectlyByIndex(${idx})" class="px-3 py-1 bg-indigo-600 text-white rounded-lg font-bold text-xs shadow">
+              🖨️ Reprint
+            </button>
+          </div>
+        `).join("");
+      }
+      document.getElementById("modal-recent-bills").classList.remove("hidden");
+    }
+
+    function closeRecentBillsModal() {
+      document.getElementById("modal-recent-bills").classList.add("hidden");
+    }
+
+    function printBillDirectlyByIndex(idx) {
+      const bill = recentBills[idx];
+      if (!bill) return;
+      closeRecentBillsModal();
+      const reprintBill = { ...bill, isReprint: true };
+      renderAndPrintThermal(reprintBill);
+    }
+
     // ----------------------------------------------------
-    // AUTHENTICATION & SESSION TRACKING
+    // AUTHENTICATION & SESSION TRACKING (Point 8)
     // ----------------------------------------------------
     function fillQuickAuthDemo() {
       document.getElementById("inp-email").value = "counter1@storepos.com";
@@ -985,9 +1264,9 @@
       msg.innerText = "";
       if (!email || !password) return msg.innerText = "Please provide email and password.";
 
-      activeUser = { email, shopName: shopName || "StorePOS Supermarket" };
+      activeUser = { email, shopName: shopName || "ShopMaster Supermarket" };
 
-      // Log Login Event to Audit Trail
+      // Log Login Event with Timestamp
       recordAuditEntry({
         type: "SESSION LOGIN",
         title: `Terminal Session Started: ${email}`,
@@ -1000,10 +1279,10 @@
       document.getElementById("header-user-email").innerText = activeUser.email;
 
       // Check First-Time Onboarding
-      const hasOnboarded = localStorage.getItem("storepos_onboarded_v1");
+      const hasOnboarded = localStorage.getItem("storepos_onboarded_v2");
       if (!hasOnboarded) {
         openBulkPresetModal();
-        localStorage.setItem("storepos_onboarded_v1", "true");
+        localStorage.setItem("storepos_onboarded_v2", "true");
       }
     }
 
@@ -1012,18 +1291,18 @@
 
       const userEmail = activeUser ? activeUser.email : "counter1@storepos.com";
       
-      // Log Logout Event to Audit Trail
+      // Log User Logout Event with Timestamp (Point 8)
       recordAuditEntry({
         type: "SESSION LOGOUT",
         title: `Terminal Session Closed: ${userEmail}`,
-        details: `Counter shift safely closed and audited at ${new Date().toLocaleTimeString("en-IN")}.`
+        details: `Counter shift safely closed and session terminated at ${new Date().toLocaleTimeString("en-IN")}.`
       });
 
       setTimeout(() => location.reload(), 200);
     }
 
     // ----------------------------------------------------
-    // STANDALONE OFFLINE PWA & TRIAL
+    // STANDALONE OFFLINE PWA & TRIAL (Point 9)
     // ----------------------------------------------------
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -1035,7 +1314,7 @@
         deferredInstallPrompt.prompt();
         deferredInstallPrompt = null;
       } else {
-        alert("Standalone PWA Mode:\nTap browser menu (⋮) -> 'Add to Home Screen' or 'Install App' for zero-latency offline billing with 3-Day Free Trial activated.");
+        alert("Standalone PWA Mode:\nTap your browser menu (⋮) -> 'Add to Home Screen' or 'Install App' for zero-latency offline billing with a 3-Day Free Trial activated.");
       }
     }
 
@@ -1048,12 +1327,18 @@
     function updateNetworkBadge() {
       const badge = document.getElementById("network-badge");
       if (navigator.onLine) {
-        badge.className = "text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+        badge.className = "cursor-pointer text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Online Synced</span>`;
       } else {
-        badge.className = "text-[9px] font-mono px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 animate-pulse";
+        badge.className = "cursor-pointer text-[9px] font-mono px-2 py-1 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1 animate-pulse";
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Offline Storage</span>`;
       }
+    }
+
+    function openNetworkStatusModal() {
+      const isOnline = navigator.onLine;
+      const offlineQueue = JSON.parse(localStorage.getItem("storepos_offline_bills") || "[]");
+      alert(`Service Worker & Sync Status:\n• Mode: ${isOnline ? 'Online Synced' : 'Offline Persistence Active'}\n• Queued Offline Bills: ${offlineQueue.length}\n• Background Auto-Sync: Ready`);
     }
 
     function syncOfflineBills() {
@@ -1064,14 +1349,14 @@
       recordAuditEntry({
         type: "OFFLINE SYNC",
         title: `Synchronized ${offlineQueue.length} Offline Transactions`,
-        details: `Network re-established. Background synced invoices to cloud database.`
+        details: `Connection restored. Background uploaded offline invoices to cloud registry.`
       });
 
       localStorage.removeItem("storepos_offline_bills");
     }
 
     // ----------------------------------------------------
-    // PRESET CATALOG SELECTION MODAL
+    // PRESET CATALOG SELECTION MODAL (Point 7)
     // ----------------------------------------------------
     function openBulkPresetModal() {
       renderPresetList(globalPresetCatalog);
@@ -1084,21 +1369,24 @@
 
     function renderPresetList(items) {
       const container = document.getElementById("preset-list-container");
-      container.innerHTML = items.map((p, idx) => `
-        <label class="flex items-center justify-between p-2 hover:bg-slate-800/40 rounded-lg cursor-pointer">
-          <div class="flex items-center gap-2">
-            <input type="checkbox" data-preset-id="${p.id}" class="preset-checkbox rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0">
-            <div>
-              <span class="font-bold text-xs text-white">${p.custom_name}</span>
-              <span class="text-[10px] text-slate-400 block">${p.category} • ${p.uom}</span>
+      container.innerHTML = items.map((p) => {
+        const isLoose = p.uom === "kg/gm";
+        return `
+          <label class="flex items-center justify-between p-2 hover:bg-slate-200 dark:hover:bg-slate-800/40 rounded-lg cursor-pointer">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" data-preset-id="${p.id}" class="preset-checkbox rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-xs">${p.custom_name}</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${p.category} • <strong class="${isLoose ? 'text-amber-500' : ''}">${p.uom}</strong></span>
+              </div>
             </div>
-          </div>
-          <div class="text-right">
-            <span class="font-mono font-bold text-emerald-400 text-xs">₹${p.unit_price}</span>
-            <span class="text-[9px] text-slate-400 block">${p.supplier_name}</span>
-          </div>
-        </label>
-      `).join("");
+            <div class="text-right">
+              <span class="font-mono font-bold text-emerald-500 text-xs">₹${p.unit_price}</span>
+              <span class="text-[9px] text-slate-400 block">${p.supplier_name}</span>
+            </div>
+          </label>
+        `;
+      }).join("");
       updatePresetSelectedCount();
 
       document.querySelectorAll(".preset-checkbox").forEach(chk => {
@@ -1161,7 +1449,7 @@
     }
 
     function promptCreateNewCategory() {
-      const newCat = prompt("Enter New Department / Category Name:", "Bakery");
+      const newCat = prompt("Enter New Department / Category Name:", "Dairy");
       if (!newCat || !newCat.trim()) return;
       const clean = newCat.trim();
       if (!departmentCategories.includes(clean)) {
@@ -1188,7 +1476,7 @@
       const basis = document.getElementById("sel-new-prod-basis").value;
       const rate = parseFloat(document.getElementById("inp-new-prod-rate").value);
       const stock = parseFloat(document.getElementById("inp-new-prod-stock").value) || 20;
-      const suppName = document.getElementById("inp-new-supp-name").value.trim() || "Local Supplier";
+      const suppName = document.getElementById("inp-new-supp-name").value.trim() || "Local Wholesaler";
       const suppPhone = document.getElementById("inp-new-supp-phone").value.trim() || "919876543210";
 
       if (!name || isNaN(rate) || rate <= 0) return alert("Please specify valid product name and selling rate.");
@@ -1220,13 +1508,13 @@
     }
 
     // ----------------------------------------------------
-    // CATALOG CARDS & KG/GM LOOSE GOODS AUTOMATION
+    // CATALOG CARDS & KG/GM LOOSE GOODS AUTOMATION (Point 10)
     // ----------------------------------------------------
     function initCategoryTabs() {
       const c = document.getElementById("catalog-category-tabs");
       if (!c) return;
       c.innerHTML = departmentCategories.map((cat, idx) => `
-        <button type="button" onclick="filterDepartmentCategory('${cat}')" class="cat-pill ${idx === 0 ? 'active bg-indigo-600 text-white' : 'bg-[#0e1a2b] text-slate-300 border border-[#1e324f]'} px-3 py-1.5 rounded-xl font-bold transition">
+        <button type="button" onclick="filterDepartmentCategory('${cat}')" class="cat-pill ${idx === 0 ? 'active bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-[#0e1a2b] text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-[#1e324f]'} px-3 py-1.5 rounded-xl font-bold transition">
           ${cat}
         </button>
       `).join("");
@@ -1234,7 +1522,7 @@
 
     function filterDepartmentCategory(cat) {
       document.querySelectorAll(".cat-pill").forEach(p => {
-        p.className = "cat-pill px-3 py-1.5 rounded-xl font-bold bg-[#0e1a2b] hover:bg-slate-800 text-slate-300 border border-[#1e324f] whitespace-nowrap transition";
+        p.className = "cat-pill px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-[#0e1a2b] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-[#1e324f] whitespace-nowrap transition";
       });
       event.target.className = "cat-pill active px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white whitespace-nowrap shadow";
       renderCatalogCards(cat);
@@ -1248,20 +1536,20 @@
       grid.innerHTML = filtered.map(item => {
         const isLoose = item.uom === "kg/gm";
         return `
-          <div onclick="handleCatalogCardClick('${item.id}')" class="bg-[#0e1a2b] border ${isLoose ? 'border-amber-500/40 hover:border-amber-400' : 'border-[#1e324f] hover:border-indigo-500'} rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow">
+          <div onclick="handleCatalogCardClick('${item.id}')" class="bg-white dark:bg-[#0e1a2b] border ${isLoose ? 'border-amber-500/60 dark:border-amber-500/40 hover:border-amber-500 bg-amber-500/[0.03]' : 'border-slate-200 dark:border-[#1e324f] hover:border-indigo-500'} rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow-sm">
             <div>
               <div class="flex justify-between items-start">
                 <span class="text-[9px] font-mono text-slate-400">${item.barcode}</span>
-                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300'}">
-                  ${item.uom}
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isLoose ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
+                  ${isLoose ? '⚖️ By Weight (kg/gm)' : item.uom}
                 </span>
               </div>
-              <h4 class="font-extrabold text-xs text-white mt-1 line-clamp-1">${item.custom_name}</h4>
-              <span class="text-[10px] text-slate-400 block">${item.category} • ${item.current_stock} left</span>
+              <h4 class="font-extrabold text-xs mt-1 line-clamp-1">${item.custom_name}</h4>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${item.category} • ${item.current_stock} left</span>
             </div>
-            <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between">
-              <span class="font-black text-xs text-emerald-400 font-mono">₹${item.unit_price}</span>
-              <button type="button" class="px-2 py-0.5 ${isLoose ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500'} text-white font-extrabold text-[11px] rounded shadow">
+            <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+              <span class="font-black text-xs text-emerald-600 dark:text-emerald-400 font-mono">₹${item.unit_price}</span>
+              <button type="button" class="px-2 py-0.5 ${isLoose ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'} font-extrabold text-[11px] rounded shadow">
                 ${isLoose ? '⚖️ Scale' : '+ Add'}
               </button>
             </div>
@@ -1270,36 +1558,66 @@
       }).join("");
     }
 
+    function handleLiveCatalogSearch(val) {
+      const q = val.trim().toLowerCase();
+      if (!q) return renderCatalogCards();
+      const filtered = currentInventory.filter(i => 
+        i.custom_name.toLowerCase().includes(q) || i.barcode.toLowerCase().includes(q)
+      );
+      const grid = document.getElementById("catalog-cards-grid");
+      if (grid) {
+        grid.innerHTML = filtered.map(item => `
+          <div onclick="handleCatalogCardClick('${item.id}')" class="bg-white dark:bg-[#0e1a2b] border border-indigo-500 rounded-2xl p-3 flex flex-col justify-between cursor-pointer shadow-sm">
+            <h4 class="font-bold text-xs">${item.custom_name}</h4>
+            <div class="flex justify-between items-center mt-2 text-xs">
+              <span class="font-mono text-emerald-500 font-bold">₹${item.unit_price}</span>
+              <span class="text-[10px] text-slate-400">${item.uom}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function clearCatalogSearch() {
+      const inp = document.getElementById("inp-catalog-search");
+      if (inp) inp.value = "";
+      renderCatalogCards();
+    }
+
     function handleCatalogCardClick(productId) {
       const item = currentInventory.find(p => p.id === productId);
       if (!item) return;
 
-      // If item basis is kg/gm, automatically launch the Loose Scale Calculator
+      // Automatically launch Weighing Scale Calculator if item basis is kg/gm (Point 10)
       if (item.uom === "kg/gm") {
         openLooseScaleModalForProduct(item);
       } else {
-        addItemToCart(item.id, scaleMultiplier);
+        addItemToCart(item.id, 1);
       }
     }
 
-    function setScaleQuantity(qty) {
-      scaleMultiplier = qty;
+    function openLooseScaleForWeight(grams) {
+      const looseItem = currentInventory.find(p => p.uom === "kg/gm") || currentInventory[0];
+      if (looseItem) {
+        openLooseScaleModalForProduct(looseItem);
+        setCalcPresetGrams(grams);
+      }
     }
 
-    // ----------------------------------------------------
-    // WEIGHT SCALE CALCULATOR (KG / GRAMS / BUDGET)
-    // ----------------------------------------------------
     function openLooseScaleCalculator() {
       const firstLoose = currentInventory.find(p => p.uom === "kg/gm") || currentInventory[0];
       if (firstLoose) openLooseScaleModalForProduct(firstLoose);
     }
 
+    // ----------------------------------------------------
+    // WEIGHING SCALE CALCULATOR (Matches Reference Picture 1)
+    // ----------------------------------------------------
     function openLooseScaleModalForProduct(item) {
       activeScaleProduct = item;
-      document.getElementById("calc-item-display").innerText = item.custom_name;
-      document.getElementById("calc-rate-display").innerText = `₹${item.unit_price} / kg`;
-      document.getElementById("inp-calc-weight").value = "250";
-      runLooseWeightInput();
+      document.getElementById("calc-item-sub").innerText = `${item.custom_name} • Rate: ₹${item.unit_price}/kg`;
+      document.getElementById("calc-preview-name").innerText = item.custom_name;
+      setScaleCalcMode('weight');
+      setCalcPresetGrams(250);
       document.getElementById("modal-scale-calc").classList.remove("hidden");
     }
 
@@ -1308,43 +1626,70 @@
       activeScaleProduct = null;
     }
 
+    function setScaleCalcMode(mode) {
+      scaleCalcMode = mode;
+      const tabWt = document.getElementById("tab-scale-wt");
+      const tabPr = document.getElementById("tab-scale-pr");
+      const blockWt = document.getElementById("block-input-weight");
+      const blockPr = document.getElementById("block-input-price");
+
+      if (mode === "weight") {
+        tabWt.className = "py-2 rounded-xl font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center gap-1";
+        tabPr.className = "py-2 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-1";
+        blockWt.classList.remove("hidden");
+        blockPr.classList.add("hidden");
+        runLooseWeightInput();
+      } else {
+        tabPr.className = "py-2 rounded-xl font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center gap-1";
+        tabWt.className = "py-2 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 flex items-center justify-center gap-1";
+        blockPr.classList.remove("hidden");
+        blockWt.classList.add("hidden");
+        runLoosePriceInput();
+      }
+    }
+
     function runLooseWeightInput() {
       if (!activeScaleProduct) return;
       const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
       const qtyKg = grams / 1000;
-      const cost = qtyKg * activeScaleProduct.unit_price;
+      const total = qtyKg * activeScaleProduct.unit_price;
 
-      document.getElementById("inp-calc-price").value = cost.toFixed(2);
-      document.getElementById("calc-res-qty").innerText = `${qtyKg.toFixed(3)} kg (${grams}g)`;
-      document.getElementById("calc-res-amt").innerText = `₹${cost.toFixed(2)}`;
+      document.getElementById("calc-kg-equiv").innerText = `≈ ${qtyKg.toFixed(3)} kg`;
+      document.getElementById("calc-preview-rate").innerText = `${grams}g @ ₹${activeScaleProduct.unit_price}/kg`;
+      document.getElementById("calc-preview-total").innerText = `₹${total.toFixed(2)}`;
+      document.getElementById("btn-scale-submit").innerText = `✓ Add ${grams}g (₹${total.toFixed(2)})`;
     }
 
     function runLoosePriceInput() {
       if (!activeScaleProduct) return;
-      const budget = parseFloat(document.getElementById("inp-calc-price").value) || 0;
-      const qtyKg = budget / activeScaleProduct.unit_price;
-      const grams = (qtyKg * 1000).toFixed(0);
+      const price = parseFloat(document.getElementById("inp-calc-price").value) || 0;
+      const qtyKg = price / activeScaleProduct.unit_price;
+      const grams = Math.round(qtyKg * 1000);
 
-      document.getElementById("inp-calc-weight").value = grams;
-      document.getElementById("calc-res-qty").innerText = `${qtyKg.toFixed(3)} kg (${grams}g)`;
-      document.getElementById("calc-res-amt").innerText = `₹${budget.toFixed(2)}`;
+      document.getElementById("calc-gm-equiv").innerText = `≈ ${grams} g`;
+      document.getElementById("calc-preview-rate").innerText = `${grams}g @ ₹${activeScaleProduct.unit_price}/kg`;
+      document.getElementById("calc-preview-total").innerText = `₹${price.toFixed(2)}`;
+      document.getElementById("btn-scale-submit").innerText = `✓ Add ${grams}g (₹${price.toFixed(2)})`;
     }
 
-    function setCalcChipGrams(g) {
+    function setCalcPresetGrams(g) {
       document.getElementById("inp-calc-weight").value = g;
+      setScaleCalcMode('weight');
       runLooseWeightInput();
-    }
-
-    function setCalcChipPrice(p) {
-      document.getElementById("inp-calc-price").value = p;
-      runLoosePriceInput();
     }
 
     function addCalculatedLooseToCart() {
       if (!activeScaleProduct) return;
-      const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
-      const qtyKg = parseFloat((grams / 1000).toFixed(3));
-      if (qtyKg <= 0) return alert("Please specify valid weight.");
+      let qtyKg = 0;
+      if (scaleCalcMode === "weight") {
+        const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
+        qtyKg = parseFloat((grams / 1000).toFixed(3));
+      } else {
+        const price = parseFloat(document.getElementById("inp-calc-price").value) || 0;
+        qtyKg = parseFloat((price / activeScaleProduct.unit_price).toFixed(3));
+      }
+
+      if (qtyKg <= 0) return alert("Please specify a valid weight/amount.");
 
       addItemToCart(activeScaleProduct.id, qtyKg);
       closeLooseScaleCalculator();
@@ -1377,7 +1722,7 @@
       document.getElementById("cart-item-count").innerText = activeCart.length;
 
       if (!activeCart.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500 text-xs">Your billing invoice is empty<br><span class="text-[10px]">Select items from catalog</span></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">Your billing invoice is empty<br><span class="text-[10px]">Select items from catalog</span></td></tr>`;
         calculateCartTotals();
         return;
       }
@@ -1385,13 +1730,13 @@
       tbody.innerHTML = activeCart.map((item, idx) => {
         const lineTotal = item.price * item.qty;
         return `
-          <tr class="border-b border-slate-800/40">
-            <td class="py-2 font-bold text-white text-[11px]">${item.name}</td>
-            <td class="py-2 text-center font-mono font-bold text-indigo-400 text-[11px]">${item.qty} ${item.uom}</td>
+          <tr class="border-b border-slate-200 dark:border-slate-800/40">
+            <td class="py-2 font-bold text-[11px]">${item.name}</td>
+            <td class="py-2 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">${item.qty} ${item.uom}</td>
             <td class="py-2 text-right font-mono text-[11px]">₹${item.price}</td>
-            <td class="py-2 text-right font-mono font-black text-emerald-400 text-[11px]">₹${lineTotal.toFixed(2)}</td>
+            <td class="py-2 text-right font-mono font-black text-emerald-600 dark:text-emerald-400 text-[11px]">₹${lineTotal.toFixed(2)}</td>
             <td class="py-2 text-center">
-              <button type="button" onclick="removeCartLine(${idx})" class="text-red-400 font-bold">✕</button>
+              <button type="button" onclick="removeCartLine(${idx})" class="text-red-500 font-bold">✕</button>
             </td>
           </tr>
         `;
@@ -1430,20 +1775,28 @@
     function processSale(paymentMode, custName = null, custPhone = null) {
       if (!activeCart.length) return alert("Invoice is empty.");
 
-      const invNo = "INV-" + Date.now().toString().slice(-6);
+      const invNo = "INV-" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
       const totalStr = document.getElementById("bill-grand-total").innerText;
+      const subtotalStr = document.getElementById("bill-subtotal").innerText;
+      const taxStr = document.getElementById("bill-tax").innerText;
+      const taxPct = document.getElementById("sel-tax-scheme").value;
 
       const billRecord = {
         invoiceNo: invNo,
         items: [...activeCart],
+        subtotal: subtotalStr,
+        tax: taxStr,
+        taxPct: taxPct,
         grandTotal: totalStr,
         paymentMode: paymentMode,
         customerName: custName,
         customerPhone: custPhone,
-        date: new Date().toLocaleString("en-IN")
+        date: new Date().toLocaleString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true }),
+        storeGstin: storeGstin,
+        shopName: activeUser ? activeUser.shopName : "ShopMaster Supermarket"
       };
 
-      // Decrement stock
+      // Decrement inventory stock
       activeCart.forEach(ci => {
         const item = currentInventory.find(p => p.id === ci.id);
         if (item) item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(2)));
@@ -1454,7 +1807,7 @@
       recordAuditEntry({
         type: isOnline ? "SALE INVOICE" : "OFFLINE SALE",
         title: `Bill ${invNo} Punched [${paymentMode}]`,
-        details: `Amount: ${totalStr}. Mode: ${paymentMode}. Synced Status: ${isOnline ? 'Online Synced' : 'Queued in Offline Storage'}.`
+        details: `Amount: ${totalStr}. Mode: ${paymentMode}. Status: ${isOnline ? 'Online Synced' : 'Stored in Offline Cache'}.`
       });
 
       if (!isOnline) {
@@ -1463,64 +1816,68 @@
         localStorage.setItem("storepos_offline_bills", JSON.stringify(offlineQueue));
       }
 
-      localStorage.setItem("storepos_last_bill", JSON.stringify(billRecord));
+      pushRecentBill(billRecord);
 
-      // Print
-      if (isA4OptionActive) {
-        renderAndPrintA4(billRecord);
-      } else {
-        renderAndPrintThermal(billRecord);
-      }
+      // Print bill formatted as in Screenshot 2
+      renderAndPrintThermal(billRecord);
 
       clearCart();
       saveInventoryState();
     }
 
+    // ----------------------------------------------------
+    // THERMAL BILL FORMATTER (Exact match to Reference Picture 2)
+    // ----------------------------------------------------
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
+      document.body.setAttribute("data-paper-width", currentPaperWidth);
+
+      document.getElementById("prn-shop-name").innerText = (bill.shopName || "SHOPMASTER SUPERMARKET").toUpperCase();
+      document.getElementById("prn-gst-line").innerText = `GSTIN: ${bill.storeGstin || storeGstin || '23AAAAA0000A1Z5'}`;
       document.getElementById("prn-inv-no").innerText = bill.invoiceNo;
-      document.getElementById("prn-date").innerText = bill.date;
-      document.getElementById("prn-total-val").innerText = bill.grandTotal;
-      document.getElementById("prn-payment-desc").innerText = `Paid: ${bill.paymentMode}` + (bill.customerName ? ` (${bill.customerName})` : "");
+      document.getElementById("prn-date").innerText = bill.date + (bill.isReprint ? " (REPRINT)" : "");
+      document.getElementById("prn-pay-mode").innerText = bill.paymentMode + (bill.customerName ? ` (${bill.customerName})` : "");
+      document.getElementById("prn-subtotal").innerText = bill.subtotal;
+      document.getElementById("prn-gst-rate-label").innerText = `GST (${bill.taxPct || '0'}%):`;
+      document.getElementById("prn-tax").innerText = bill.tax;
+      document.getElementById("prn-grand-total").innerText = bill.grandTotal;
+
+      const totalUnits = bill.items.reduce((sum, i) => sum + (typeof i.qty === 'number' ? i.qty : 1), 0);
+      document.getElementById("prn-item-count").innerText = `${bill.items.length} items (${totalUnits} units)`;
+      document.getElementById("prn-footer-barcode").innerText = `* ${bill.invoiceNo} *`;
 
       document.getElementById("prn-thermal-items").innerHTML = bill.items.map(i => `
         <tr>
-          <td>${i.name} x${i.qty}</td>
-          <td style="text-align: right; font-weight: bold;">₹${(i.price * i.qty).toFixed(2)}</td>
+          <td style="text-align: left; padding: 2px 0;">${i.name}</td>
+          <td style="text-align: center; padding: 2px 0;">${i.qty}</td>
+          <td style="text-align: right; padding: 2px 0; font-weight: bold;">₹${(i.price * i.qty).toFixed(2)}</td>
         </tr>
       `).join("");
 
       window.print();
     }
 
-    function renderAndPrintA4(bill) {
-      document.body.setAttribute("data-print-format", "a4");
-      document.getElementById("a4-inv-no").innerText = bill.invoiceNo;
-      document.getElementById("a4-inv-date").innerText = bill.date;
-      document.getElementById("a4-total-val").innerText = bill.grandTotal;
-
-      document.getElementById("a4-table-tbody").innerHTML = bill.items.map(i => `
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px;">${i.name}</td>
-          <td style="padding: 8px; text-align: center;">${i.qty} ${i.uom}</td>
-          <td style="padding: 8px; text-align: right;">₹${i.price.toFixed(2)}</td>
-          <td style="padding: 8px; text-align: right; font-weight: bold;">₹${(i.price * i.qty).toFixed(2)}</td>
-        </tr>
-      `).join("");
-
-      window.print();
+    function togglePaperWidth() {
+      currentPaperWidth = currentPaperWidth === "58mm" ? "80mm" : "58mm";
+      localStorage.setItem("storepos_paper_width", currentPaperWidth);
+      syncPaperWidthUI();
     }
 
-    function reprintLastBill() {
-      const raw = localStorage.getItem("storepos_last_bill");
-      if (!raw) return alert("No recent bill stored in counter cache.");
-      const bill = JSON.parse(raw);
-      bill.date = bill.date + " (REPRINT)";
-      renderAndPrintThermal(bill);
+    function syncPaperWidthUI() {
+      document.body.setAttribute("data-paper-width", currentPaperWidth);
+      document.getElementById("paper-width-text").innerText = currentPaperWidth;
+      const b = document.getElementById("paper-roll-badge");
+      if (currentPaperWidth === "80mm") {
+        b.innerText = "80mm (3-inch)";
+        b.className = "text-[8px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 px-1 py-0.2 rounded border border-emerald-500/30";
+      } else {
+        b.innerText = "58mm (2-inch)";
+        b.className = "text-[8px] bg-amber-500/20 text-amber-600 dark:text-amber-300 px-1 py-0.2 rounded border border-amber-500/30";
+      }
     }
 
     // ----------------------------------------------------
-    // LIVE INVENTORY TABLE (REORDER & SUPPLIER DISPATCH)
+    // LIVE INVENTORY TABLE (Points 10 & 11)
     // ----------------------------------------------------
     function renderLiveInventoryTable() {
       const tbody = document.getElementById("inventory-table-body");
@@ -1531,33 +1888,33 @@
         const isLoose = item.uom === "kg/gm";
 
         return `
-          <tr class="border-b border-slate-800/60 hover:bg-slate-800/30 text-xs">
+          <tr class="border-b border-slate-200 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/30 text-xs">
             <td class="py-2.5 px-3">
-              <div class="font-bold text-white">${item.custom_name}</div>
+              <div class="font-bold">${item.custom_name}</div>
               <div class="text-[10px] text-slate-400 font-mono">${item.barcode}</div>
             </td>
-            <td class="py-2.5 px-3 text-slate-300">${item.category}</td>
+            <td class="py-2.5 px-3 text-slate-500 dark:text-slate-300">${item.category}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-300'}">
-                ${item.uom}
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isLoose ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
+                ${isLoose ? '⚖️ By Weight (kg/gm)' : item.uom}
               </span>
             </td>
-            <td class="py-2.5 px-3 font-mono font-bold text-slate-200">${item.current_stock} <span class="text-[10px] text-slate-400 font-normal">${item.uom}</span></td>
+            <td class="py-2.5 px-3 font-mono font-bold">${item.current_stock} <span class="text-[10px] text-slate-400 font-normal">${item.uom}</span></td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isLow ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isLow ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'}">
                 ${isLow ? '⚠️ LOW STOCK' : '✅ HEALTHY'}
               </span>
             </td>
-            <td class="py-2.5 px-3 font-mono text-slate-200">₹${item.unit_price.toFixed(2)}</td>
+            <td class="py-2.5 px-3 font-mono">₹${item.unit_price.toFixed(2)}</td>
             <td class="py-2.5 px-3">
-              <div class="font-semibold text-slate-200">${item.supplier_name || 'Direct Wholesale'}</div>
-              <div class="text-[10px] text-emerald-400 font-mono">${item.supplier_phone || '9876543210'}</div>
+              <div class="font-semibold">${item.supplier_name || 'Direct Wholesale'}</div>
+              <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${item.supplier_phone || '9876543210'}</div>
             </td>
             <td class="py-2.5 px-3 text-right space-x-1.5 whitespace-nowrap">
-              <button type="button" onclick="openReorderModal('${item.id}')" class="px-2.5 py-1 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded text-[11px] font-bold tracking-wide transition shadow">
+              <button type="button" onclick="openReorderModal('${item.id}')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-bold transition shadow">
                 📦 Reorder
               </button>
-              <button type="button" onclick="deleteInventoryItem('${item.id}')" class="px-2 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/30 rounded text-[11px] font-bold transition">
+              <button type="button" onclick="deleteInventoryItem('${item.id}')" class="px-2 py-1 bg-red-600/20 hover:bg-red-600/40 text-red-600 dark:text-red-300 border border-red-500/30 rounded text-[11px] font-bold transition">
                 🗑️
               </button>
             </td>
@@ -1576,6 +1933,9 @@
       if (skuEl) skuEl.innerText = `${currentInventory.length} goods`;
     }
 
+    // ----------------------------------------------------
+    // SUPPLIER REORDER & WHATSAPP DIRECT DISPATCH (Point 11)
+    // ----------------------------------------------------
     function openReorderModal(productId) {
       const item = currentInventory.find(p => p.id === productId);
       if (!item) return;
@@ -1585,7 +1945,7 @@
       document.getElementById("reorder-item-current").innerText = `${item.current_stock} ${item.uom}`;
       document.getElementById("reorder-supp-name").innerText = item.supplier_name || "Direct Supplier";
       document.getElementById("reorder-supp-phone").innerText = item.supplier_phone || "+91 98765 43210";
-      document.getElementById("reorder-input-qty").value = "25";
+      document.getElementById("reorder-input-qty").value = "20";
 
       document.getElementById("modal-reorder").classList.remove("hidden");
     }
@@ -1608,9 +1968,9 @@
         `Good: *${item.custom_name}*\n` +
         `SKU: ${item.barcode}\n` +
         `Required Inward Qty: *${qty} ${item.uom}*\n` +
-        `Current On-Hand: ${item.current_stock} ${item.uom}\n` +
+        `Current On-Hand Stock: ${item.current_stock} ${item.uom}\n` +
         `---------------------------\n` +
-        `Kindly confirm order dispatch and delivery timeline.`
+        `Kindly dispatch at wholesale rate and share courier/challan details.`
       );
 
       window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
@@ -1628,7 +1988,7 @@
       recordAuditEntry({
         type: "STOCK INWARD",
         title: `Restocked ${item.custom_name}`,
-        details: `Added +${qty} ${item.uom}. Balance updated from ${oldStock} to ${item.current_stock}. Supplier: ${item.supplier_name}`
+        details: `Added +${qty} ${item.uom}. Balance: ${oldStock} -> ${item.current_stock}. Vendor: ${item.supplier_name}`
       });
 
       saveInventoryState();
@@ -1653,7 +2013,69 @@
     }
 
     // ----------------------------------------------------
-    // AUDIT TRAIL & EMPTY PDF FIX
+    // SALES ANALYSIS CHARTS (Point 4)
+    // ----------------------------------------------------
+    function initSalesCharts() {
+      const ctxRev = document.getElementById("chart-daily-revenue");
+      const ctxVol = document.getElementById("chart-sales-volume");
+      if (!ctxRev || !ctxVol) return;
+
+      if (dailyRevenueChart) dailyRevenueChart.destroy();
+      if (salesVolumeChart) salesVolumeChart.destroy();
+
+      const textColor = isDarkMode ? "#94a3b8" : "#475569";
+      const gridColor = isDarkMode ? "rgba(30, 50, 79, 0.4)" : "rgba(226, 232, 240, 0.8)";
+
+      dailyRevenueChart = new Chart(ctxRev, {
+        type: "line",
+        data: {
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          datasets: [{
+            label: "Daily Revenue (₹)",
+            data: [483, 120, 310, 890, 650, 940, 780],
+            borderColor: "#10b981",
+            backgroundColor: "rgba(16, 185, 129, 0.1)",
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor }, grid: { color: gridColor } }
+          }
+        }
+      });
+
+      salesVolumeChart = new Chart(ctxVol, {
+        type: "bar",
+        data: {
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          datasets: [{
+            label: "Units Sold",
+            data: [12, 5, 9, 18, 14, 22, 16],
+            backgroundColor: "#6366f1",
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor }, grid: { color: gridColor } }
+          }
+        }
+      });
+    }
+
+    // ----------------------------------------------------
+    // AUDIT TRAIL & FIXED PDF EXPORT (Point 8)
     // ----------------------------------------------------
     function recordAuditEntry({ type, title, details }) {
       const entry = {
@@ -1665,15 +2087,15 @@
         time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })
       };
       auditLogs.unshift(entry);
-      localStorage.setItem("storepos_audit_records_v2", JSON.stringify(auditLogs));
+      localStorage.setItem("storepos_audit_records_v3", JSON.stringify(auditLogs));
       renderAuditLogsUI();
     }
 
     function loadStoredAuditLogs() {
-      const saved = localStorage.getItem("storepos_audit_records_v2");
+      const saved = localStorage.getItem("storepos_audit_records_v3");
       if (saved) auditLogs = JSON.parse(saved);
       if (!auditLogs.length) {
-        recordAuditEntry({ type: "SYSTEM BOOT", title: "StorePOS Terminal Initialized", details: "Local database seeded with active counter inventory." });
+        recordAuditEntry({ type: "SYSTEM BOOT", title: "StorePOS Terminal Initialized", details: "Counter database active with cloud synchronization ready." });
       }
       renderAuditLogsUI();
     }
@@ -1685,13 +2107,13 @@
       if (!container) return;
 
       container.innerHTML = auditLogs.map(l => `
-        <div class="bg-[#08111e] border border-slate-800 p-2.5 rounded-xl space-y-1">
+        <div class="bg-slate-50 dark:bg-[#08111e] border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl space-y-1">
           <div class="flex justify-between items-center text-[10px]">
-            <span class="font-bold text-amber-400 font-mono">${l.type} • ${l.id}</span>
+            <span class="font-bold text-amber-500 font-mono">${l.type} • ${l.id}</span>
             <span class="text-slate-400">${l.date} • ${l.time}</span>
           </div>
-          <p class="font-bold text-white text-xs">${l.title}</p>
-          <p class="text-[11px] text-slate-400 leading-tight">${l.details}</p>
+          <p class="font-bold text-xs">${l.title}</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">${l.details}</p>
         </div>
       `).join("");
     }
@@ -1705,7 +2127,6 @@
       document.getElementById("modal-audit-trail").classList.add("hidden");
     }
 
-    // Fixed PDF & Date-Wise Sheet Generator
     function downloadAuditPdf() {
       document.body.setAttribute("data-print-format", "audit");
       const tbody = document.getElementById("audit-sheet-table-body");
@@ -1723,7 +2144,7 @@
     }
 
     // ----------------------------------------------------
-    // ADMIN PIN & TOGGLES
+    // ADMIN PIN MODAL
     // ----------------------------------------------------
     function handleAdminModeAccess() {
       if (isAdminUnlocked) {
@@ -1731,9 +2152,8 @@
         document.getElementById("panel-owner").classList.add("hidden");
         document.getElementById("panel-staff").classList.remove("hidden");
         document.getElementById("role-pill-badge").innerText = "Staff Mode";
-        document.getElementById("role-pill-badge").className = "text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-bold border border-slate-700";
         document.getElementById("admin-lock-icon").innerText = "🔒";
-        document.getElementById("admin-lock-label").innerText = "Unlock Admin";
+        document.getElementById("admin-lock-label").innerText = "Admin Mode";
       } else {
         openAdminPinModal();
       }
@@ -1775,57 +2195,37 @@
         document.getElementById("panel-staff").classList.add("hidden");
         document.getElementById("panel-owner").classList.remove("hidden");
         document.getElementById("role-pill-badge").innerText = "Admin Master";
-        document.getElementById("role-pill-badge").className = "text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold border border-emerald-500/30";
         document.getElementById("admin-lock-icon").innerText = "🔓";
         document.getElementById("admin-lock-label").innerText = "Lock / Staff";
+        initSalesCharts();
       } else {
         alert("Invalid PIN! Default demo PIN is 123456.");
         clearPinInput();
       }
     }
 
-    function togglePaperWidth() {
-      currentPaperWidth = currentPaperWidth === "58mm" ? "80mm" : "58mm";
-      localStorage.setItem("storepos_paper_width", currentPaperWidth);
-      syncPaperWidthUI();
-    }
-
-    function syncPaperWidthUI() {
-      document.body.setAttribute("data-paper-width", currentPaperWidth);
-      document.getElementById("paper-width-text").innerText = currentPaperWidth;
-      const b = document.getElementById("paper-roll-badge");
-      if (currentPaperWidth === "80mm") {
-        b.innerText = "WIDE";
-        b.className = "text-[8px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded border border-emerald-500/30";
-      } else {
-        b.innerText = "ROLL";
-        b.className = "text-[8px] bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded border border-amber-500/30";
-      }
-    }
-
-    function toggleA4NormalPrinting() {
-      isA4OptionActive = !isA4OptionActive;
-      localStorage.setItem("storepos_a4_active", isA4OptionActive);
-      syncA4ButtonUI();
-    }
-
-    function syncA4ButtonUI() {
-      const b = document.getElementById("a4-status-badge");
-      const btn = document.getElementById("btn-toggle-a4-mode");
-      if (isA4OptionActive) {
-        b.innerText = "OPTION ON";
-        b.className = "ml-2 text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono";
-        btn.innerText = "● Turn OFF Normal Printer (A4)";
-      } else {
-        b.innerText = "OPTION OFF";
-        b.className = "ml-2 text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono";
-        btn.innerText = "● Turn ON Normal Printer (A4)";
-      }
-    }
-
     // ----------------------------------------------------
-    // WHATSAPP ALERTS & KHATA
+    // KHATA & CSV HELPERS
     // ----------------------------------------------------
+    function openKhataModal() {
+      if (!isKhataEnabled) return alert("Khata / Credit Billing is currently switched OFF by the Store Owner.");
+      if (!activeCart.length) return alert("Cart is empty.");
+      document.getElementById("modal-khata").classList.remove("hidden");
+    }
+
+    function closeKhataModal() {
+      document.getElementById("modal-khata").classList.add("hidden");
+    }
+
+    function confirmKhataCheckout() {
+      const phone = document.getElementById("khata-phone").value.trim();
+      const name = document.getElementById("khata-name").value.trim();
+      if (phone.length < 10 || !name) return alert("Enter valid 10-digit number and name.");
+
+      closeKhataModal();
+      processSale('KHATA', name, phone);
+    }
+
     function openWhatsAppAlertsModal() {
       const lowItems = currentInventory.filter(i => i.current_stock <= (i.min_stock_alert || 5));
       document.getElementById("wa-preview-body").value = 
@@ -1847,24 +2247,6 @@
     function dispatchToWhatsApp() {
       const text = encodeURIComponent(document.getElementById("wa-preview-body").value);
       window.open(`https://wa.me/?text=${text}`, "_blank");
-    }
-
-    function openKhataModal() {
-      if (!activeCart.length) return alert("Cart is empty.");
-      document.getElementById("modal-khata").classList.remove("hidden");
-    }
-
-    function closeKhataModal() {
-      document.getElementById("modal-khata").classList.add("hidden");
-    }
-
-    function confirmKhataCheckout() {
-      const phone = document.getElementById("khata-phone").value.trim();
-      const name = document.getElementById("khata-name").value.trim();
-      if (phone.length < 10 || !name) return alert("Enter valid 10-digit number and name.");
-
-      closeKhataModal();
-      processSale('KHATA', name, phone);
     }
 
     function openBulkCsvModal() {
@@ -1930,15 +2312,6 @@
       document.querySelectorAll("#inventory-table-body tr").forEach(row => {
         row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
       });
-    }
-
-    function closeAllModals() {
-      document.querySelectorAll("[id^='modal-']").forEach(m => m.classList.add("hidden"));
-    }
-
-    function focusSearchInput() {
-      const s = document.getElementById("inp-catalog-search");
-      if (s) s.focus();
     }
   </script>
 </body>
