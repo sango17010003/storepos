@@ -1693,82 +1693,119 @@
       closeLooseScaleCalculator();
     }
 
+    // ----------------------------------------------------
+    // STRICT INVENTORY VALIDATION & LOW-STOCK THRESHOLD LOCK
+    // ----------------------------------------------------
     function addItemToCart(productId, qty) {
       const product = currentInventory.find(p => p.id === productId);
       if (!product) return;
 
-      const existing = activeCart.find(c => c.id === productId);
-      if (existing) {
-        existing.qty = parseFloat((existing.qty + qty).toFixed(3));
-      } else {
-        activeCart.push({
-          id: product.id,
-          name: product.custom_name,
-          price: product.unit_price,
-          uom: product.uom,
-          qty: qty
-        });
-      }
-      renderCartUI();
-    }
-
-    function renderCartUI() {
-      const tbody = document.getElementById("cart-table-tbody");
-      document.getElementById("cart-item-count").innerText = activeCart.length;
-
-      if (!activeCart.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">Your billing invoice is empty<br><span class="text-[10px]">Select items from catalog</span></td></tr>`;
-        calculateCartTotals();
+      if (product.current_stock <= 0) {
+        alert(`⚠️ Out of Stock!\n"${product.custom_name}" has 0 ${product.uom} left in stock.`);
         return;
       }
 
-      tbody.innerHTML = activeCart.map((item, idx) => {
-        const lineTotal = item.price * item.qty;
-        return `
-          <tr class="border-b border-slate-200 dark:border-slate-800/40">
-            <td class="py-2 font-bold text-[11px]">${item.name}</td>
-            <td class="py-2 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">${item.qty} ${item.uom}</td>
-            <td class="py-2 text-right font-mono text-[11px]">₹${item.price}</td>
-            <td class="py-2 text-right font-mono font-black text-emerald-600 dark:text-emerald-400 text-[11px]">₹${lineTotal.toFixed(2)}</td>
-            <td class="py-2 text-center">
-              <button type="button" onclick="removeCartLine(${idx})" class="text-red-500 font-bold">✕</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
+      const existing = activeCart.find(c => c.id === productId);
+      const currentCartQty = existing ? existing.qty : 0;
+      const requestedTotalQty = parseFloat((currentCartQty + qty).toFixed(3));
 
-      calculateCartTotals();
-    }
+      if (requestedTotalQty > product.current_stock) {
+        const allowedAdd = parseFloat((product.current_stock - currentCartQty).toFixed(3));
+        
+        if (allowedAdd <= 0) {
+          alert(
+            `⛔ Stock Limit Reached!\n\n` +
+            `Only ${product.current_stock} ${product.uom} available in stock for "${product.custom_name}".\n` +
+            `You already have ${currentCartQty} ${product.uom} in your cart. Cannot add more.`
+          );
+          return;
+        }
 
-    function removeCartLine(idx) {
-      activeCart.splice(idx, 1);
+        if (existing) {
+          existing.qty = product.current_stock;
+        } else {
+          activeCart.push({
+            id: product.id,
+            name: product.custom_name,
+            price: product.unit_price,
+            uom: product.uom,
+            qty: product.current_stock
+          });
+        }
+
+        alert(
+          `⚠️ Stock Limit Applied!\n\n` +
+          `Requested quantity exceeded available stock.\n` +
+          `Added the maximum remaining amount: ${product.current_stock} ${product.uom}.`
+        );
+      } else {
+        if (existing) {
+          existing.qty = requestedTotalQty;
+        } else {
+          activeCart.push({
+            id: product.id,
+            name: product.custom_name,
+            price: product.unit_price,
+            uom: product.uom,
+            qty: qty
+          });
+        }
+      }
+
+      const finalCartQty = existing ? existing.qty : qty;
+      const remainingStock = parseFloat((product.current_stock - finalCartQty).toFixed(3));
+      const minThreshold = product.min_stock_alert || 5;
+
+      if (remainingStock <= minThreshold) {
+        console.warn(`[LOW STOCK REMINDER] ${product.custom_name}: Only ${remainingStock} ${product.uom} left.`);
+      }
+
       renderCartUI();
     }
 
-    function clearCart() {
-      activeCart = [];
-      renderCartUI();
-    }
+    function addCalculatedLooseToCart() {
+      if (!activeScaleProduct) return;
 
-    function calculateCartTotals() {
-      const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-      const discountPct = parseFloat(document.getElementById("sel-discount-scheme").value) || 0;
-      const taxPct = parseFloat(document.getElementById("sel-tax-scheme").value) || 0;
-      const settle = parseFloat(document.getElementById("inp-cash-settle").value) || 0;
+      let qtyKg = 0;
+      if (scaleCalcMode === "weight") {
+        const grams = parseFloat(document.getElementById("inp-calc-weight").value) || 0;
+        qtyKg = parseFloat((grams / 1000).toFixed(3));
+      } else {
+        const price = parseFloat(document.getElementById("inp-calc-price").value) || 0;
+        qtyKg = parseFloat((price / activeScaleProduct.unit_price).toFixed(3));
+      }
 
-      const discountAmount = subtotal * (discountPct / 100);
-      const taxable = subtotal - discountAmount;
-      const taxAmount = taxable * (taxPct / 100);
-      const grandTotal = settle > 0 ? settle : (taxable + taxAmount);
+      if (qtyKg <= 0) return alert("Please specify a valid weight/amount.");
 
-      document.getElementById("bill-subtotal").innerText = `₹${subtotal.toFixed(2)}`;
-      document.getElementById("bill-discount").innerText = `-₹${discountAmount.toFixed(2)}`;
-      document.getElementById("bill-tax").innerText = `+₹${taxAmount.toFixed(2)}`;
-      document.getElementById("bill-grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
+      const existing = activeCart.find(c => c.id === activeScaleProduct.id);
+      const currentCartQty = existing ? existing.qty : 0;
+      const totalWanted = parseFloat((currentCartQty + qtyKg).toFixed(3));
+
+      if (totalWanted > activeScaleProduct.current_stock) {
+        const available = parseFloat((activeScaleProduct.current_stock - currentCartQty).toFixed(3));
+        alert(
+          `⛔ Insufficient Stock!\n\n` +
+          `Available: ${activeScaleProduct.current_stock} kg\n` +
+          `In Cart: ${currentCartQty} kg\n` +
+          `Remaining that can be added: ${Math.max(0, available)} kg.`
+        );
+        return;
+      }
+
+      addItemToCart(activeScaleProduct.id, qtyKg);
+      closeLooseScaleCalculator();
     }
 
     function processSale(paymentMode, custName = null, custPhone = null) {
       if (!activeCart.length) return alert("Invoice is empty.");
+
+      for (const ci of activeCart) {
+        const item = currentInventory.find(p => p.id === ci.id);
+        if (item && ci.qty > item.current_stock) {
+          alert(`Cannot checkout: "${ci.name}" exceeds current stock (${item.current_stock} available).`);
+          return;
+        }
+      }
 
       const invNo = "INV-" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
       const totalStr = document.getElementById("bill-grand-total").innerText;
@@ -1793,7 +1830,17 @@
 
       activeCart.forEach(ci => {
         const item = currentInventory.find(p => p.id === ci.id);
-        if (item) item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(2)));
+        if (item) {
+          item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(3)));
+          
+          if (item.current_stock <= (item.min_stock_alert || 5)) {
+            recordAuditEntry({
+              type: "LOW STOCK WARNING",
+              title: `Low Stock Alert: ${item.custom_name}`,
+              details: `Remaining balance dropped to ${item.current_stock} ${item.uom}. Reorder required from ${item.supplier_name}.`
+            });
+          }
+        }
       });
 
       const isOnline = navigator.onLine;
@@ -1815,6 +1862,8 @@
       clearCart();
       saveInventoryState();
     }
+    
+
 
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
