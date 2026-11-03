@@ -1609,34 +1609,58 @@ function commitSelectedPresets() {
     }
 
     function renderCatalogCards(categoryFilter = "All Items") {
-      const grid = document.getElementById("catalog-cards-grid");
-      if (!grid) return;
-      const filtered = categoryFilter === "All Items" ? currentInventory : currentInventory.filter(i => i.category === categoryFilter);
+  const grid = document.getElementById("catalog-cards-grid");
+  if (!grid) return;
+  const filtered = categoryFilter === "All Items" 
+    ? currentInventory 
+    : currentInventory.filter(i => i.category === categoryFilter);
 
-      grid.innerHTML = filtered.map(item => {
-        const isLoose = item.uom === "kg/gm";
-        return `
-          <div onclick="handleCatalogCardClick('${item.id}')" class="bg-white dark:bg-[#0e1a2b] border ${isLoose ? 'border-amber-500/60 dark:border-amber-500/40 hover:border-amber-500 bg-amber-500/[0.03]' : 'border-slate-200 dark:border-[#1e324f] hover:border-indigo-500'} rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow-sm">
-            <div>
-              <div class="flex justify-between items-start">
-                <span class="text-[9px] font-mono text-slate-400">${item.barcode}</span>
-                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isLoose ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">
-                  ${isLoose ? '⚖️ By Weight (kg/gm)' : item.uom}
-                </span>
-              </div>
-              <h4 class="font-extrabold text-xs mt-1 line-clamp-1">${item.custom_name}</h4>
-              <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${item.category} • ${item.current_stock} left</span>
-            </div>
-            <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
-              <span class="font-black text-xs text-emerald-600 dark:text-emerald-400 font-mono">₹${item.unit_price}</span>
-              <button type="button" class="px-2 py-0.5 ${isLoose ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'} font-extrabold text-[11px] rounded shadow">
-                ${isLoose ? '⚖️ Scale' : '+ Add'}
-              </button>
-            </div>
+  grid.innerHTML = filtered.map(item => {
+    const isLoose = item.uom === "kg/gm";
+    const isLowStock = Number(item.current_stock) <= Number(item.min_stock_alert || 5);
+
+    return `
+      <div onclick="handleCatalogCardClick('${item.id}')" class="card-bg border ${
+        isLowStock 
+          ? 'border-red-500/50 bg-red-950/10 hover:border-red-400' 
+          : (isLoose ? 'border-amber-500/40 hover:border-amber-400' : 'hover:border-indigo-500')
+      } rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow">
+        <div>
+          <div class="flex justify-between items-start">
+            <span class="text-[9px] font-mono subtext-color">${item.barcode || 'NO-SKU'}</span>
+            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${
+              isLowStock 
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' 
+                : (isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300')
+            }">
+              ${isLowStock ? '⚠️ LOW STOCK' : item.uom}
+            </span>
           </div>
-        `;
-      }).join("");
-    }
+          <h4 class="font-extrabold text-xs mt-1 line-clamp-1">${item.custom_name}</h4>
+          
+          <!-- Stock text turns bright red and bold when stock is low -->
+          <span class="text-[10px] block mt-0.5 ${isLowStock ? 'text-red-400 font-extrabold' : 'subtext-color'}">
+            ${item.category} • ${
+              isLowStock 
+                ? `<span class="text-red-400 font-black underline">${item.current_stock} ${item.uom} left</span>` 
+                : `${item.current_stock} left`
+            }
+          </span>
+        </div>
+        <div class="mt-2 pt-2 border-t border-slate-700/60 flex items-center justify-between">
+          <span class="font-black text-xs text-emerald-400 font-mono">₹${item.unit_price}</span>
+          <button type="button" class="px-2 py-0.5 ${
+            isLowStock 
+              ? 'bg-red-600 hover:bg-red-500' 
+              : (isLoose ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500')
+          } text-white font-extrabold text-[11px] rounded shadow">
+            ${isLoose ? '⚖️ Scale' : '+ Add'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 
     function handleLiveCatalogSearch(val) {
       const q = val.trim().toLowerCase();
@@ -2347,6 +2371,41 @@ function commitSelectedPresets() {
         clearPinInput();
       }
     }
+    // ==========================================
+// KEYBOARD LISTENER FOR ADMIN 6-DIGIT PIN
+// ==========================================
+document.addEventListener("keydown", (e) => {
+  const pinModal = document.getElementById("modal-admin-pin");
+  
+  // Only intercept keys when the Admin PIN popup is actually open
+  if (!pinModal || pinModal.classList.contains("hidden")) return;
+
+  // 1. Numeric keys (0-9) from both main keyboard and Numpad
+  if (/^[0-9]$/.test(e.key)) {
+    e.preventDefault();
+    pressPinDigit(e.key);
+  } 
+  // 2. Backspace: remove the last entered digit
+  else if (e.key === "Backspace") {
+    e.preventDefault();
+    if (enteredPin.length > 0) {
+      enteredPin = enteredPin.slice(0, -1);
+      updatePinDots();
+    }
+  } 
+  // 3. Escape: close the modal immediately
+  else if (e.key === "Escape") {
+    e.preventDefault();
+    closeAdminPinModal();
+  } 
+  // 4. Enter: submit the PIN if 6 digits have been typed
+  else if (e.key === "Enter") {
+    e.preventDefault();
+    if (enteredPin.length === 6) {
+      submitPinAuthentication();
+    }
+  }
+});
 
     function openKhataModal() {
       if (!isKhataEnabled) return alert("Khata / Credit Billing is currently switched OFF by the Store Owner.");
