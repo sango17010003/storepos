@@ -346,7 +346,7 @@
               <button type="button" onclick="processSale('CASH')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-xl text-xs shadow transition">
                 💵 Cash Bill
               </button>
-              <button type="button" onclick="processSale('UPI')" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
+              <button type="button" onclick="processCounterUpiSale()" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
                 📱 UPI Soundbox
               </button>
               <button type="button" onclick="processSale('CARD')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-2.5 rounded-xl text-xs shadow transition">
@@ -504,7 +504,84 @@
   <!-- ========================================================
        3. MODALS
        ======================================================== -->
-  <!-- Price Revision & Margin Modal -->
+  <!-- Modal: Dynamic Customer UPI Checkout QR -->
+<div id="modal-upi-checkout" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+      <div class="flex items-center gap-2">
+        <span class="text-emerald-400 text-lg">📱</span>
+        <h3 class="font-extrabold text-sm text-white">Scan UPI to Pay</h3>
+      </div>
+      <button type="button" onclick="closeUpiCheckoutModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    </div>
+
+    <!-- Bill Details & Payable Amount -->
+    <div>
+      <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Total Bill Payable</span>
+      <div id="txt-upi-amount" class="text-2xl font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
+    </div>
+
+    <!-- Live Dynamic QR Container -->
+    <div class="bg-white p-3.5 rounded-2xl inline-block shadow-inner mx-auto">
+      <img id="img-upi-qr-display" src="" alt="UPI QR Code" class="w-48 h-48 block mx-auto">
+    </div>
+
+    <div class="text-[11px] text-slate-300">
+      Accepts <span class="font-bold text-white">GPay • PhonePe • Paytm • BHIM</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="space-y-2 pt-2">
+      <button type="button" onclick="confirmUpiPaymentComplete()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
+        ✔ Payment Received — Print Slip
+      </button>
+      <button type="button" onclick="closeUpiCheckoutModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+        Cancel / Switch to Cash
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Subscription ₹299 Unlock via 12-Digit UTR -->
+<div id="modal-utr-unlock" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+      <div class="flex items-center gap-1.5">
+        <span class="text-amber-400 text-lg">👑</span>
+        <h3 class="font-extrabold text-sm text-white">Activate Pro License (₹299)</h3>
+      </div>
+      <button type="button" onclick="closeUtrUnlockModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    </div>
+
+    <p class="text-xs text-slate-300">
+      Scan with any UPI app and transfer <strong class="text-emerald-400">₹299</strong> to activate 1-Month Pro access.
+    </p>
+
+    <!-- Subscription Admin Static QR -->
+    <div class="bg-white p-3 rounded-2xl inline-block mx-auto shadow-inner">
+      <img id="img-sub-qr-display" src="" alt="Pro License QR" class="w-44 h-44 block mx-auto">
+    </div>
+
+    <div class="space-y-2 text-left">
+      <label class="text-[10px] text-slate-300 font-bold block">Enter 12-Digit UPI Ref / UTR Number:</label>
+      <input 
+        id="inp-sub-utr-number" 
+        type="text" 
+        maxlength="12" 
+        placeholder="e.g. 423589123456" 
+        class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono text-center font-bold text-white text-sm outline-none focus:border-emerald-400">
+    </div>
+
+    <div class="space-y-2 pt-1">
+      <button type="button" onclick="verifyAndUnlockSubscription()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow transition">
+        Verify UTR & Unlock POS →
+      </button>
+      <button type="button" onclick="closeUtrUnlockModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+        Back
+      </button>
+    </div>
+  </div>
+</div>
 <!-- Price Revision & Margin Modal -->
 <div id="modal-edit-price" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
   <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-slate-100">
@@ -1361,9 +1438,29 @@ function showSubscriptionPaymentModal() {
     modal.classList.remove("hidden");
   }
 }
+// ==========================================
+// PLATFORM OWNER UPI (FOR YOUR ₹299 SUBSCRIPTION)
+// ==========================================
+const PLATFORM_ADMIN_UPI = "yourname@okhdfcbank"; // Put your real UPI ID here
+const PLATFORM_ADMIN_NAME = "StorePOS Technologies"; // Put your business name here
 
 function launchSubscriptionPayment() {
-  alert("Redirecting to secure UPI payment gateway... Once paid, counter unlocks automatically.");
+  // Hide trial ended lock modal if open
+  const trialModal = document.getElementById("modal-subscription-lock");
+  if (trialModal) trialModal.classList.add("hidden");
+
+  // Generate UPI URI targeting your VPA
+  const subUpiUri = `upi://pay?pa=${PLATFORM_ADMIN_UPI}&pn=${encodeURIComponent(PLATFORM_ADMIN_NAME)}&am=299.00&cu=INR&tn=StorePOS_Pro_30Days`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(subUpiUri)}`;
+
+  const qrImg = document.getElementById("img-sub-qr-display");
+  if (qrImg) qrImg.src = qrUrl;
+
+  const utrInp = document.getElementById("inp-sub-utr-number");
+  if (utrInp) utrInp.value = "";
+
+  const modal = document.getElementById("modal-utr-unlock");
+  if (modal) modal.classList.remove("hidden");
 }
 
 function contactSupportWhatsApp() {
@@ -2181,7 +2278,73 @@ function commitSelectedPresets() {
       if (taxEl) taxEl.innerText = `+₹${taxAmount.toFixed(2)}`;
       if (totalEl) totalEl.innerText = `₹${grandTotal.toFixed(2)}`;
     }
+    // ==========================================
+// COUNTER UPI (SHOP OWNER'S PHYSICAL QR & SOUNDBOX)
+// ==========================================
+function processCounterUpiSale() {
+  if (!activeCart || !activeCart.length) {
+    return alert("Cart is empty. Add products before billing.");
+  }
 
+  // Calculate bill total
+  const billTotal = activeCart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  const formattedTotal = billTotal.toFixed(2);
+
+  // Open Soundbox payment confirmation dialog
+  openSoundboxConfirmModal(formattedTotal);
+}
+
+function openSoundboxConfirmModal(amount) {
+  let modal = document.getElementById("modal-soundbox-confirm");
+  if (!modal) {
+    const modalHtml = `
+      <div id="modal-soundbox-confirm" style="z-index: 9999;" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+          <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">
+            🔊
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">Scan Counter QR & Check Soundbox</h3>
+            <p class="text-xs text-slate-400 mt-1">Ask customer to scan your printed desk QR standee.</p>
+          </div>
+
+          <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3.5 space-y-1">
+            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Payable Amount</span>
+            <div id="txt-soundbox-payable" class="text-3xl font-black font-mono text-emerald-400">₹${amount}</div>
+          </div>
+
+          <div class="bg-indigo-950/30 border border-indigo-800/40 rounded-xl p-3 text-[11px] text-indigo-200">
+            📢 Listen for voice announcement on your <strong>Paytm / PhonePe / GPay Soundbox</strong> before clicking confirm.
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <button type="button" onclick="confirmSoundboxSaleComplete()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+              ✔ Audio Confirmed — Save & Print Bill
+            </button>
+            <button type="button" onclick="closeSoundboxModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+              Cancel / Switch to Cash
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  } else {
+    document.getElementById("txt-soundbox-payable").innerText = `₹${amount}`;
+    modal.classList.remove("hidden");
+  }
+}
+
+function closeSoundboxModal() {
+  const modal = document.getElementById("modal-soundbox-confirm");
+  if (modal) modal.classList.add("hidden");
+}
+
+function confirmSoundboxSaleComplete() {
+  closeSoundboxModal();
+  // Calls your existing checkout function
+  processSale("UPI");
+}
     function processSale(paymentMode, custName = null, custPhone = null) {
       if (!checkStoreSubscriptionStatus()) return;
       if (!activeCart.length) return alert("Invoice is empty.");
