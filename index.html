@@ -168,7 +168,14 @@
           </div>
         </div>
       </div>
-
+      <!-- Live Trial Countdown Warning Badge -->
+<div 
+  id="trial-remaining-banner" 
+  onclick="showSubscriptionPaymentModal()" 
+  class="hidden items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/25 transition">
+  <span>⏳</span>
+  <span id="trial-remaining-text">Trial: Calculating...</span>
+</div>
       <div class="flex items-center gap-1.5 flex-wrap">
         <!-- Online/Offline Badge -->
         <span id="network-badge" onclick="openNetworkStatusModal()" class="cursor-pointer text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
@@ -1197,6 +1204,7 @@
       populateCategoryDropdowns();
       initSalesCharts();
       renderCartUI();
+      checkStoreSubscriptionStatus();
     });
 
     function toggleThemeMode() {
