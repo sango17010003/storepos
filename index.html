@@ -523,7 +523,13 @@
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-between text-xs">
-        <input id="inp-preset-search" type="text" placeholder="Search FMCG, Cold Drink, Sweets..." oninput="filterPresetList()" class="bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 outline-none w-64">
+        <input 
+  id="inp-preset-search" 
+  type="text" 
+  placeholder="Search FMCG, Cold Drink, Sweets..." 
+  oninput="filterPresetCatalogUI()" 
+  class="bg-[#08111e] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-64 focus:border-indigo-500"
+>
         <div class="space-x-2">
           <button type="button" onclick="toggleSelectAllPresets(true)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Select All</button>
           <button type="button" onclick="toggleSelectAllPresets(false)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Deselect All</button>
@@ -1433,7 +1439,30 @@ function toggleSelectAllPresets(select) {
   });
   updatePresetSelectedCount();
 }
+// Preset real-time search & filter function
+function filterPresetCatalogUI() {
+  const master = (typeof globalPresetCatalog !== "undefined" && globalPresetCatalog.length)
+    ? globalPresetCatalog
+    : (typeof globalPresetsList !== "undefined" ? globalPresetsList : []);
 
+  const searchInput = document.getElementById("inp-preset-search");
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+  let filtered = master.filter((item) => {
+    const nameMatch = item.custom_name && item.custom_name.toLowerCase().includes(query);
+    const catMatch = item.category && item.category.toLowerCase().includes(query);
+    const barcodeMatch = item.barcode && item.barcode.toLowerCase().includes(query);
+    return nameMatch || catMatch || barcodeMatch;
+  });
+
+  if (typeof presetViewMode !== "undefined" && presetViewMode === "ALPHABETICAL") {
+    filtered.sort((a, b) => a.custom_name.localeCompare(b.custom_name));
+  } else {
+    filtered.sort((a, b) => (a.category || "").localeCompare(b.category || ""));
+  }
+
+  renderPresetList(filtered);
+}
 function commitSelectedPresets() {
   if (!checkedPresetIds || checkedPresetIds.size === 0) {
     return alert("Please check at least one item.");
