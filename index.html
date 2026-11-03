@@ -1364,82 +1364,115 @@
     }
 
     function closePresetModal() {
-      document.getElementById("modal-preset-catalog").classList.add("hidden");
+  const modal = document.getElementById("modal-preset-catalog");
+  if (modal) modal.classList.add("hidden");
+  const searchInput = document.getElementById("inp-preset-search");
+  if (searchInput) searchInput.value = "";
+}
+
+    // A persistent Set to track checked item IDs even when filtering/searching
+let checkedPresetIds = new Set();
+
+function renderPresetList(items) {
+  const container = document.getElementById("preset-list-container");
+  if (!container) return;
+
+  container.innerHTML = items.map((item) => {
+    const isChecked = checkedPresetIds.has(String(item.id)) ? "checked" : "";
+    return `
+      <label class="flex items-center justify-between p-2.5 hover:bg-slate-800/40 rounded-xl cursor-pointer transition border-b border-slate-800/60">
+        <div class="flex items-center gap-3">
+          <input 
+            type="checkbox" 
+            value="${item.id}"
+            ${isChecked}
+            onchange="handlePresetCheckboxChange(this)"
+            class="preset-item-checkbox w-4 h-4 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer"
+          >
+          <div>
+            <div class="font-bold text-xs text-slate-100">${item.custom_name}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${item.category} • ${item.uom || 'pc'}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="font-mono font-bold text-emerald-400 text-xs">₹${item.unit_price}</span>
+          <span class="text-[9px] text-slate-400 block">${item.supplier_name || 'Direct Wholesale'}</span>
+        </div>
+      </label>
+    `;
+  }).join("");
+
+  updatePresetSelectedCount();
+}
+
+function handlePresetCheckboxChange(el) {
+  if (el.checked) {
+    checkedPresetIds.add(String(el.value));
+  } else {
+    checkedPresetIds.delete(String(el.value));
+  }
+  updatePresetSelectedCount();
+}
+
+function updatePresetSelectedCount() {
+  const countEl = document.getElementById("preset-selected-count");
+  if (countEl) countEl.innerText = checkedPresetIds.size;
+}
+
+function toggleSelectAllPresets(select) {
+  const checkboxes = document.querySelectorAll(".preset-item-checkbox");
+  checkboxes.forEach(c => {
+    c.checked = select;
+    if (select) {
+      checkedPresetIds.add(String(c.value));
+    } else {
+      checkedPresetIds.delete(String(c.value));
     }
+  });
+  updatePresetSelectedCount();
+}
 
-    function renderPresetList(items) {
-      const container = document.getElementById("preset-list-container");
-      container.innerHTML = items.map((p) => {
-        const isLoose = p.uom === "kg/gm";
-        return `
-          <label class="flex items-center justify-between p-2 hover:bg-slate-200 dark:hover:bg-slate-800/40 rounded-lg cursor-pointer">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" data-preset-id="${p.id}" class="preset-checkbox rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-emerald-500 focus:ring-0">
-              <div>
-                <span class="font-bold text-xs">${p.custom_name}</span>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${p.category} • <strong class="${isLoose ? 'text-amber-500' : ''}">${p.uom}</strong></span>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="font-mono font-bold text-emerald-500 text-xs">₹${p.unit_price}</span>
-              <span class="text-[9px] text-slate-400 block">${p.supplier_name}</span>
-            </div>
-          </label>
-        `;
-      }).join("");
-      updatePresetSelectedCount();
+function commitSelectedPresets() {
+  // Pull directly from the Set so search filters do not drop selections
+  if (checkedPresetIds.size === 0) {
+    return alert("Please check at least one item.");
+  }
 
-      document.querySelectorAll(".preset-checkbox").forEach(chk => {
-        chk.addEventListener("change", updatePresetSelectedCount);
-      });
-    }
+  // Load existing catalog from localStorage or fallback
+  let existingCatalog = JSON.parse(localStorage.getItem("storepos_catalog_inventory_v3") || "[]");
 
-    function filterPresetList() {
-      const query = document.getElementById("inp-preset-search").value.toLowerCase();
-      const filtered = globalPresetCatalog.filter(p => 
-        p.custom_name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
-      );
-      renderPresetList(filtered);
-    }
-
-    function toggleSelectAllPresets(select) {
-      document.querySelectorAll(".preset-checkbox").forEach(c => c.checked = select);
-      updatePresetSelectedCount();
-    }
-
-    function updatePresetSelectedCount() {
-      const count = document.querySelectorAll(".preset-checkbox:checked").length;
-      document.getElementById("preset-selected-count").innerText = count;
-    }
-
-    function commitSelectedPresets() {
-  const checkedBoxes = Array.from(document.querySelectorAll(".preset-chk:checked"));
-  if (!checkedBoxes.length) return alert("Please check at least one item.");
-
-  // 1. Clear out default demo items so ONLY checked items are saved
-  currentInventory = [];
-
-  // 2. Add ONLY the checked items
-  checkedBoxes.forEach(chk => {
-    const id = chk.dataset.presetId;
-    const presetItem = globalPresetsList.find(p => p.id === id);
+  let addedCount = 0;
+  checkedPresetIds.forEach(id => {
+    const presetItem = globalPresetsList.find(p => String(p.id) === String(id));
     if (presetItem) {
-      currentInventory.push({ ...presetItem });
+      // If already present, skip duplicate; otherwise add to catalog
+      const exists = existingCatalog.some(existing => 
+        String(existing.barcode) === String(presetItem.barcode) || 
+        existing.custom_name.trim().toLowerCase() === presetItem.custom_name.trim().toLowerCase()
+      );
+      if (!exists) {
+        existingCatalog.push({ ...presetItem });
+        addedCount++;
+      }
     }
   });
 
-  // 3. Save to localStorage and re-render
-  saveInventoryState();
+  // Save to the exact active storage key
+  currentInventory = existingCatalog;
+  localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
+  localStorage.setItem("storepos_onboarded_flag_v3", "true");
+
+  // Re-render UI grids immediately
+  renderCatalogCards();
+  renderLiveInventoryTable();
+  if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+  if (typeof updateKpis === "function") updateKpis();
+
+  // Clear selections and close modal
+  checkedPresetIds.clear();
   closePresetModal();
 
-  // 4. Record to Audit Trail
-  recordAuditEntry({
-    type: "PRESET COMMIT",
-    title: `Catalog Initialized with ${currentInventory.length} Selected Items`,
-    details: `Imported strictly user-selected goods. Default placeholder items cleared.`
-  });
-
-  alert(`Success! Loaded only your ${currentInventory.length} selected products into your catalog.`);
+  alert(`Success! Added ${addedCount} products to your store catalog.`);
 }
 
     function openAddProductModal() {
