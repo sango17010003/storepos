@@ -1026,6 +1026,7 @@
     ];
 
     let globalPresetCatalog = [];
+    let globalPresetsList = [];
     function generatePresetCatalog() {
       const presets = [];
       const fmcgBases = [
@@ -1103,6 +1104,7 @@
       }
 
       globalPresetCatalog = presets;
+      globalPresetsList = presets;
     }
 
     window.openGeneralAddStockModal = function() {
@@ -1433,44 +1435,60 @@ function toggleSelectAllPresets(select) {
 }
 
 function commitSelectedPresets() {
-  // Pull directly from the Set so search filters do not drop selections
-  if (checkedPresetIds.size === 0) {
+  if (!checkedPresetIds || checkedPresetIds.size === 0) {
     return alert("Please check at least one item.");
   }
 
-  // Load existing catalog from localStorage or fallback
-  let existingCatalog = JSON.parse(localStorage.getItem("storepos_catalog_inventory_v3") || "[]");
+  // Support both variable names so it never throws ReferenceError again
+  const masterSource = (typeof globalPresetCatalog !== "undefined" && globalPresetCatalog.length)
+    ? globalPresetCatalog
+    : (typeof globalPresetsList !== "undefined" ? globalPresetsList : []);
+
+  if (!masterSource.length) {
+    return alert("Preset catalog data is still loading. Please try again in a moment.");
+  }
+
+  // Load existing catalog from localStorage
+  let existingCatalog = JSON.parse(
+    localStorage.getItem("storepos_catalog_inventory_v3") || 
+    localStorage.getItem("storepos_custom_inventory") || 
+    "[]"
+  );
 
   let addedCount = 0;
-  checkedPresetIds.forEach(id => {
-    const presetItem = globalPresetsList.find(p => String(p.id) === String(id));
+  checkedPresetIds.forEach((id) => {
+    const presetItem = masterSource.find((p) => String(p.id) === String(id));
     if (presetItem) {
-      // If already present, skip duplicate; otherwise add to catalog
-      const exists = existingCatalog.some(existing => 
-        String(existing.barcode) === String(presetItem.barcode) || 
-        existing.custom_name.trim().toLowerCase() === presetItem.custom_name.trim().toLowerCase()
+      // Check for duplicate by barcode or exact name
+      const alreadyExists = existingCatalog.some(
+        (existing) =>
+          String(existing.barcode) === String(presetItem.barcode) ||
+          existing.custom_name.trim().toLowerCase() === presetItem.custom_name.trim().toLowerCase()
       );
-      if (!exists) {
+
+      if (!alreadyExists) {
         existingCatalog.push({ ...presetItem });
         addedCount++;
       }
     }
   });
 
-  // Save to the exact active storage key
+  // Save to active storage key
   currentInventory = existingCatalog;
   localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
+  localStorage.setItem("storepos_custom_inventory", JSON.stringify(currentInventory));
   localStorage.setItem("storepos_onboarded_flag_v3", "true");
 
   // Re-render UI grids immediately
-  renderCatalogCards();
-  renderLiveInventoryTable();
+  if (typeof renderCatalogCards === "function") renderCatalogCards();
+  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
+  if (typeof populateFastEntryBar === "function") populateFastEntryBar();
   if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
   if (typeof updateKpis === "function") updateKpis();
 
   // Clear selections and close modal
   checkedPresetIds.clear();
-  closePresetModal();
+  if (typeof closePresetModal === "function") closePresetModal();
 
   alert(`Success! Added ${addedCount} products to your store catalog.`);
 }
