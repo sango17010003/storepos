@@ -512,66 +512,72 @@
        3. MODALS
        ======================================================== -->
   <!-- Price Revision & Margin Modal -->
+<!-- Price Revision & Margin Modal -->
 <div id="modal-edit-price" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-  <div class="w-full max-w-md card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+  <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-slate-100">
     <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
       <div class="flex items-center gap-1.5">
         <span class="text-amber-400">🏷️</span>
-        <h3 class="font-extrabold text-sm text-slate-100">Revise Product Price & Margin</h3>
+        <h3 class="font-extrabold text-sm text-white">Revise Product Price & Margin</h3>
       </div>
       <button type="button" onclick="closePriceRevisionModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
     </div>
 
     <div class="space-y-3 text-xs">
+      <!-- Select Product Dropdown -->
       <div>
-        <label class="text-[10px] subtext-color font-bold block mb-1">Select Product to Revise</label>
+        <label class="text-[10px] text-slate-300 font-bold block mb-1">Select Product to Revise</label>
         <select 
           id="sel-price-modal-product" 
           onchange="loadPriceRevisionModalFields()" 
-          class="w-full input-bg border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500">
+          class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-bold text-white outline-none focus:border-indigo-500">
         </select>
       </div>
 
+      <!-- Current Rates vs New Rates -->
       <div class="grid grid-cols-2 gap-2.5">
         <div>
-          <label class="text-[10px] subtext-color font-bold block mb-1">New Selling Rate (₹)</label>
+          <label class="text-[10px] text-slate-300 font-bold block mb-1">New Selling Rate (₹)</label>
           <input 
             id="inp-modal-selling-rate" 
             type="number" 
             step="any" 
-            class="w-full input-bg border border-emerald-500/40 rounded-xl p-2.5 font-mono font-bold text-emerald-400 text-sm outline-none">
+            class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-2.5 font-mono font-bold text-emerald-400 text-sm outline-none focus:border-emerald-400">
         </div>
         <div>
-          <label class="text-[10px] subtext-color font-bold block mb-1">New Wholesale Cost (₹)</label>
+          <label class="text-[10px] text-slate-300 font-bold block mb-1">New Wholesale Cost (₹)</label>
           <input 
             id="inp-modal-cost-rate" 
             type="number" 
             step="any" 
-            class="w-full input-bg border rounded-xl p-2.5 font-mono font-bold text-slate-300 text-sm outline-none">
+            class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono font-bold text-slate-200 text-sm outline-none focus:border-indigo-500">
         </div>
       </div>
 
+      <!-- Revision Reason -->
       <div>
-        <label class="text-[10px] subtext-color font-bold block mb-1">Revision Rationale / Reason</label>
-        <select id="sel-modal-price-reason" class="w-full input-bg border rounded-xl p-2 text-xs outline-none">
-          <option>Market Rate Revision</option>
-          <option>Wholesale Cost Fluctuation</option>
-          <option>Festival / Promotional Cut</option>
-          <option>Transport / Logistics Surcharge</option>
+        <label class="text-[10px] text-slate-300 font-bold block mb-1">Revision Rationale / Reason</label>
+        <select id="sel-modal-price-reason" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500">
+          <option value="Market Rate Revision" class="bg-[#08111e] text-white">Market Rate Revision</option>
+          <option value="Wholesale Cost Fluctuation" class="bg-[#08111e] text-white">Wholesale Cost Fluctuation</option>
+          <option value="Festival / Promotional Cut" class="bg-[#08111e] text-white">Festival / Promotional Cut</option>
+          <option value="Transport / Logistics Surcharge" class="bg-[#08111e] text-white">Transport / Logistics Surcharge</option>
         </select>
       </div>
 
-      <div class="input-bg p-3 rounded-xl border text-xs flex justify-between items-center">
-        <span class="subtext-color">Projected Gross Profit:</span>
+      <!-- Margin Preview Box -->
+      <div class="bg-[#08111e] p-3 rounded-xl border border-slate-700 text-xs flex justify-between items-center">
+        <span class="text-slate-300 font-bold">Projected Gross Profit:</span>
         <span id="txt-modal-margin-preview" class="font-mono font-bold text-emerald-400 text-sm">+₹0.00 (0%)</span>
       </div>
     </div>
 
+    <!-- Modal Actions -->
     <div class="grid grid-cols-2 gap-2 pt-1">
       <button 
         type="button" 
         onclick="closePriceRevisionModal()" 
-        class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">
+        class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition">
         Cancel
       </button>
       <button 
