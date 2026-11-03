@@ -144,20 +144,6 @@
         <div id="auth-status-msg" class="text-xs text-red-500 text-center font-semibold"></div>
       </div>
     </div>
-
-    <!-- Standalone Offline App Download with 3-Day Free Trial -->
-    <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] p-3.5 rounded-2xl flex items-center justify-between shadow-xl my-4">
-      <div>
-        <div class="flex items-center gap-1.5">
-          <p class="font-extrabold text-xs">Standalone App (Offline PWA)</p>
-          <span class="text-[9px] bg-amber-500/20 text-amber-600 dark:text-amber-300 font-bold px-1.5 py-0.2 rounded border border-amber-500/30">3-Day Free Trial</span>
-        </div>
-        <p class="text-[10px] text-slate-500 dark:text-slate-400">Run zero-latency billing without internet</p>
-      </div>
-      <button type="button" onclick="triggerPwaInstall()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow transition">
-        Install App
-      </button>
-    </div>
   </div>
 
   <!-- ========================================================
@@ -1290,6 +1276,91 @@
       renderLiveInventoryTable();
       updateKpis();
     }
+    // ==========================================
+// 3-DAY TRIAL & SUBSCRIPTION GATEWAY
+// ==========================================
+const TRIAL_DURATION_DAYS = 3;
+
+function checkStoreSubscriptionStatus() {
+  const userCreatedAt = localStorage.getItem("storepos_registered_date") || new Date().toISOString();
+  if (!localStorage.getItem("storepos_registered_date")) {
+    localStorage.setItem("storepos_registered_date", userCreatedAt);
+  }
+
+  const isSubscribed = localStorage.getItem("storepos_is_paid_license") === "true";
+  if (isSubscribed) return true;
+
+  const createdTime = new Date(userCreatedAt).getTime();
+  const trialExpiryTime = createdTime + (TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  const currentTime = Date.now();
+
+  const remainingHours = Math.max(0, Math.round((trialExpiryTime - currentTime) / (1000 * 60 * 60)));
+
+  if (currentTime > trialExpiryTime) {
+    showSubscriptionPaymentModal();
+    return false;
+  }
+
+  const banner = document.getElementById("trial-remaining-banner");
+  if (banner) {
+    banner.innerText = `⏳ Trial: ${remainingHours}h remaining`;
+  }
+
+  return true;
+}
+
+function showSubscriptionPaymentModal() {
+  let modal = document.getElementById("modal-subscription-lock");
+  if (!modal) {
+    const modalHtml = `
+      <div id="modal-subscription-lock" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4">
+          <div class="w-14 h-14 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">
+            👑
+          </div>
+          <div>
+            <h3 class="text-base font-black text-white">Your 3-Day Free Trial Has Ended</h3>
+            <p class="text-xs text-slate-400 mt-1">Upgrade your license to continue issuing thermal bills, tracking Khata, and managing catalog inventory.</p>
+          </div>
+          
+          <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3.5 space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-400">StorePOS Pro Plan:</span>
+              <strong class="text-emerald-400 font-mono">₹299 / month</strong>
+            </div>
+            <div class="text-[10px] text-slate-500 text-left">
+              ✔ Unlimited Thermal Invoices<br>
+              ✔ Offline/Online Queue Sync<br>
+              ✔ WhatsApp Alerts & Reorder
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <button type="button" onclick="launchSubscriptionPayment()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
+              Pay via UPI / Card (Instant Unlock) →
+            </button>
+            <button type="button" onclick="contactSupportWhatsApp()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+              💬 Contact Support / Pay Manually
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  } else {
+    modal.classList.remove("hidden");
+  }
+}
+
+function launchSubscriptionPayment() {
+  alert("Redirecting to secure UPI payment gateway... Once paid, counter unlocks automatically.");
+}
+
+function contactSupportWhatsApp() {
+  const shop = document.getElementById("header-shop-name")?.innerText || "StorePOS Outlet";
+  const msg = encodeURIComponent(`Hello, I would like to activate my StorePOS license for ${shop}.`);
+  window.open(`https://wa.me/919876543210?text=${msg}`, "_blank");
+}
 
     function loadStoredRecentBills() {
       const saved = localStorage.getItem("storepos_recent_bills_v2");
@@ -2102,6 +2173,7 @@ function commitSelectedPresets() {
     }
 
     function processSale(paymentMode, custName = null, custPhone = null) {
+      if (!checkStoreSubscriptionStatus()) return;
       if (!activeCart.length) return alert("Invoice is empty.");
 
       for (const ci of activeCart) {
