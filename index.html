@@ -387,6 +387,7 @@
             
             <div class="flex flex-wrap items-center gap-1.5">
               <button type="button" onclick="openGeneralAddStockModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow">+ Add Product</button>
+              <button type="button" onclick="openPriceRevisionModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-1.5"><span>✏️</span> Edit Price</button>
               <button type="button" onclick="openBulkPresetModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition shadow">📚 Preset Library</button>
               <button type="button" onclick="openBulkCsvModal()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold transition">📥 Bulk CSV</button>
               <button type="button" onclick="openWhatsAppAlertsModal()" class="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">💬 WhatsApp Alerts</button>
@@ -510,7 +511,78 @@
   <!-- ========================================================
        3. MODALS
        ======================================================== -->
+  <!-- Price Revision & Margin Modal -->
+<div id="modal-edit-price" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+  <div class="w-full max-w-md card-bg border rounded-2xl shadow-2xl p-5 space-y-4">
+    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+      <div class="flex items-center gap-1.5">
+        <span class="text-amber-400">🏷️</span>
+        <h3 class="font-extrabold text-sm text-slate-100">Revise Product Price & Margin</h3>
+      </div>
+      <button type="button" onclick="closePriceRevisionModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    </div>
 
+    <div class="space-y-3 text-xs">
+      <div>
+        <label class="text-[10px] subtext-color font-bold block mb-1">Select Product to Revise</label>
+        <select 
+          id="sel-price-modal-product" 
+          onchange="loadPriceRevisionModalFields()" 
+          class="w-full input-bg border rounded-xl p-2.5 font-bold outline-none focus:border-indigo-500">
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="text-[10px] subtext-color font-bold block mb-1">New Selling Rate (₹)</label>
+          <input 
+            id="inp-modal-selling-rate" 
+            type="number" 
+            step="any" 
+            class="w-full input-bg border border-emerald-500/40 rounded-xl p-2.5 font-mono font-bold text-emerald-400 text-sm outline-none">
+        </div>
+        <div>
+          <label class="text-[10px] subtext-color font-bold block mb-1">New Wholesale Cost (₹)</label>
+          <input 
+            id="inp-modal-cost-rate" 
+            type="number" 
+            step="any" 
+            class="w-full input-bg border rounded-xl p-2.5 font-mono font-bold text-slate-300 text-sm outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="text-[10px] subtext-color font-bold block mb-1">Revision Rationale / Reason</label>
+        <select id="sel-modal-price-reason" class="w-full input-bg border rounded-xl p-2 text-xs outline-none">
+          <option>Market Rate Revision</option>
+          <option>Wholesale Cost Fluctuation</option>
+          <option>Festival / Promotional Cut</option>
+          <option>Transport / Logistics Surcharge</option>
+        </select>
+      </div>
+
+      <div class="input-bg p-3 rounded-xl border text-xs flex justify-between items-center">
+        <span class="subtext-color">Projected Gross Profit:</span>
+        <span id="txt-modal-margin-preview" class="font-mono font-bold text-emerald-400 text-sm">+₹0.00 (0%)</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 pt-1">
+      <button 
+        type="button" 
+        onclick="closePriceRevisionModal()" 
+        class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">
+        Cancel
+      </button>
+      <button 
+        type="button" 
+        onclick="savePriceRevisionModal()" 
+        class="py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-xl shadow transition">
+        Save & Update Catalog
+      </button>
+    </div>
+  </div>
+</div>
   <!-- 3A. PRESET CATALOG MODAL -->
   <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-4xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
@@ -1462,6 +1534,85 @@ function filterPresetCatalogUI() {
   }
 
   renderPresetList(filtered);
+}
+function openPriceRevisionModal(targetProductId = null) {
+  const sel = document.getElementById("sel-price-modal-product");
+  if (!sel || !currentInventory.length) {
+    return alert("No products currently available in catalog to edit.");
+  }
+
+  sel.innerHTML = currentInventory.map(item => `
+    <option value="${item.id}" ${targetProductId && String(item.id) === String(targetProductId) ? 'selected' : ''}>
+      ${item.custom_name} — (Current: ₹${Number(item.unit_price).toFixed(2)})
+    </option>
+  `).join("");
+
+  loadPriceRevisionModalFields();
+
+  const sellInp = document.getElementById("inp-modal-selling-rate");
+  const costInp = document.getElementById("inp-modal-cost-rate");
+  sellInp.oninput = calculatePriceModalMargin;
+  costInp.oninput = calculatePriceModalMargin;
+
+  document.getElementById("modal-edit-price").classList.remove("hidden");
+}
+
+function closePriceRevisionModal() {
+  document.getElementById("modal-edit-price").classList.add("hidden");
+}
+
+function loadPriceRevisionModalFields() {
+  const sel = document.getElementById("sel-price-modal-product");
+  const item = currentInventory.find(p => String(p.id) === String(sel.value));
+  if (!item) return;
+
+  document.getElementById("inp-modal-selling-rate").value = item.unit_price;
+  document.getElementById("inp-modal-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
+  calculatePriceModalMargin();
+}
+
+function calculatePriceModalMargin() {
+  const sell = parseFloat(document.getElementById("inp-modal-selling-rate").value) || 0;
+  const cost = parseFloat(document.getElementById("inp-modal-cost-rate").value) || 0;
+  const margin = (sell - cost).toFixed(2);
+  const marginPct = sell > 0 ? (((sell - cost) / sell) * 100).toFixed(1) : 0;
+  
+  const preview = document.getElementById("txt-modal-margin-preview");
+  if (preview) {
+    preview.innerText = `+₹${margin} (${marginPct}%)`;
+    preview.className = margin >= 0 ? "font-mono font-bold text-emerald-400 text-sm" : "font-mono font-bold text-red-400 text-sm";
+  }
+}
+
+function savePriceRevisionModal() {
+  const sel = document.getElementById("sel-price-modal-product");
+  const item = currentInventory.find(p => String(p.id) === String(sel.value));
+  if (!item) return;
+
+  const newSelling = parseFloat(document.getElementById("inp-modal-selling-rate").value);
+  const newCost = parseFloat(document.getElementById("inp-modal-cost-rate").value);
+  const reason = document.getElementById("sel-modal-price-reason").value;
+
+  if (isNaN(newSelling) || newSelling <= 0) {
+    return alert("Please enter a valid selling price greater than 0.");
+  }
+
+  const oldPrice = item.unit_price;
+  item.unit_price = newSelling;
+  if (!isNaN(newCost) && newCost >= 0) {
+    item.cost_price = newCost;
+  }
+
+  saveInventoryState();
+
+  recordAuditEntry({
+    type: "PRICE REVISE",
+    title: `Price Edited: ${item.custom_name}`,
+    details: `Rate changed from ₹${oldPrice} to ₹${newSelling} (Cost: ₹${item.cost_price}). Reason: ${reason}`
+  });
+
+  closePriceRevisionModal();
+  alert(`Updated price for "${item.custom_name}" to ₹${newSelling.toFixed(2)}.`);
 }
 function commitSelectedPresets() {
   if (!checkedPresetIds || checkedPresetIds.size === 0) {
