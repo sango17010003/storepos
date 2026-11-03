@@ -172,7 +172,7 @@
 <div 
   id="trial-remaining-banner" 
   onclick="showSubscriptionPaymentModal()" 
-  class="hidden items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/25 transition">
+  class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/25 transition">
   <span>⏳</span>
   <span id="trial-remaining-text">Trial: Calculating...</span>
 </div>
@@ -1204,7 +1204,9 @@
       populateCategoryDropdowns();
       initSalesCharts();
       renderCartUI();
-      checkStoreSubscriptionStatus();
+      if (typeof checkStoreSubscriptionStatus === "function") {
+    checkStoreSubscriptionStatus();
+  }
     });
 
     function toggleThemeMode() {
