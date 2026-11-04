@@ -209,7 +209,7 @@
         <button type="button" onclick="openGeneralAddStockModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow">
           + Add Product
         </button>
-
+        <button type="button" onclick="openStaffQuickUpdateModal()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow"><span>📦</span> Quick Stock / Price</button>
         <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-600 dark:text-red-300 border border-red-500/30">
           ⏻ Exit
         </button>
@@ -356,7 +356,52 @@
                 📖 Khata Ledger
               </button>
             </div>
+            <!-- Modal: Staff Quick Stock & Price Update -->
+<div id="modal-staff-quick-update" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+  <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
+    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+      <div class="flex items-center gap-1.5">
+        <span class="text-amber-400">📦</span>
+        <h3 class="font-extrabold text-sm text-white">Staff Inventory & Price Update</h3>
+      </div>
+      <button type="button" onclick="closeStaffQuickUpdateModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+    </div>
 
+    <!-- Product Selection -->
+    <div>
+      <label class="text-[10px] text-slate-400 font-bold block mb-1">Select Product</label>
+      <select id="sel-staff-product" onchange="populateStaffQuickFields()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white font-bold outline-none focus:border-indigo-500"></select>
+    </div>
+
+    <!-- Rate & Stock Inward Inputs -->
+    <div class="grid grid-cols-2 gap-2 text-xs">
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold block mb-1">Selling Rate (₹)</label>
+        <input id="inp-staff-selling-rate" type="number" step="any" class="w-full bg-[#08111e] border border-emerald-500/40 rounded-xl p-2 font-mono font-bold text-emerald-400 text-sm outline-none">
+      </div>
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold block mb-1">Wholesale Cost (₹)</label>
+        <input id="inp-staff-cost-rate" type="number" step="any" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-slate-300 text-sm outline-none">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 text-xs">
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold block mb-1">Current Stock</label>
+        <input id="inp-staff-current-stock" type="number" disabled class="w-full bg-[#08111e]/50 border border-slate-800 rounded-xl p-2 font-mono text-slate-400 text-sm">
+      </div>
+      <div>
+        <label class="text-[10px] text-emerald-400 font-bold block mb-1">+ Inward Arrived Stock</label>
+        <input id="inp-staff-add-stock" type="number" step="any" placeholder="e.g. 50" class="w-full bg-[#08111e] border border-indigo-500/50 rounded-xl p-2 font-mono font-bold text-indigo-300 text-sm outline-none">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 pt-1">
+      <button type="button" onclick="closeStaffQuickUpdateModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">Cancel</button>
+      <button type="button" onclick="saveStaffQuickUpdate()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow transition">Save Updates</button>
+    </div>
+  </div>
+</div>
           </div>
         </div>
 
@@ -440,7 +485,25 @@
             <span class="text-[10px] text-red-400">Threshold &lt; 5 units</span>
           </div>
         </div>
-
+        <!-- Admin Real-Time Payment Breakdown Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 my-3">
+  <div class="bg-[#08111e] border border-slate-800 p-3 rounded-xl">
+    <span class="text-[10px] text-slate-400 font-bold uppercase">Opening Float</span>
+    <div id="adm-txt-opening-cash" class="text-base font-black font-mono text-slate-200 mt-0.5">₹0.00</div>
+  </div>
+  <div class="bg-[#08111e] border border-emerald-500/20 p-3 rounded-xl">
+    <span class="text-[10px] text-emerald-400 font-bold uppercase">💵 Cash Received</span>
+    <div id="adm-txt-cash-total" class="text-base font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
+  </div>
+  <div class="bg-[#08111e] border border-indigo-500/20 p-3 rounded-xl">
+    <span class="text-[10px] text-indigo-400 font-bold uppercase">📱 UPI / Soundbox</span>
+    <div id="adm-txt-upi-total" class="text-base font-black font-mono text-indigo-400 mt-0.5">₹0.00</div>
+  </div>
+  <div class="bg-[#08111e] border border-amber-500/20 p-3 rounded-xl">
+    <span class="text-[10px] text-amber-400 font-bold uppercase">💳 Card / Other</span>
+    <div id="adm-txt-card-total" class="text-base font-black font-mono text-amber-400 mt-0.5">₹0.00</div>
+  </div>
+</div>
         <!-- Sales Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
@@ -659,6 +722,7 @@
     </div>
   </div>
 </div>
+
   <!-- 3A. PRESET CATALOG MODAL -->
   <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-4xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
@@ -1124,7 +1188,35 @@
       <tbody id="audit-sheet-table-body"></tbody>
     </table>
   </div>
-
+  <!-- Modal: Morning Opening Cash Drawer Float -->
+<div id="modal-morning-cash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 text-center space-y-3.5 text-slate-100">
+    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-2xl mx-auto">
+      💵
+    </div>
+    <div>
+      <h3 class="font-extrabold text-sm text-white">Morning Cash Drawer Entry</h3>
+      <p class="text-xs text-slate-400 mt-1">Enter physical cash present in the drawer at store opening.</p>
+    </div>
+    <div class="text-left">
+      <label class="text-[10px] text-slate-400 font-bold block mb-1">Opening Cash Amount (₹)</label>
+      <input 
+        id="inp-morning-cash-amount" 
+        type="number" 
+        step="any"
+        placeholder="e.g. 2000" 
+        class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-3 font-mono font-bold text-center text-emerald-400 text-lg outline-none focus:border-emerald-400">
+    </div>
+    <div class="pt-1">
+      <button 
+        type="button" 
+        onclick="submitMorningOpeningCash()" 
+        class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+        Start Daily Register →
+      </button>
+    </div>
+  </div>
+</div>
   <!-- ========================================================
        5. JAVASCRIPT CONTROLLER (ALL FUNCTIONS INCLUDED)
        ======================================================== -->
@@ -1273,24 +1365,23 @@
       loadStoredRecentBills();
       syncGstinUI();
       syncKhataUI();
-      syncPaperWidthUI();
-      initNetworkHandlers();
-      initCategoryTabs();
-      renderCatalogCards();
-      renderLiveInventoryTable();
-      populateCategoryDropdowns();
-      initSalesCharts();
-      renderCartUI();
+      
+    if (typeof renderCatalogCards === "function") renderCatalogCards();
+    if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
+    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+    if (typeof initSalesCharts === "function") initSalesCharts();
+    if (typeof renderCartUI === "function") renderCartUI();
+
+    if (typeof checkStoreSubscriptionStatus === "function") {
+      checkStoreSubscriptionStatus();
+    }
+    if (typeof syncLicenseStatusFromCloud === "function") {
       syncLicenseStatusFromCloud();
-      if (typeof checkStoreSubscriptionStatus === "function") {
-    checkStoreSubscriptionStatus();
-  }
-  // Add this line right below:
-  if (typeof syncLicenseStatusFromCloud === "function") {
-    syncLicenseStatusFromCloud();
-  }
-  }
-    );
+    }
+    if (typeof checkMorningCashDrawerPrompt === "function") {
+      checkMorningCashDrawerPrompt();
+    }
+  });
 
     function toggleThemeMode() {
       isDarkMode = !isDarkMode;
@@ -1313,7 +1404,96 @@
       }
       if (dailyRevenueChart) initSalesCharts();
     }
+  // ==========================================
+// CASH DRAWER & EOD RECONCILIATION FUNCTIONS
+// ==========================================
 
+// Check and prompt for morning cash once per calendar day
+function checkMorningCashDrawerPrompt() {
+  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+  if (!localStorage.getItem(todayKey)) {
+    document.getElementById("modal-morning-cash")?.classList.remove("hidden");
+  } else {
+    updateAdminPaymentTotals();
+  }
+}
+
+function submitMorningOpeningCash() {
+  const amount = parseFloat(document.getElementById("inp-morning-cash-amount").value);
+  if (isNaN(amount) || amount < 0) return alert("Please enter a valid amount.");
+  
+  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+  localStorage.setItem(todayKey, amount.toString());
+  document.getElementById("modal-morning-cash")?.classList.add("hidden");
+  updateAdminPaymentTotals();
+}
+
+function updateAdminPaymentTotals() {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayKey = "storepos_opening_cash_" + todayStr;
+  const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
+
+  let cashTotal = 0;
+  let upiTotal = 0;
+  let cardTotal = 0;
+
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+  bills.forEach(bill => {
+    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
+    if (billDate === todayStr) {
+      const mode = (bill.payment_mode || "").toLowerCase();
+      const amt = parseFloat(bill.total_amount || bill.total || 0);
+      if (mode.includes("cash")) cashTotal += amt;
+      else if (mode.includes("upi")) upiTotal += amt;
+      else cardTotal += amt;
+    }
+  });
+
+  const openElem = document.getElementById("adm-txt-opening-cash");
+  const cashElem = document.getElementById("adm-txt-cash-total");
+  const upiElem = document.getElementById("adm-txt-upi-total");
+  const cardElem = document.getElementById("adm-txt-card-total");
+
+  if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
+  if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
+  if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
+  if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
+}
+
+// End-Of-Day Total & Register Reconciliation
+function generateEndOfDayReport() {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayStr) || "0");
+
+  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0;
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+  bills.forEach(bill => {
+    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
+    if (billDate === todayStr) {
+      const mode = (bill.payment_mode || "").toLowerCase();
+      const amt = parseFloat(bill.total_amount || bill.total || 0);
+      totalSales += amt;
+      if (mode.includes("cash")) cashSales += amt;
+      else if (mode.includes("upi")) upiSales += amt;
+      else cardSales += amt;
+    }
+  });
+
+  const expectedDrawerCash = openingCash + cashSales;
+
+  alert(
+    `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayStr})\n\n` +
+    `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
+    `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
+    `--------------------------------------\n` +
+    `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
+    `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
+    `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
+    `--------------------------------------\n` +
+    `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}`
+  );
+}
     function syncGstinUI() {
       const el = document.getElementById("inp-store-gstin");
       if (el) el.value = storeGstin;
@@ -1428,37 +1608,68 @@ function checkStoreSubscriptionStatus() {
 }
 
 function showSubscriptionPaymentModal() {
+  const isPaid = localStorage.getItem("storepos_is_paid_license") === "true";
+  const activatedAt = localStorage.getItem("storepos_license_activated_at") || new Date().toISOString();
+  const subDurationDays = parseInt(localStorage.getItem("storepos_license_duration_days") || "30", 10);
+  const nextRenewalDate = new Date(new Date(activatedAt).getTime() + (subDurationDays * 24 * 60 * 60 * 1000));
+  const daysLeft = Math.max(0, Math.ceil((nextRenewalDate - Date.now()) / (1000 * 60 * 60 * 24)));
+
   let modal = document.getElementById("modal-subscription-lock");
   if (!modal) {
     const modalHtml = `
-      <div id="modal-subscription-lock" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4">
+      <div id="modal-subscription-lock" style="z-index: 99999;" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100 relative">
+          <!-- Close / Back Button -->
+          <button type="button" onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-black text-sm bg-slate-800/80 px-2.5 py-1 rounded-lg">✕</button>
+
           <div class="w-14 h-14 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">
             👑
           </div>
-          <div>
-            <h3 class="text-base font-black text-white">Your 3-Day Free Trial Has Ended</h3>
-            <p class="text-xs text-slate-400 mt-1">Upgrade your license to continue issuing thermal bills, tracking Khata, and managing catalog inventory.</p>
+
+          <div id="sub-modal-header">
+            <h3 class="text-base font-black text-white" id="sub-modal-title">Upgrade Your StorePOS License</h3>
+            <p class="text-xs text-slate-400 mt-1" id="sub-modal-desc">Select a plan to unlock uninterrupted billing, inventory, and cloud sync.</p>
           </div>
-          
-          <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-400">StorePOS Pro Plan:</span>
-              <strong class="text-emerald-400 font-mono">₹299 / month</strong>
+
+          <!-- Active License Status Indicator -->
+          <div id="sub-active-status-card" class="${isPaid ? 'block' : 'hidden'} bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 text-left space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-emerald-300 font-bold">✔ Current Plan: Pro Active</span>
+              <span class="text-slate-300 font-mono text-[11px]">${daysLeft} days remaining</span>
             </div>
-            <div class="text-[10px] text-slate-500 text-left">
-              ✔ Unlimited Thermal Invoices<br>
-              ✔ Offline/Online Queue Sync<br>
-              ✔ WhatsApp Alerts & Reorder
+            <p class="text-[10px] text-slate-400">Next renewal date: <strong class="text-white">${nextRenewalDate.toLocaleDateString()}</strong></p>
+          </div>
+
+          <!-- Subscription Plan Picker -->
+          <div class="grid grid-cols-2 gap-2 text-left text-xs">
+            <!-- Monthly -->
+            <div onclick="selectLicensePlan(299, 30, this)" class="sub-plan-card cursor-pointer border-2 border-indigo-500 bg-[#08111e] p-3 rounded-xl transition">
+              <div class="text-[10px] text-indigo-400 font-bold uppercase">Monthly Plan</div>
+              <div class="text-lg font-black font-mono text-white mt-0.5">₹299<span class="text-[10px] text-slate-400 font-normal">/mo</span></div>
+              <p class="text-[9px] text-slate-400 mt-1">30 days counter access</p>
+            </div>
+
+            <!-- Yearly -->
+            <div onclick="selectLicensePlan(2499, 365, this)" class="sub-plan-card cursor-pointer border border-slate-700 bg-[#08111e] p-3 rounded-xl transition hover:border-slate-500">
+              <div class="flex justify-between items-center">
+                <span class="text-[10px] text-amber-400 font-bold uppercase">Yearly Plan</span>
+                <span class="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 rounded font-bold">SAVE 30%</span>
+              </div>
+              <div class="text-lg font-black font-mono text-white mt-0.5">₹2,499<span class="text-[10px] text-slate-400 font-normal">/yr</span></div>
+              <p class="text-[9px] text-slate-400 mt-1">365 days full access</p>
             </div>
           </div>
 
-          <div class="space-y-2">
-            <button type="button" onclick="launchSubscriptionPayment()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
-              Pay via UPI / Card (Instant Unlock) →
+          <!-- Autopay / Instant UPI Unlock Options -->
+          <div class="space-y-2 pt-1">
+            <button type="button" onclick="launchSubscriptionPaymentWithCurrentPlan()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <span>⚡</span> Pay via UPI QR (<span id="txt-sub-btn-amount">₹299</span>) →
             </button>
-            <button type="button" onclick="contactSupportWhatsApp()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
-              💬 Contact Support / Pay Manually
+            <button type="button" onclick="setupUpiAutoPay()" class="w-full py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl border border-indigo-500/40 transition flex items-center justify-center gap-2">
+              <span>🔄</span> Setup UPI Autopay (Recurring e-Mandate)
+            </button>
+            <button type="button" onclick="closeSubscriptionModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+              Back to Counter
             </button>
           </div>
         </div>
@@ -1468,6 +1679,48 @@ function showSubscriptionPaymentModal() {
   } else {
     modal.classList.remove("hidden");
   }
+}
+
+// Variables & Helpers for Plan Picker
+let selectedPlanAmount = 299;
+let selectedPlanDays = 30;
+
+function selectLicensePlan(amount, days, element) {
+  selectedPlanAmount = amount;
+  selectedPlanDays = days;
+  document.querySelectorAll(".sub-plan-card").forEach(c => {
+    c.classList.remove("border-2", "border-indigo-500");
+    c.classList.add("border", "border-slate-700");
+  });
+  element.classList.remove("border-slate-700");
+  element.classList.add("border-2", "border-indigo-500");
+  const btnTxt = document.getElementById("txt-sub-btn-amount");
+  if (btnTxt) btnTxt.innerText = `₹${amount}`;
+}
+
+function closeSubscriptionModal() {
+  const modal = document.getElementById("modal-subscription-lock");
+  if (modal) modal.classList.add("hidden");
+}
+
+function launchSubscriptionPaymentWithCurrentPlan() {
+  closeSubscriptionModal();
+  const subUpiUri = `upi://pay?pa=${PLATFORM_ADMIN_UPI}&pn=${encodeURIComponent(PLATFORM_ADMIN_NAME)}&am=${selectedPlanAmount}.00&cu=INR&tn=StorePOS_Pro_${selectedPlanDays}Days`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(subUpiUri)}`;
+
+  const qrImg = document.getElementById("img-sub-qr-display");
+  if (qrImg) qrImg.src = qrUrl;
+
+  const utrInp = document.getElementById("inp-sub-utr-number");
+  if (utrInp) utrInp.value = "";
+
+  const unlockModal = document.getElementById("modal-utr-unlock");
+  if (unlockModal) unlockModal.classList.remove("hidden");
+}
+
+function setupUpiAutoPay() {
+  alert(`UPI Autopay (NPCI e-Mandate) will register recurring authorization of ₹${selectedPlanAmount} every ${selectedPlanDays === 365 ? '12 months' : 'month'}. Redirecting to Autopay gateway...`);
+  window.open(`https://wa.me/919876543210?text=${encodeURIComponent("Hi, I want to set up UPI Autopay e-mandate for StorePOS " + (selectedPlanDays === 365 ? "Yearly Plan" : "Monthly Plan"))}`, "_blank");
 }
 // ==========================================
 // PLATFORM OWNER UPI (FOR YOUR ₹299 SUBSCRIPTION)
@@ -1756,12 +2009,98 @@ function contactSupportWhatsApp() {
 
       localStorage.removeItem("storepos_offline_bills");
     }
+// ==========================================
+// MORNING CASH FLOAT & PAYMENT RECONCILIATION
+// ==========================================
 
-    function openBulkPresetModal() {
-      renderPresetList(globalPresetCatalog);
-      document.getElementById("modal-preset-catalog").classList.remove("hidden");
+// Check if opening cash has already been recorded for today
+function checkMorningCashDrawerPrompt() {
+  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+  const existingFloat = localStorage.getItem(todayKey);
+
+  // If no entry for today, prompt staff
+  if (!existingFloat) {
+    const modal = document.getElementById("modal-morning-cash");
+    if (modal) {
+      modal.classList.remove("hidden");
+      const inp = document.getElementById("inp-morning-cash-amount");
+      if (inp) {
+        inp.value = "";
+        setTimeout(() => inp.focus(), 200);
+      }
     }
+  } else {
+    updateAdminPaymentTotals();
+  }
+}
 
+// Save the morning float amount
+function submitMorningOpeningCash() {
+  const inp = document.getElementById("inp-morning-cash-amount");
+  const amount = parseFloat(inp ? inp.value : 0);
+
+  if (isNaN(amount) || amount < 0) {
+    return alert("Please enter a valid cash amount (e.g. 1500 or 0).");
+  }
+
+  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+  localStorage.setItem(todayKey, amount.toString());
+
+  // Hide the modal
+  const modal = document.getElementById("modal-morning-cash");
+  if (modal) modal.classList.add("hidden");
+
+  // Refresh totals
+  updateAdminPaymentTotals();
+
+  alert(`✅ Morning cash float recorded: ₹${amount.toFixed(2)}. Counter register is now open.`);
+}
+
+// Compute real-time payment mode totals
+function updateAdminPaymentTotals() {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayKey = "storepos_opening_cash_" + todayStr;
+  const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
+
+  let cashTotal = 0;
+  let upiTotal = 0;
+  let cardTotal = 0;
+
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+  bills.forEach(bill => {
+    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
+    if (billDate === todayStr) {
+      const mode = (bill.payment_mode || "").toLowerCase();
+      const amt = parseFloat(bill.total_amount || bill.total || 0);
+      if (mode.includes("cash")) cashTotal += amt;
+      else if (mode.includes("upi")) upiTotal += amt;
+      else cardTotal += amt;
+    }
+  });
+
+  const openElem = document.getElementById("adm-txt-opening-cash");
+  const cashElem = document.getElementById("adm-txt-cash-total");
+  const upiElem = document.getElementById("adm-txt-upi-total");
+  const cardElem = document.getElementById("adm-txt-card-total");
+
+  if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
+  if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
+  if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
+  if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
+}
+    function openBulkPresetModal() {
+  // Guard: Never open if user has already completed onboarding or has products
+  const hasOnboarded = localStorage.getItem("storepos_onboarding_completed") === "true";
+  const hasItems = Array.isArray(currentInventory) && currentInventory.length > 0;
+  if (hasOnboarded || hasItems) {
+    return;
+  }
+
+  const modal = document.getElementById("modal-preset-catalog");
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
+}
     function closePresetModal() {
   const modal = document.getElementById("modal-preset-catalog");
   if (modal) modal.classList.add("hidden");
@@ -1854,6 +2193,72 @@ function filterPresetCatalogUI() {
 
   renderPresetList(filtered);
 }
+// ==========================================
+// STAFF QUICK STOCK & PRICE EDIT CONTROLLER
+// ==========================================
+window.openStaffQuickUpdateModal = function() {
+  const sel = document.getElementById("sel-staff-product");
+  if (!sel || !currentInventory || !currentInventory.length) {
+    return alert("No inventory items found to edit.");
+  }
+
+  sel.innerHTML = currentInventory.map(item => `
+    <option value="${item.id}">
+      ${item.custom_name} (Stock: ${item.stock_qty || 0}) — ₹${Number(item.unit_price).toFixed(2)}
+    </option>
+  `).join("");
+
+  populateStaffQuickFields();
+  document.getElementById("modal-staff-quick-update").classList.remove("hidden");
+};
+
+window.closeStaffQuickUpdateModal = function() {
+  const modal = document.getElementById("modal-staff-quick-update");
+  if (modal) modal.classList.add("hidden");
+};
+
+window.populateStaffQuickFields = function() {
+  const sel = document.getElementById("sel-staff-product");
+  if (!sel) return;
+  const item = currentInventory.find(i => String(i.id) === String(sel.value));
+  if (!item) return;
+
+  document.getElementById("inp-staff-selling-rate").value = item.unit_price;
+  document.getElementById("inp-staff-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
+  document.getElementById("inp-staff-current-stock").value = item.stock_qty || 0;
+  document.getElementById("inp-staff-add-stock").value = "";
+};
+
+window.saveStaffQuickUpdate = function() {
+  const sel = document.getElementById("sel-staff-product");
+  const item = currentInventory.find(i => String(i.id) === String(sel.value));
+  if (!item) return;
+
+  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate").value);
+  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate").value);
+  const addedStock = parseFloat(document.getElementById("inp-staff-add-stock").value) || 0;
+
+  if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
+
+  const oldPrice = item.unit_price;
+  item.unit_price = newPrice;
+  if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
+  if (addedStock > 0) item.stock_qty = (parseFloat(item.stock_qty) || 0) + addedStock;
+
+  saveInventoryState();
+
+  if (typeof recordAuditEntry === "function") {
+    recordAuditEntry({
+      type: "STAFF QUICK UPDATE",
+      title: `Stock/Price Updated: ${item.custom_name}`,
+      details: `Rate: ₹${oldPrice} -> ₹${newPrice}. Added Inward Stock: +${addedStock}`
+    });
+  }
+
+  closeStaffQuickUpdateModal();
+  if (typeof renderInventoryTable === "function") renderInventoryTable();
+  alert(`✔ Updated "${item.custom_name}": Price is now ₹${newPrice.toFixed(2)}, Current Stock: ${item.stock_qty}`);
+};
 function openPriceRevisionModal(targetProductId = null) {
   const sel = document.getElementById("sel-price-modal-product");
   if (!sel || !currentInventory.length) {
