@@ -1369,28 +1369,52 @@
 const TRIAL_DURATION_DAYS = 3;
 
 function checkStoreSubscriptionStatus() {
+  const isSubscribed = localStorage.getItem("storepos_is_paid_license") === "true";
+  const banner = document.getElementById("trial-remaining-banner");
+  const bannerText = document.getElementById("trial-remaining-text");
+
+  // If already paid Pro license:
+  if (isSubscribed) {
+    if (banner) {
+      banner.classList.add("hidden");
+      banner.classList.remove("flex");
+    }
+    return true;
+  }
+
+  // Normal trial calculation for free tier
   const userCreatedAt = localStorage.getItem("storepos_registered_date") || new Date().toISOString();
   if (!localStorage.getItem("storepos_registered_date")) {
     localStorage.setItem("storepos_registered_date", userCreatedAt);
   }
 
-  const isSubscribed = localStorage.getItem("storepos_is_paid_license") === "true";
-  if (isSubscribed) return true;
-
   const createdTime = new Date(userCreatedAt).getTime();
-  const trialExpiryTime = createdTime + (TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  const trialExpiryTime = createdTime + (3 * 24 * 60 * 60 * 1000);
   const currentTime = Date.now();
+  const diffMs = trialExpiryTime - currentTime;
 
-  const remainingHours = Math.max(0, Math.round((trialExpiryTime - currentTime) / (1000 * 60 * 60)));
-
-  if (currentTime > trialExpiryTime) {
+  if (diffMs <= 0) {
+    if (banner) {
+      banner.classList.remove("hidden");
+      banner.className = "flex items-center gap-1.5 px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold cursor-pointer animate-pulse";
+      if (bannerText) bannerText.innerText = "Trial Expired — Upgrade Now";
+    }
     showSubscriptionPaymentModal();
     return false;
   }
 
-  const banner = document.getElementById("trial-remaining-banner");
+  const remainingHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const remainingDays = Math.floor(remainingHours / 24);
+  const leftoverHours = remainingHours % 24;
+
+  let displayTime = remainingDays > 0 
+    ? `${remainingDays}d ${leftoverHours}h left` 
+    : `${remainingHours} hours left`;
+
   if (banner) {
-    banner.innerText = `⏳ Trial: ${remainingHours}h remaining`;
+    banner.classList.remove("hidden");
+    banner.classList.add("flex");
+    if (bannerText) bannerText.innerText = `⏳ Free Trial: ${displayTime}`;
   }
 
   return true;
@@ -1509,12 +1533,22 @@ window.verifyAndUnlockSubscription = async function() {
   const modal = document.getElementById("modal-utr-unlock");
   if (modal) modal.classList.add("hidden");
 
-  // 5. Hide trial banner if present
+  // 5. Hide any trial expiry lock screens
+  const subLock = document.getElementById("modal-subscription-lock");
+  if (subLock) subLock.classList.add("hidden");
+
+  // 6. Hide trial countdown banner directly
   const banner = document.getElementById("trial-remaining-banner");
-  if (banner) banner.classList.add("hidden");
+  if (banner) {
+    banner.classList.add("hidden");
+    banner.classList.remove("flex");
+  }
 
   alert("🎉 Success! Your 12-digit UTR has been recorded. StorePOS Pro License is now active.");
-  location.reload();
+  
+  // Do NOT do location.reload(); — call your UI refresh directly instead:
+  if (typeof renderInventoryTable === "function") renderInventoryTable();
+  if (typeof checkStoreSubscriptionStatus === "function") checkStoreSubscriptionStatus();
 };
 
 window.closeUtrUnlockModal = function() {
