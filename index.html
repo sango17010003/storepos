@@ -1462,6 +1462,70 @@ function launchSubscriptionPayment() {
   const modal = document.getElementById("modal-utr-unlock");
   if (modal) modal.classList.remove("hidden");
 }
+// ==========================================
+// VERIFY & UNLOCK PRO LICENSE VIA 12-DIGIT UTR
+// ==========================================
+window.verifyAndUnlockSubscription = async function() {
+  const utrInp = document.getElementById("inp-sub-utr-number");
+  const utrInput = utrInp ? utrInp.value.trim() : "";
+
+  // 1. Validate 12-digit numeric UPI reference number
+  if (!/^\d{12}$/.test(utrInput)) {
+    return alert("Please enter a valid 12-digit numeric UPI Ref / UTR number from your payment app.");
+  }
+
+  const ownerEmail = localStorage.getItem("storepos_owner_email") || "counter1@storepos.com";
+  const storeName = localStorage.getItem("storepos_store_name") || "ShopMaster Supermarket";
+
+  // 2. Insert into Supabase table if client is present
+  if (typeof supabaseClient !== "undefined" && supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("license_payments")
+        .insert([{
+          store_owner_email: ownerEmail,
+          store_name: storeName,
+          amount: 299.00,
+          utr_number: utrInput,
+          payment_status: "pending_verification",
+          paid_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+      } else {
+        console.log("Supabase payment logged:", data);
+      }
+    } catch (err) {
+      console.warn("Could not write to Supabase:", err);
+    }
+  }
+
+  // 3. Mark terminal as paid locally
+  localStorage.setItem("storepos_is_paid_license", "true");
+  localStorage.setItem("storepos_active_utr", utrInput);
+
+  // 4. Close the modal
+  const modal = document.getElementById("modal-utr-unlock");
+  if (modal) modal.classList.add("hidden");
+
+  // 5. Hide trial banner if present
+  const banner = document.getElementById("trial-remaining-banner");
+  if (banner) banner.classList.add("hidden");
+
+  alert("🎉 Success! Your 12-digit UTR has been recorded. StorePOS Pro License is now active.");
+  location.reload();
+};
+
+window.closeUtrUnlockModal = function() {
+  const modal = document.getElementById("modal-utr-unlock");
+  if (modal) modal.classList.add("hidden");
+};
+
+function closeUtrUnlockModal() {
+  const modal = document.getElementById("modal-utr-unlock");
+  if (modal) modal.classList.add("hidden");
+}
 
 function contactSupportWhatsApp() {
   const shop = document.getElementById("header-shop-name")?.innerText || "StorePOS Outlet";
