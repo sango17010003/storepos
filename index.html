@@ -1281,10 +1281,16 @@
       populateCategoryDropdowns();
       initSalesCharts();
       renderCartUI();
+      syncLicenseStatusFromCloud();
       if (typeof checkStoreSubscriptionStatus === "function") {
     checkStoreSubscriptionStatus();
   }
-    });
+  // Add this line right below:
+  if (typeof syncLicenseStatusFromCloud === "function") {
+    syncLicenseStatusFromCloud();
+  }
+  }
+    );
 
     function toggleThemeMode() {
       isDarkMode = !isDarkMode;
@@ -1376,8 +1382,9 @@ function checkStoreSubscriptionStatus() {
   // If already paid Pro license:
   if (isSubscribed) {
     if (banner) {
-      banner.classList.add("hidden");
-      banner.classList.remove("flex");
+      banner.classList.remove("hidden");
+      banner.className = "flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold";
+      if (bannerText) bannerText.innerHTML = "👑 <span>Pro Active</span>";
     }
     return true;
   }
@@ -1550,6 +1557,36 @@ window.verifyAndUnlockSubscription = async function() {
   if (typeof renderInventoryTable === "function") renderInventoryTable();
   if (typeof checkStoreSubscriptionStatus === "function") checkStoreSubscriptionStatus();
 };
+// ==========================================
+// CLOUD LICENSE SYNC (CROSS-DEVICE VALIDATION)
+// ==========================================
+async function syncLicenseStatusFromCloud() {
+  const ownerEmail = localStorage.getItem("storepos_owner_email") || "counter1@storepos.com";
+  if (!ownerEmail || typeof supabaseClient === "undefined" || !supabaseClient) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("store_profiles")
+      .select("is_active_pro, trial_ends_at")
+      .eq("owner_email", ownerEmail)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("Supabase license sync notice:", error.message);
+      return;
+    }
+
+    // If the account is marked active Pro in Supabase, activate locally
+    if (data && data.is_active_pro) {
+      localStorage.setItem("storepos_is_paid_license", "true");
+      if (typeof checkStoreSubscriptionStatus === "function") {
+        checkStoreSubscriptionStatus();
+      }
+    }
+  } catch (err) {
+    console.warn("Running in offline mode; could not sync license from cloud.", err);
+  }
+}
 
 window.closeUtrUnlockModal = function() {
   const modal = document.getElementById("modal-utr-unlock");
