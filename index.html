@@ -1244,6 +1244,32 @@
   <script>
     // Global Admin PIN default (use store setting or fallback to 1234)
 window.ADMIN_PIN = localStorage.getItem("storepos_admin_pin") || "1234";
+window.openStaffQuickUpdateModal = function() {
+  const modal = document.getElementById("modal-staff-quick-update");
+  const sel = document.getElementById("sel-staff-product");
+  if (!modal) return alert("Modal element #modal-staff-quick-update not found in HTML.");
+
+  const items = (typeof currentInventory !== "undefined" && Array.isArray(currentInventory)) ? currentInventory : [];
+  if (items.length === 0) return alert("Inventory is loading or empty.");
+
+  if (sel) {
+    sel.innerHTML = items.map(item => `
+      <option value="${item.id}">
+        ${item.custom_name} (Stock: ${item.stock_qty || 0}) — ₹${Number(item.unit_price).toFixed(2)}
+      </option>
+    `).join("");
+  }
+
+  if (typeof populateStaffQuickFields === "function") {
+    populateStaffQuickFields();
+  }
+  modal.classList.remove("hidden");
+};
+
+window.closeStaffQuickUpdateModal = function() {
+  const modal = document.getElementById("modal-staff-quick-update");
+  if (modal) modal.classList.add("hidden");
+};
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
 
@@ -1578,23 +1604,6 @@ _Generated automatically via StorePOS Terminal_`;
 
   window.open(targetUrl, "_blank");
 }
-
-const todayIso = new Date().toISOString().slice(0, 10);
-const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
-  const expectedDrawerCash = openingCash + cashSales;
-
-  alert(
-    `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayStr})\n\n` +
-    `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
-    `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
-    `--------------------------------------\n` +
-    `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
-    `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
-    `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
-    `--------------------------------------\n` +
-    `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}`
-  );
-
     function syncGstinUI() {
       const el = document.getElementById("inp-store-gstin");
       if (el) el.value = storeGstin;
