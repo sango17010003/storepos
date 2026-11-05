@@ -1242,6 +1242,8 @@
        5. JAVASCRIPT CONTROLLER (ALL FUNCTIONS INCLUDED)
        ======================================================== -->
   <script>
+    // Global Admin PIN default (use store setting or fallback to 1234)
+window.ADMIN_PIN = localStorage.getItem("storepos_admin_pin") || "1234";
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
 
@@ -1576,6 +1578,9 @@ _Generated automatically via StorePOS Terminal_`;
 
   window.open(targetUrl, "_blank");
 }
+
+const todayIso = new Date().toISOString().slice(0, 10);
+const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
   const expectedDrawerCash = openingCash + cashSales;
 
   alert(
