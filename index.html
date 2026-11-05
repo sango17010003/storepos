@@ -503,6 +503,27 @@
     <span class="text-[10px] text-amber-400 font-bold uppercase">💳 Card / Other</span>
     <div id="adm-txt-card-total" class="text-base font-black font-mono text-amber-400 mt-0.5">₹0.00</div>
   </div>
+  <!-- EOD Daily Register Action Row -->
+<div class="flex justify-between items-center my-3 bg-[#08111e] border border-slate-800 p-3 rounded-xl">
+  <div>
+    <h4 class="text-xs font-bold text-white">Daily Register Reconciliation</h4>
+    <p class="text-[10px] text-slate-400">Reconcile physical cash drawer with UPI/Soundbox collections before store closing.</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <button 
+      type="button" 
+      onclick="generateEndOfDayReport()" 
+      class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
+      <span>📊</span> View EOD Summary
+    </button>
+    <button 
+      type="button" 
+      onclick="sendDailyWhatsappSummary()" 
+      class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
+      <span>💬</span> WhatsApp to Owner
+    </button>
+  </div>
+</div>
 </div>
         <!-- Sales Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1378,9 +1399,6 @@
     if (typeof syncLicenseStatusFromCloud === "function") {
       syncLicenseStatusFromCloud();
     }
-    if (typeof checkMorningCashDrawerPrompt === "function") {
-      checkMorningCashDrawerPrompt();
-    }
   });
 
     function toggleThemeMode() {
@@ -1462,24 +1480,102 @@ function updateAdminPaymentTotals() {
 
 // End-Of-Day Total & Register Reconciliation
 function generateEndOfDayReport() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayStr) || "0");
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
 
-  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0;
+  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
   const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
 
   bills.forEach(bill => {
-    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
-    if (billDate === todayStr) {
-      const mode = (bill.payment_mode || "").toLowerCase();
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      billCount++;
+      const mode = String(bill.payment_mode || "").toUpperCase();
       const amt = parseFloat(bill.total_amount || bill.total || 0);
       totalSales += amt;
-      if (mode.includes("cash")) cashSales += amt;
-      else if (mode.includes("upi")) upiSales += amt;
+      if (mode.includes("CASH")) cashSales += amt;
+      else if (mode.includes("UPI")) upiSales += amt;
       else cardSales += amt;
     }
   });
 
+  const expectedDrawerCash = openingCash + cashSales;
+
+  const shouldPrint = confirm(
+    `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayUk})\n\n` +
+    `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
+    `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
+    `--------------------------------------\n` +
+    `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
+    `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
+    `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
+    `--------------------------------------\n` +
+    `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}\n` +
+    `🧾 Total Bills:           ${billCount}\n\n` +
+    `Do you want to print the 58mm thermal EOD slip?`
+  );
+
+  if (shouldPrint && typeof printEodThermalSlip === "function") {
+    printEodThermalSlip();
+  }
+}
+// ==========================================
+// WHATSAPP EOD DAILY SUMMARY DISPATCH
+// ==========================================
+function sendDailyWhatsappSummary() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
+
+  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+  bills.forEach(bill => {
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      billCount++;
+      const mode = String(bill.payment_mode || "").toUpperCase();
+      const amt = parseFloat(bill.total_amount || bill.total || 0);
+      totalSales += amt;
+      if (mode.includes("CASH")) cashSales += amt;
+      else if (mode.includes("UPI")) upiSales += amt;
+      else cardSales += amt;
+    }
+  });
+
+  const expectedDrawerCash = openingCash + cashSales;
+  const storeName = localStorage.getItem("storepos_store_name") || "StorePOS Supermarket";
+  const ownerPhone = localStorage.getItem("storepos_owner_phone") || "";
+
+  const summaryText = 
+`🏪 *DAILY CLOSE REPORT: ${storeName}*
+📅 Date: ${todayUk}
+
+💵 *Cash Drawer:*
+• Opening Float: ₹${openingCash.toFixed(2)}
+• Cash Sales: ₹${cashSales.toFixed(2)}
+👉 *Expected Cash in Hand:* ₹${expectedDrawerCash.toFixed(2)}
+
+📱 *Digital Payments:*
+• UPI / Soundbox: ₹${upiSales.toFixed(2)}
+• Card / Other: ₹${cardSales.toFixed(2)}
+
+----------------------------
+⭐ *Total Revenue:* ₹${totalSales.toFixed(2)}
+🧾 *Total Invoices:* ${billCount} bills
+----------------------------
+_Generated automatically via StorePOS Terminal_`;
+
+  const encodedText = encodeURIComponent(summaryText);
+  const targetUrl = ownerPhone 
+    ? `https://wa.me/${ownerPhone.replace(/\D/g, "")}?text=${encodedText}`
+    : `https://wa.me/?text=${encodedText}`;
+
+  window.open(targetUrl, "_blank");
+}
   const expectedDrawerCash = openingCash + cashSales;
 
   alert(
@@ -1493,7 +1589,7 @@ function generateEndOfDayReport() {
     `--------------------------------------\n` +
     `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}`
   );
-}
+
     function syncGstinUI() {
       const el = document.getElementById("inp-store-gstin");
       if (el) el.value = storeGstin;
@@ -2231,6 +2327,7 @@ window.populateStaffQuickFields = function() {
 
 window.saveStaffQuickUpdate = function() {
   const sel = document.getElementById("sel-staff-product");
+  if (!sel || !Array.isArray(currentInventory)) return;
   const item = currentInventory.find(i => String(i.id) === String(sel.value));
   if (!item) return;
 
@@ -2245,7 +2342,12 @@ window.saveStaffQuickUpdate = function() {
   if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
   if (addedStock > 0) item.stock_qty = (parseFloat(item.stock_qty) || 0) + addedStock;
 
+  // Persist updated catalog to local storage & cloud
   saveInventoryState();
+
+  // Re-render the counter product cards so the new stock and price show immediately
+  if (typeof renderCatalogCards === "function") renderCatalogCards();
+  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
 
   if (typeof recordAuditEntry === "function") {
     recordAuditEntry({
@@ -2256,7 +2358,6 @@ window.saveStaffQuickUpdate = function() {
   }
 
   closeStaffQuickUpdateModal();
-  if (typeof renderInventoryTable === "function") renderInventoryTable();
   alert(`✔ Updated "${item.custom_name}": Price is now ₹${newPrice.toFixed(2)}, Current Stock: ${item.stock_qty}`);
 };
 function openPriceRevisionModal(targetProductId = null) {
@@ -2950,9 +3051,82 @@ function confirmSoundboxSaleComplete() {
       renderAndPrintThermal(billRecord);
 
       clearCart();
+      if (typeof updateAdminPaymentTotals === "function") {
+  updateAdminPaymentTotals();
+}
       saveInventoryState();
     }
+// ==========================================
+// END-OF-DAY (EOD) THERMAL PRINT SLIP
+// ==========================================
+function printEodThermalSlip() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
 
+  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+  bills.forEach(bill => {
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      billCount++;
+      const mode = String(bill.payment_mode || "").toUpperCase();
+      const amt = parseFloat(bill.total_amount || bill.total || 0);
+      totalSales += amt;
+      if (mode.includes("CASH")) cashSales += amt;
+      else if (mode.includes("UPI")) upiSales += amt;
+      else cardSales += amt;
+    }
+  });
+
+  const expectedDrawerCash = openingCash + cashSales;
+  const storeName = localStorage.getItem("storepos_store_name") || "ShopMaster Supermarket";
+
+  const printWindow = window.open("", "_blank", "width=320,height=600");
+  if (!printWindow) return alert("Please allow popups to print EOD slip.");
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>EOD Reconciliation Slip</title>
+        <style>
+          body { font-family: 'Courier New', monospace; font-size: 12px; width: 58mm; padding: 4px; margin: 0; color: #000; }
+          .center { text-align: center; }
+          .bold { font-weight: bold; }
+          .line { border-top: 1px dashed #000; margin: 5px 0; }
+          .row { display: flex; justify-content: space-between; margin: 2px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="center bold" style="font-size:14px;">${storeName}</div>
+        <div class="center">DAILY REGISTER SUMMARY</div>
+        <div class="center">${todayUk} | ${now.toLocaleTimeString()}</div>
+        <div class="line"></div>
+        <div class="row"><span>Opening Cash:</span><span class="bold">INR ${openingCash.toFixed(2)}</span></div>
+        <div class="row"><span>Cash Sales:</span><span class="bold">INR ${cashSales.toFixed(2)}</span></div>
+        <div class="line"></div>
+        <div class="row bold"><span>Expected Drawer:</span><span>INR ${expectedDrawerCash.toFixed(2)}</span></div>
+        <div class="line"></div>
+        <div class="row"><span>UPI / Soundbox:</span><span>INR ${upiSales.toFixed(2)}</span></div>
+        <div class="row"><span>Card / Other:</span><span>INR ${cardSales.toFixed(2)}</span></div>
+        <div class="line"></div>
+        <div class="row bold" style="font-size:13px;"><span>TOTAL REVENUE:</span><span>INR ${totalSales.toFixed(2)}</span></div>
+        <div class="row"><span>Total Bills:</span><span>${billCount}</span></div>
+        <div class="line"></div>
+        <div class="center" style="margin-top:10px;">--- Cashier Signature ---</div>
+        <br><br>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => {
+    printWindow.print();
+    printWindow.close();
+  }, 300);
+}
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
       document.body.setAttribute("data-paper-width", currentPaperWidth);
@@ -3270,9 +3444,15 @@ function confirmSoundboxSaleComplete() {
     }
 
     function openAdminPinModal() {
-      enteredPin = "";
+    if (enteredPin === ADMIN_PIN) {
+  isAdminUnlocked = true;
+  // switches panels to owner/admin
       updatePinDots();
-      document.getElementById("modal-admin-pin").classList.remove("hidden");
+      if (typeof checkMorningCashDrawerPrompt === "function") {
+    checkMorningCashDrawerPrompt();
+  }
+      document.getElementById("modal-admin-pin").classList.remove("hidden");    }
+
     }
 
     function closeAdminPinModal() {
