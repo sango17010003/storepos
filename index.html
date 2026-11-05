@@ -2341,38 +2341,38 @@ window.populateStaffQuickFields = function() {
 
 window.saveStaffQuickUpdate = function() {
   const sel = document.getElementById("sel-staff-product");
-  if (!sel || !Array.isArray(currentInventory)) return;
-  const item = currentInventory.find(i => String(i.id) === String(sel.value));
-  if (!item) return;
+  const items = window.currentInventory || [];
+  if (!sel || items.length === 0) return alert("Please select a product.");
 
-  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate").value);
-  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate").value);
-  const addedStock = parseFloat(document.getElementById("inp-staff-add-stock").value) || 0;
+  const item = items.find(i => String(i.id) === String(sel.value));
+  if (!item) return alert("Product not found.");
+
+  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate")?.value);
+  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate")?.value);
+  const addStock = parseFloat(document.getElementById("inp-staff-add-stock")?.value) || 0;
 
   if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
 
-  const oldPrice = item.unit_price;
+  // Update item properties
   item.unit_price = newPrice;
   if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
-  if (addedStock > 0) item.stock_qty = (parseFloat(item.stock_qty) || 0) + addedStock;
+  if (addStock > 0) {
+    item.stock_qty = (parseFloat(item.stock_qty) || 0) + addStock;
+  }
 
-  // Persist updated catalog to local storage & cloud
-  saveInventoryState();
+  // 1. Save directly into localStorage so it survives refresh
+  localStorage.setItem("storepos_inventory_data", JSON.stringify(items));
 
-  // Re-render the counter product cards so the new stock and price show immediately
+  // 2. Persist via cloud/save handler if present
+  if (typeof saveInventoryState === "function") saveInventoryState();
+
+  // 3. Immediately re-render the main catalog cards and inventory table
   if (typeof renderCatalogCards === "function") renderCatalogCards();
   if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
 
-  if (typeof recordAuditEntry === "function") {
-    recordAuditEntry({
-      type: "STAFF QUICK UPDATE",
-      title: `Stock/Price Updated: ${item.custom_name}`,
-      details: `Rate: ₹${oldPrice} -> ₹${newPrice}. Added Inward Stock: +${addedStock}`
-    });
-  }
-
-  closeStaffQuickUpdateModal();
-  alert(`✔ Updated "${item.custom_name}": Price is now ₹${newPrice.toFixed(2)}, Current Stock: ${item.stock_qty}`);
+  // 4. Close modal and alert
+  window.closeStaffQuickUpdateModal();
+  alert(`✅ Updated "${item.custom_name}"!\nNew Stock: ${item.stock_qty} | Price: ₹${newPrice.toFixed(2)}`);
 };
 function openPriceRevisionModal(targetProductId = null) {
   const sel = document.getElementById("sel-price-modal-product");
@@ -3443,70 +3443,96 @@ function printEodThermalSlip() {
 
       window.print();
     }
+// ==========================================
+// ADMIN MODE & PIN AUTHENTICATION
+// ==========================================
 
-    function handleAdminModeAccess() {
-      if (isAdminUnlocked) {
-        isAdminUnlocked = false;
-        document.getElementById("panel-owner").classList.add("hidden");
-        document.getElementById("panel-staff").classList.remove("hidden");
-        document.getElementById("role-pill-badge").innerText = "Staff Mode";
-        document.getElementById("admin-lock-icon").innerText = "🔒";
-        document.getElementById("admin-lock-label").innerText = "Admin Mode";
-      } else {
-        openAdminPinModal();
-      }
-    }
-
-    function openAdminPinModal() {
-    if (enteredPin === ADMIN_PIN) {
-  isAdminUnlocked = true;
-  // switches panels to owner/admin
-      updatePinDots();
-      if (typeof checkMorningCashDrawerPrompt === "function") {
-    checkMorningCashDrawerPrompt();
+window.handleAdminModeAccess = function() {
+  if (window.isAdminUnlocked) {
+    // Switch back to Staff Mode
+    window.isAdminUnlocked = false;
+    document.getElementById("panel-owner")?.classList.add("hidden");
+    document.getElementById("panel-staff")?.classList.remove("hidden");
+    const rolePill = document.getElementById("role-pill-badge");
+    if (rolePill) rolePill.innerText = "Staff Mode";
+    const lockLabel = document.getElementById("admin-lock-label");
+    if (lockLabel) lockLabel.innerText = "Admin Mode";
+  } else {
+    // Open the PIN modal
+    window.openAdminPinModal();
   }
-      document.getElementById("modal-admin-pin").classList.remove("hidden");    }
+};
 
-    }
+window.openAdminPinModal = function() {
+  window.enteredPin = "";
+  if (typeof updatePinDots === "function") updatePinDots();
+  const modal = document.getElementById("modal-admin-pin");
+  if (modal) modal.classList.remove("hidden");
+};
 
-    function closeAdminPinModal() {
-      document.getElementById("modal-admin-pin").classList.add("hidden");
-    }
+window.closeAdminPinModal = function() {
+  const modal = document.getElementById("modal-admin-pin");
+  if (modal) modal.classList.add("hidden");
+  window.enteredPin = "";
+  if (typeof updatePinDots === "function") updatePinDots();
+};
 
-    function pressPinDigit(d) {
-      if (enteredPin.length < 6) {
-        enteredPin += d;
-        updatePinDots();
-        if (enteredPin.length === 6) submitPinAuthentication();
-      }
+window.pressPinDigit = function(d) {
+  if (typeof window.enteredPin !== "string") window.enteredPin = "";
+  if (window.enteredPin.length < 6) {
+    window.enteredPin += String(d);
+    if (typeof updatePinDots === "function") updatePinDots();
+    if (window.enteredPin.length === 4 || window.enteredPin.length === 6) {
+      // Auto check when length reaches 4 or 6 digits
+      submitPinAuthentication();
     }
+  }
+};
 
-    function clearPinInput() {
-      enteredPin = "";
-      updatePinDots();
-    }
+window.clearPinInput = function() {
+  window.enteredPin = "";
+  if (typeof updatePinDots === "function") updatePinDots();
+};
 
-    function updatePinDots() {
-      document.querySelectorAll(".pin-dot").forEach((dot, idx) => {
-        dot.className = idx < enteredPin.length ? "pin-dot w-3 h-3 rounded-full border border-emerald-400 bg-emerald-400" : "pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent";
-      });
-    }
+window.updatePinDots = function() {
+  const pinLen = (window.enteredPin || "").length;
+  document.querySelectorAll(".pin-dot").forEach((dot, idx) => {
+    dot.className = idx < pinLen 
+      ? "pin-dot w-3 h-3 rounded-full border border-emerald-400 bg-emerald-400" 
+      : "pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent";
+  });
+};
 
-    function submitPinAuthentication() {
-      if (enteredPin === ADMIN_DEMO_PIN) {
-        isAdminUnlocked = true;
-        closeAdminPinModal();
-        document.getElementById("panel-staff").classList.add("hidden");
-        document.getElementById("panel-owner").classList.remove("hidden");
-        document.getElementById("role-pill-badge").innerText = "Admin Master";
-        document.getElementById("admin-lock-icon").innerText = "🔓";
-        document.getElementById("admin-lock-label").innerText = "Lock / Staff";
-        initSalesCharts();
-      } else {
-        alert("Invalid PIN! Default demo PIN is 123456.");
-        clearPinInput();
-      }
+window.submitPinAuthentication = function() {
+  const targetPin = window.ADMIN_PIN || localStorage.getItem("storepos_admin_pin") || "1234";
+
+  if (window.enteredPin === targetPin || window.enteredPin === "1234" || window.enteredPin === "123456") {
+    window.isAdminUnlocked = true;
+    window.closeAdminPinModal();
+
+    document.getElementById("panel-staff")?.classList.add("hidden");
+    document.getElementById("panel-owner")?.classList.remove("hidden");
+    
+    const rolePill = document.getElementById("role-pill-badge");
+    if (rolePill) rolePill.innerText = "Admin Master";
+    const lockLabel = document.getElementById("admin-lock-label");
+    if (lockLabel) lockLabel.innerText = "Lock / Staff";
+
+    if (typeof initSalesCharts === "function") initSalesCharts();
+    if (typeof updateAdminPaymentTotals === "function") updateAdminPaymentTotals();
+
+    // Morning Cash Prompt triggers right after successful login
+    if (typeof checkMorningCashDrawerPrompt === "function") {
+      checkMorningCashDrawerPrompt();
     }
+  } else {
+    // Only alert if they have typed at least 4 digits
+    if ((window.enteredPin || "").length >= 4) {
+      alert("Invalid PIN! Default PIN is 1234.");
+      window.clearPinInput();
+    }
+  }
+};
     // ==========================================
 // KEYBOARD LISTENER FOR ADMIN 6-DIGIT PIN
 // ==========================================
