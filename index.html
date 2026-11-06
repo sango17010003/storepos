@@ -1358,10 +1358,10 @@ window.saveStaffQuickUpdate = function() {
 
     let globalPresetCatalog = [];
     let globalPresetsList = [];
-    function generatePresetCatalog() {
+function generatePresetCatalog() {
   const presets = [];
 
-  // --- 1. 500 FMCG / GROCERY VARIETIES ---
+  // 1. FMCG BASES (500 ITEMS)
   const fmcgBases = [
     "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2 Minute Masala Noodles",
     "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
@@ -1376,7 +1376,7 @@ window.saveStaffQuickUpdate = function() {
   for (let i = 0; i < 500; i++) {
     const base = fmcgBases[i % fmcgBases.length];
     const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
-    const isWeightLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
+    const isLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
     const price = Math.round(25 + ((i * 17) % 380));
     const cost = Math.round(price * 0.82);
 
@@ -1384,14 +1384,71 @@ window.saveStaffQuickUpdate = function() {
       id: `fmcg-${i + 1}`,
       custom_name: `${base} (${weightTag} - Batch #${i + 1})`,
       barcode: `890${String(1000000 + i).slice(1)}`,
-      category: isWeightLoose ? "Groceries" : "Packaged Goods",
-      uom: isWeightLoose ? "kg/gm" : "pc",
+      category: isLoose ? "Groceries" : "Packaged Goods",
+      uom: isLoose ? "kg/gm" : "pc",
       unit_price: price,
       cost_price: cost,
-      tax_rate: (i % 5 === 0) ? 0 : (i % 2 === 0 ? 5 : 18),
+      tax_rate: (i % 5 === 0) ? 0 : 5,
       stock_qty: 25
     });
   }
+
+  // 2. 150 MITHAI & SWEET VARIETIES
+  const sweetBases = [
+    { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
+    { name: "Motichoor Desi Ghee Ladoo", uom: "kg/gm", price: 420, cost: 310 },
+    { name: "Besan Ladoo Pure Desi Ghee", uom: "kg/gm", price: 440, cost: 320 },
+    { name: "Atta Gond Dry Fruit Ladoo", uom: "kg/gm", price: 560, cost: 420 },
+    { name: "Tirupati Style Boondi Ladoo", uom: "kg/gm", price: 460, cost: 340 },
+    { name: "Gulab Jamun Khoya Pure Ghee", uom: "kg/gm", price: 380, cost: 270 },
+    { name: "Kala Jamun Mawa", uom: "kg/gm", price: 400, cost: 290 },
+    { name: "Mathura Peda Special", uom: "kg/gm", price: 460, cost: 340 },
+    { name: "Kesar Peda Malai", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Dharwad Peda Authentic", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Milk Cake Alwar Special", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Kalakand Fresh Malai", uom: "kg/gm", price: 500, cost: 370 },
+    { name: "Doda Barfi Desi Ghee", uom: "kg/gm", price: 540, cost: 410 },
+    { name: "White Mawa Barfi", uom: "kg/gm", price: 460, cost: 330 },
+    { name: "Pista Lauj Barfi", uom: "kg/gm", price: 1400, cost: 1150 },
+    { name: "Badam Katli Pure Almond", uom: "kg/gm", price: 950, cost: 770 },
+    { name: "Kaju Roll Pista Stuffed", uom: "kg/gm", price: 980, cost: 770 },
+    { name: "Kaju Anjeer Chakri", uom: "kg/gm", price: 980, cost: 790 },
+    { name: "Anjeer Dryfruit Barfi (Sugarfree)", uom: "kg/gm", price: 1100, cost: 890 },
+    { name: "Khajoor Dryfruit Roll", uom: "kg/gm", price: 850, cost: 680 },
+    { name: "Kolkata Spongy Rasgulla", uom: "pc", price: 20, cost: 12 },
+    { name: "Kesar Pista Rasmalai", uom: "pc", price: 40, cost: 25 },
+    { name: "Rajbhog Kesar Dry Fruit", uom: "pc", price: 35, cost: 21 },
+    { name: "Cham Cham Pink Cream", uom: "kg/gm", price: 440, cost: 320 },
+    { name: "Malai Chop Stuffed", uom: "kg/gm", price: 460, cost: 330 },
+    { name: "Chhena Poda Odia Baked", uom: "kg/gm", price: 500, cost: 370 },
+    { name: "Sandesh Nolen Gur", uom: "kg/gm", price: 540, cost: 400 },
+    { name: "Mysore Pak Traditional Ghee", uom: "kg/gm", price: 540, cost: 410 },
+    { name: "Sunnundalu (Andhra Urad Dal Ladoo)", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Balushahi Traditional", uom: "kg/gm", price: 380, cost: 260 }
+  ];
+
+  for (let s = 0; s < 150; s++) {
+    const item = sweetBases[s % sweetBases.length];
+    const tier = Math.floor(s / sweetBases.length) + 1;
+    const tierLabel = tier === 1 ? "Standard" : (tier === 2 ? "Special Desi Ghee" : (tier === 3 ? "Royal Festive" : (tier === 4 ? "Export Quality" : "Handcrafted")));
+
+    presets.push({
+      id: `swt-${s + 1}`,
+      custom_name: `${item.name} [${tierLabel}]`,
+      barcode: `8909${String(1000 + s).slice(1)}`,
+      category: "Sweets",
+      uom: item.uom,
+      unit_price: item.price + ((tier - 1) * 20),
+      cost_price: item.cost + ((tier - 1) * 15),
+      tax_rate: 5,
+      stock_qty: 20
+    });
+  }
+
+  window.globalPresetCatalog = presets;
+  window.globalPresetsList = presets;
+  return presets;
+}
 // ==========================================
 // PRESET LIBRARY MODAL RENDER & IMPORT LOGIC
 // ==========================================
@@ -1412,7 +1469,7 @@ window.renderPresetModalLibrary = function(filterQuery = "") {
     }
   }
 
-  const q = String(filterQuery).toLowerCase().trim();
+  const q = String(filterQuery || "").toLowerCase().trim();
   const list = (window.globalPresetCatalog || []).filter(item => 
     !q || 
     (item.custom_name && item.custom_name.toLowerCase().includes(q)) || 
@@ -1541,62 +1598,7 @@ window.importSelectedPresets = function() {
 
   if (modal) modal.classList.add("hidden");
   alert(`✅ Successfully imported ${addedCount} products into your active counter catalog!`);
-};     
-  // --- 2. 150 MITHAI & SWEET VARIETIES ---
-  const sweetBases = [
-    { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
-    { name: "Motichoor Desi Ghee Ladoo", uom: "kg/gm", price: 420, cost: 310 },
-    { name: "Besan Ladoo Pure Desi Ghee", uom: "kg/gm", price: 440, cost: 320 },
-    { name: "Atta Gond Dry Fruit Ladoo", uom: "kg/gm", price: 560, cost: 420 },
-    { name: "Tirupati Style Boondi Ladoo", uom: "kg/gm", price: 460, cost: 340 },
-    { name: "Gulab Jamun Khoya Pure Ghee", uom: "kg/gm", price: 380, cost: 270 },
-    { name: "Kala Jamun Mawa", uom: "kg/gm", price: 400, cost: 290 },
-    { name: "Mathura Peda Special", uom: "kg/gm", price: 460, cost: 340 },
-    { name: "Kesar Peda Malai", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Dharwad Peda Authentic", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Milk Cake Alwar Special", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Kalakand Fresh Malai", uom: "kg/gm", price: 500, cost: 370 },
-    { name: "Doda Barfi Desi Ghee", uom: "kg/gm", price: 540, cost: 410 },
-    { name: "White Mawa Barfi", uom: "kg/gm", price: 460, cost: 330 },
-    { name: "Pista Lauj Barfi", uom: "kg/gm", price: 1400, cost: 1150 },
-    { name: "Badam Katli Pure Almond", uom: "kg/gm", price: 950, cost: 770 },
-    { name: "Kaju Roll Pista Stuffed", uom: "kg/gm", price: 980, cost: 770 },
-    { name: "Kaju Anjeer Chakri", uom: "kg/gm", price: 980, cost: 790 },
-    { name: "Anjeer Dryfruit Barfi (Sugarfree)", uom: "kg/gm", price: 1100, cost: 890 },
-    { name: "Khajoor Dryfruit Roll", uom: "kg/gm", price: 850, cost: 680 },
-    { name: "Kolkata Spongy Rasgulla", uom: "pc", price: 20, cost: 12 },
-    { name: "Kesar Pista Rasmalai", uom: "pc", price: 40, cost: 25 },
-    { name: "Rajbhog Kesar Dry Fruit", uom: "pc", price: 35, cost: 21 },
-    { name: "Cham Cham Pink Cream", uom: "kg/gm", price: 440, cost: 320 },
-    { name: "Malai Chop Stuffed", uom: "kg/gm", price: 460, cost: 330 },
-    { name: "Chhena Poda Odia Baked", uom: "kg/gm", price: 500, cost: 370 },
-    { name: "Sandesh Nolen Gur", uom: "kg/gm", price: 540, cost: 400 },
-    { name: "Mysore Pak Traditional Ghee", uom: "kg/gm", price: 540, cost: 410 },
-    { name: "Sunnundalu (Andhra Urad Dal Ladoo)", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Balushahi Traditional", uom: "kg/gm", price: 380, cost: 260 }
-  ];
-
-  for (let s = 0; s < 150; s++) {
-    const item = sweetBases[s % sweetBases.length];
-    const tier = Math.floor(s / sweetBases.length) + 1;
-    const tierLabel = tier === 1 ? "Standard" : (tier === 2 ? "Special Desi Ghee" : (tier === 3 ? "Royal Festive" : (tier === 4 ? "Export Quality" : "Handcrafted")));
-
-    presets.push({
-      id: `swt-${s + 1}`,
-      custom_name: `${item.name} [${tierLabel}]`,
-      barcode: `8909${String(1000 + s).slice(1)}`,
-      category: "Sweets",
-      uom: item.uom,
-      unit_price: item.price + ((tier - 1) * 20),
-      cost_price: item.cost + ((tier - 1) * 15),
-      tax_rate: 5,
-      stock_qty: 20
-    });
-  }
-  window.globalPresetCatalog = presets;
-  window.globalPresetsList = presets;
-  return presets;
-}
+};
   window.openGeneralAddStockModal = function() {
       openAddProductModal();
     };
