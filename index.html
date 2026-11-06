@@ -92,7 +92,6 @@
        ======================================================== -->
   <div id="view-landing" class="max-w-md mx-auto p-4 min-h-screen flex flex-col justify-between w-full">
     <div class="space-y-6 pt-6">
-      
       <div class="flex flex-col items-center justify-center text-center space-y-2">
         <div class="w-16 h-16 rounded-2xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] flex items-center justify-center text-emerald-500 text-3xl shadow-xl">
           🏪
@@ -168,14 +167,16 @@
           </div>
         </div>
       </div>
+      
       <!-- Live Trial Countdown Warning Badge -->
-<div 
-  id="trial-remaining-banner" 
-  onclick="showSubscriptionPaymentModal()" 
-  class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/25 transition">
-  <span>⏳</span>
-  <span id="trial-remaining-text">Trial: Calculating...</span>
-</div>
+      <div 
+        id="trial-remaining-banner" 
+        onclick="showSubscriptionPaymentModal()" 
+        class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold cursor-pointer hover:bg-amber-500/25 transition">
+        <span>⏳</span>
+        <span id="trial-remaining-text">Trial: Calculating...</span>
+      </div>
+
       <div class="flex items-center gap-1.5 flex-wrap">
         <!-- Online/Offline Badge -->
         <span id="network-badge" onclick="openNetworkStatusModal()" class="cursor-pointer text-[9px] font-mono px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
@@ -209,7 +210,9 @@
         <button type="button" onclick="openGeneralAddStockModal()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow">
           + Add Product
         </button>
-        <button type="button" onclick="openStaffQuickUpdateModal()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow"><span>📦</span> Quick Stock / Price</button>
+        <button type="button" onclick="openStaffQuickUpdateModal()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow">
+          <span>📦</span> Quick Stock / Price
+        </button>
         <button type="button" onclick="executeLogout()" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-600/20 hover:bg-red-600/30 text-red-600 dark:text-red-300 border border-red-500/30">
           ⏻ Exit
         </button>
@@ -240,7 +243,6 @@
         
         <!-- Left: Search, Quick Chips, Catalog Cards -->
         <div class="lg:col-span-7 space-y-3">
-          
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3 space-y-2 shadow-sm">
             <div class="relative">
               <input 
@@ -265,7 +267,7 @@
             </div>
           </div>
 
-          <!-- Dynamic Department Category Filter Tabs -->
+          <!-- Department Category Filter Tabs -->
           <div id="catalog-category-tabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs whitespace-nowrap"></div>
 
           <!-- Catalog Cards Grid -->
@@ -275,7 +277,6 @@
         <!-- Right: Current Cart Invoice Ledger -->
         <div class="lg:col-span-5 space-y-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 shadow-xl space-y-3">
-            
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
               <div class="flex items-center gap-2">
                 <span class="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">🛒</span>
@@ -356,52 +357,6 @@
                 📖 Khata Ledger
               </button>
             </div>
-            <!-- Modal: Staff Quick Stock & Price Update -->
-<div id="modal-staff-quick-update" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-  <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
-    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-      <div class="flex items-center gap-1.5">
-        <span class="text-amber-400">📦</span>
-        <h3 class="font-extrabold text-sm text-white">Staff Inventory & Price Update</h3>
-      </div>
-      <button type="button" onclick="closeStaffQuickUpdateModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
-    </div>
-
-    <!-- Product Selection -->
-    <div>
-      <label class="text-[10px] text-slate-400 font-bold block mb-1">Select Product</label>
-      <select id="sel-staff-product" onchange="populateStaffQuickFields()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white font-bold outline-none focus:border-indigo-500"></select>
-    </div>
-
-    <!-- Rate & Stock Inward Inputs -->
-    <div class="grid grid-cols-2 gap-2 text-xs">
-      <div>
-        <label class="text-[10px] text-slate-400 font-bold block mb-1">Selling Rate (₹)</label>
-        <input id="inp-staff-selling-rate" type="number" step="any" class="w-full bg-[#08111e] border border-emerald-500/40 rounded-xl p-2 font-mono font-bold text-emerald-400 text-sm outline-none">
-      </div>
-      <div>
-        <label class="text-[10px] text-slate-400 font-bold block mb-1">Wholesale Cost (₹)</label>
-        <input id="inp-staff-cost-rate" type="number" step="any" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-slate-300 text-sm outline-none">
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-2 text-xs">
-      <div>
-        <label class="text-[10px] text-slate-400 font-bold block mb-1">Current Stock</label>
-        <input id="inp-staff-current-stock" type="number" disabled class="w-full bg-[#08111e]/50 border border-slate-800 rounded-xl p-2 font-mono text-slate-400 text-sm">
-      </div>
-      <div>
-        <label class="text-[10px] text-emerald-400 font-bold block mb-1">+ Inward Arrived Stock</label>
-        <input id="inp-staff-add-stock" type="number" step="any" placeholder="e.g. 50" class="w-full bg-[#08111e] border border-indigo-500/50 rounded-xl p-2 font-mono font-bold text-indigo-300 text-sm outline-none">
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-2 pt-1">
-      <button type="button" onclick="closeStaffQuickUpdateModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">Cancel</button>
-      <button type="button" onclick="saveStaffQuickUpdate()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow transition">Save Updates</button>
-    </div>
-  </div>
-</div>
           </div>
         </div>
 
@@ -437,8 +392,6 @@
 
           <!-- Store GST Number & Khata Toggle Strip -->
           <div class="border-t border-slate-200 dark:border-slate-800 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-            
-            <!-- GST Number Input -->
             <div class="flex items-center gap-2 bg-slate-50 dark:bg-[#08111e] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
               <div class="flex-1">
                 <label class="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 block">Store GSTIN (Printed on Bills)</label>
@@ -447,7 +400,6 @@
               <span class="text-xs">🧾</span>
             </div>
 
-            <!-- Khata Payment On/Off Toggle -->
             <div class="flex items-center justify-between bg-slate-50 dark:bg-[#08111e] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
               <div>
                 <span class="text-xs font-bold block">Khata / Credit Billing</span>
@@ -458,7 +410,6 @@
                 <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </label>
             </div>
-
           </div>
         </div>
 
@@ -466,65 +417,68 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Revenue</span>
-            <div id="kpi-revenue" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">₹3,227.38</div>
+            <div id="kpi-revenue" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">₹0.00</div>
             <span class="text-[10px] text-emerald-500 font-medium">↗ Real-time Audited</span>
           </div>
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Units Dispatched</span>
-            <div id="kpi-units" class="text-xl font-black font-mono">37 <span class="text-xs font-normal text-slate-400">units</span></div>
+            <div id="kpi-units" class="text-xl font-black font-mono">0 <span class="text-xs font-normal text-slate-400">units</span></div>
             <span class="text-[10px] text-slate-500 dark:text-slate-400">Across active catalog</span>
           </div>
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Catalog SKUs</span>
-            <div id="kpi-sku-count" class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">12 <span class="text-xs font-normal text-slate-400">goods</span></div>
+            <div id="kpi-sku-count" class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">0 <span class="text-xs font-normal text-slate-400">goods</span></div>
             <span class="text-[10px] text-indigo-500 dark:text-indigo-300">Active retail stock</span>
           </div>
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-red-500 uppercase tracking-wider block">Low Stock Alerts</span>
-            <div id="kpi-low-stock" class="text-xl font-black text-red-500 font-mono">4 <span class="text-xs font-normal text-slate-400">items</span></div>
+            <div id="kpi-low-stock" class="text-xl font-black text-red-500 font-mono">0 <span class="text-xs font-normal text-slate-400">items</span></div>
             <span class="text-[10px] text-red-400">Threshold &lt; 5 units</span>
           </div>
         </div>
+
         <!-- Admin Real-Time Payment Breakdown Cards -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 my-3">
-  <div class="bg-[#08111e] border border-slate-800 p-3 rounded-xl">
-    <span class="text-[10px] text-slate-400 font-bold uppercase">Opening Float</span>
-    <div id="adm-txt-opening-cash" class="text-base font-black font-mono text-slate-200 mt-0.5">₹0.00</div>
-  </div>
-  <div class="bg-[#08111e] border border-emerald-500/20 p-3 rounded-xl">
-    <span class="text-[10px] text-emerald-400 font-bold uppercase">💵 Cash Received</span>
-    <div id="adm-txt-cash-total" class="text-base font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
-  </div>
-  <div class="bg-[#08111e] border border-indigo-500/20 p-3 rounded-xl">
-    <span class="text-[10px] text-indigo-400 font-bold uppercase">📱 UPI / Soundbox</span>
-    <div id="adm-txt-upi-total" class="text-base font-black font-mono text-indigo-400 mt-0.5">₹0.00</div>
-  </div>
-  <div class="bg-[#08111e] border border-amber-500/20 p-3 rounded-xl">
-    <span class="text-[10px] text-amber-400 font-bold uppercase">💳 Card / Other</span>
-    <div id="adm-txt-card-total" class="text-base font-black font-mono text-amber-400 mt-0.5">₹0.00</div>
-  </div>
-  <!-- EOD Daily Register Action Row -->
-<div class="flex justify-between items-center my-3 bg-[#08111e] border border-slate-800 p-3 rounded-xl">
-  <div>
-    <h4 class="text-xs font-bold text-white">Daily Register Reconciliation</h4>
-    <p class="text-[10px] text-slate-400">Reconcile physical cash drawer with UPI/Soundbox collections before store closing.</p>
-  </div>
-  <div class="flex items-center gap-2">
-    <button 
-      type="button" 
-      onclick="generateEndOfDayReport()" 
-      class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
-      <span>📊</span> View EOD Summary
-    </button>
-    <button 
-      type="button" 
-      onclick="sendDailyWhatsappSummary()" 
-      class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
-      <span>💬</span> WhatsApp to Owner
-    </button>
-  </div>
-</div>
-</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 my-3">
+          <div class="bg-[#08111e] border border-slate-800 p-3 rounded-xl">
+            <span class="text-[10px] text-slate-400 font-bold uppercase">Opening Float</span>
+            <div id="adm-txt-opening-cash" class="text-base font-black font-mono text-slate-200 mt-0.5">₹0.00</div>
+          </div>
+          <div class="bg-[#08111e] border border-emerald-500/20 p-3 rounded-xl">
+            <span class="text-[10px] text-emerald-400 font-bold uppercase">💵 Cash Received</span>
+            <div id="adm-txt-cash-total" class="text-base font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
+          </div>
+          <div class="bg-[#08111e] border border-indigo-500/20 p-3 rounded-xl">
+            <span class="text-[10px] text-indigo-400 font-bold uppercase">📱 UPI / Soundbox</span>
+            <div id="adm-txt-upi-total" class="text-base font-black font-mono text-indigo-400 mt-0.5">₹0.00</div>
+          </div>
+          <div class="bg-[#08111e] border border-amber-500/20 p-3 rounded-xl">
+            <span class="text-[10px] text-amber-400 font-bold uppercase">💳 Card / Other</span>
+            <div id="adm-txt-card-total" class="text-base font-black font-mono text-amber-400 mt-0.5">₹0.00</div>
+          </div>
+        </div>
+
+        <!-- EOD Daily Register Action Row -->
+        <div class="flex flex-wrap justify-between items-center my-3 bg-[#08111e] border border-slate-800 p-3 rounded-xl gap-2">
+          <div>
+            <h4 class="text-xs font-bold text-white">Daily Register Reconciliation</h4>
+            <p class="text-[10px] text-slate-400">Reconcile physical cash drawer with UPI/Soundbox collections before store closing.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              onclick="generateEndOfDayReport()" 
+              class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
+              <span>📊</span> View EOD Summary
+            </button>
+            <button 
+              type="button" 
+              onclick="sendDailyWhatsappSummary()" 
+              class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow">
+              <span>💬</span> WhatsApp to Owner
+            </button>
+          </div>
+        </div>
+
         <!-- Sales Charts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow">
@@ -588,163 +542,200 @@
   <!-- ========================================================
        3. MODALS
        ======================================================== -->
+  <!-- Modal: Staff Quick Stock & Price Update -->
+  <div id="modal-staff-quick-update" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-amber-400">📦</span>
+          <h3 class="font-extrabold text-sm text-white">Staff Inventory & Price Update</h3>
+        </div>
+        <button type="button" onclick="closeStaffQuickUpdateModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <div>
+        <label class="text-[10px] text-slate-400 font-bold block mb-1">Select Product</label>
+        <select id="sel-staff-product" onchange="populateStaffQuickFields()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white font-bold outline-none focus:border-indigo-500"></select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="text-[10px] text-slate-400 font-bold block mb-1">Selling Rate (₹)</label>
+          <input id="inp-staff-selling-rate" type="number" step="any" class="w-full bg-[#08111e] border border-emerald-500/40 rounded-xl p-2 font-mono font-bold text-emerald-400 text-sm outline-none">
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 font-bold block mb-1">Wholesale Cost (₹)</label>
+          <input id="inp-staff-cost-rate" type="number" step="any" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-slate-300 text-sm outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="text-[10px] text-slate-400 font-bold block mb-1">Current Stock</label>
+          <input id="inp-staff-current-stock" type="number" disabled class="w-full bg-[#08111e]/50 border border-slate-800 rounded-xl p-2 font-mono text-slate-400 text-sm">
+        </div>
+        <div>
+          <label class="text-[10px] text-emerald-400 font-bold block mb-1">+ Inward Arrived Stock</label>
+          <input id="inp-staff-add-stock" type="number" step="any" placeholder="e.g. 50" class="w-full bg-[#08111e] border border-indigo-500/50 rounded-xl p-2 font-mono font-bold text-indigo-300 text-sm outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button type="button" onclick="closeStaffQuickUpdateModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700">Cancel</button>
+        <button type="button" onclick="saveStaffQuickUpdate()" class="py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow transition">Save Updates</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Dynamic Customer UPI Checkout QR -->
-<div id="modal-upi-checkout" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
-    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-      <div class="flex items-center gap-2">
-        <span class="text-emerald-400 text-lg">📱</span>
-        <h3 class="font-extrabold text-sm text-white">Scan UPI to Pay</h3>
-      </div>
-      <button type="button" onclick="closeUpiCheckoutModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
-    </div>
-
-    <!-- Bill Details & Payable Amount -->
-    <div>
-      <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Total Bill Payable</span>
-      <div id="txt-upi-amount" class="text-2xl font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
-    </div>
-
-    <!-- Live Dynamic QR Container -->
-    <div class="bg-white p-3.5 rounded-2xl inline-block shadow-inner mx-auto">
-      <img id="img-upi-qr-display" src="" alt="UPI QR Code" class="w-48 h-48 block mx-auto">
-    </div>
-
-    <div class="text-[11px] text-slate-300">
-      Accepts <span class="font-bold text-white">GPay • PhonePe • Paytm • BHIM</span>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="space-y-2 pt-2">
-      <button type="button" onclick="confirmUpiPaymentComplete()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
-        ✔ Payment Received — Print Slip
-      </button>
-      <button type="button" onclick="closeUpiCheckoutModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
-        Cancel / Switch to Cash
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Subscription ₹299 Unlock via 12-Digit UTR -->
-<div id="modal-utr-unlock" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
-    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-      <div class="flex items-center gap-1.5">
-        <span class="text-amber-400 text-lg">👑</span>
-        <h3 class="font-extrabold text-sm text-white">Activate Pro License (₹299)</h3>
-      </div>
-      <button type="button" onclick="closeUtrUnlockModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
-    </div>
-
-    <p class="text-xs text-slate-300">
-      Scan with any UPI app and transfer <strong class="text-emerald-400">₹299</strong> to activate 1-Month Pro access.
-    </p>
-
-    <!-- Subscription Admin Static QR -->
-    <div class="bg-white p-3 rounded-2xl inline-block mx-auto shadow-inner">
-      <img id="img-sub-qr-display" src="" alt="Pro License QR" class="w-44 h-44 block mx-auto">
-    </div>
-
-    <div class="space-y-2 text-left">
-      <label class="text-[10px] text-slate-300 font-bold block">Enter 12-Digit UPI Ref / UTR Number:</label>
-      <input 
-        id="inp-sub-utr-number" 
-        type="text" 
-        maxlength="12" 
-        placeholder="e.g. 423589123456" 
-        class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono text-center font-bold text-white text-sm outline-none focus:border-emerald-400">
-    </div>
-
-    <div class="space-y-2 pt-1">
-      <button type="button" onclick="verifyAndUnlockSubscription()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow transition">
-        Verify UTR & Unlock POS →
-      </button>
-      <button type="button" onclick="closeUtrUnlockModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
-        Back
-      </button>
-    </div>
-  </div>
-</div>
-<!-- Price Revision & Margin Modal -->
-<div id="modal-edit-price" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-  <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-slate-100">
-    <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
-      <div class="flex items-center gap-1.5">
-        <span class="text-amber-400">🏷️</span>
-        <h3 class="font-extrabold text-sm text-white">Revise Product Price & Margin</h3>
-      </div>
-      <button type="button" onclick="closePriceRevisionModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
-    </div>
-
-    <div class="space-y-3 text-xs">
-      <!-- Select Product Dropdown -->
-      <div>
-        <label class="text-[10px] text-slate-300 font-bold block mb-1">Select Product to Revise</label>
-        <select 
-          id="sel-price-modal-product" 
-          onchange="loadPriceRevisionModalFields()" 
-          class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-bold text-white outline-none focus:border-indigo-500">
-        </select>
-      </div>
-
-      <!-- Current Rates vs New Rates -->
-      <div class="grid grid-cols-2 gap-2.5">
-        <div>
-          <label class="text-[10px] text-slate-300 font-bold block mb-1">New Selling Rate (₹)</label>
-          <input 
-            id="inp-modal-selling-rate" 
-            type="number" 
-            step="any" 
-            class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-2.5 font-mono font-bold text-emerald-400 text-sm outline-none focus:border-emerald-400">
+  <div id="modal-upi-checkout" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 text-lg">📱</span>
+          <h3 class="font-extrabold text-sm text-white">Scan UPI to Pay</h3>
         </div>
+        <button type="button" onclick="closeUpiCheckoutModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <div>
+        <span class="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Total Bill Payable</span>
+        <div id="txt-upi-amount" class="text-2xl font-black font-mono text-emerald-400 mt-0.5">₹0.00</div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-2xl inline-block shadow-inner mx-auto">
+        <img id="img-upi-qr-display" src="" alt="UPI QR Code" class="w-48 h-48 block mx-auto">
+      </div>
+
+      <div class="text-[11px] text-slate-300">
+        Accepts <span class="font-bold text-white">GPay • PhonePe • Paytm • BHIM</span>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <button type="button" onclick="confirmUpiPaymentComplete()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow-lg transition">
+          ✔ Payment Received — Print Slip
+        </button>
+        <button type="button" onclick="closeUpiCheckoutModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+          Cancel / Switch to Cash
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Subscription ₹299 Unlock via 12-Digit UTR -->
+  <div id="modal-utr-unlock" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-amber-400 text-lg">👑</span>
+          <h3 class="font-extrabold text-sm text-white">Activate Pro License (₹299)</h3>
+        </div>
+        <button type="button" onclick="closeUtrUnlockModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300">
+        Scan with any UPI app and transfer <strong class="text-emerald-400">₹299</strong> to activate 1-Month Pro access.
+      </p>
+
+      <div class="bg-white p-3 rounded-2xl inline-block mx-auto shadow-inner">
+        <img id="img-sub-qr-display" src="" alt="Pro License QR" class="w-44 h-44 block mx-auto">
+      </div>
+
+      <div class="space-y-2 text-left">
+        <label class="text-[10px] text-slate-300 font-bold block">Enter 12-Digit UPI Ref / UTR Number:</label>
+        <input 
+          id="inp-sub-utr-number" 
+          type="text" 
+          maxlength="12" 
+          placeholder="e.g. 423589123456" 
+          class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono text-center font-bold text-white text-sm outline-none focus:border-emerald-400">
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="verifyAndUnlockSubscription()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs rounded-xl shadow transition">
+          Verify UTR & Unlock POS →
+        </button>
+        <button type="button" onclick="closeUtrUnlockModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Revision & Margin Modal -->
+  <div id="modal-edit-price" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-amber-400">🏷️</span>
+          <h3 class="font-extrabold text-sm text-white">Revise Product Price & Margin</h3>
+        </div>
+        <button type="button" onclick="closePriceRevisionModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
         <div>
-          <label class="text-[10px] text-slate-300 font-bold block mb-1">New Wholesale Cost (₹)</label>
-          <input 
-            id="inp-modal-cost-rate" 
-            type="number" 
-            step="any" 
-            class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono font-bold text-slate-200 text-sm outline-none focus:border-indigo-500">
+          <label class="text-[10px] text-slate-300 font-bold block mb-1">Select Product to Revise</label>
+          <select 
+            id="sel-price-modal-product" 
+            onchange="loadPriceRevisionModalFields()" 
+            class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-bold text-white outline-none focus:border-indigo-500">
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="text-[10px] text-slate-300 font-bold block mb-1">New Selling Rate (₹)</label>
+            <input 
+              id="inp-modal-selling-rate" 
+              type="number" 
+              step="any" 
+              class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-2.5 font-mono font-bold text-emerald-400 text-sm outline-none focus:border-emerald-400">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-300 font-bold block mb-1">New Wholesale Cost (₹)</label>
+            <input 
+              id="inp-modal-cost-rate" 
+              type="number" 
+              step="any" 
+              class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 font-mono font-bold text-slate-200 text-sm outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] text-slate-300 font-bold block mb-1">Revision Rationale / Reason</label>
+          <select id="sel-modal-price-reason" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500">
+            <option value="Market Rate Revision" class="bg-[#08111e] text-white">Market Rate Revision</option>
+            <option value="Wholesale Cost Fluctuation" class="bg-[#08111e] text-white">Wholesale Cost Fluctuation</option>
+            <option value="Festival / Promotional Cut" class="bg-[#08111e] text-white">Festival / Promotional Cut</option>
+            <option value="Transport / Logistics Surcharge" class="bg-[#08111e] text-white">Transport / Logistics Surcharge</option>
+          </select>
+        </div>
+
+        <div class="bg-[#08111e] p-3 rounded-xl border border-slate-700 text-xs flex justify-between items-center">
+          <span class="text-slate-300 font-bold">Projected Gross Profit:</span>
+          <span id="txt-modal-margin-preview" class="font-mono font-bold text-emerald-400 text-sm">+₹0.00 (0%)</span>
         </div>
       </div>
 
-      <!-- Revision Reason -->
-      <div>
-        <label class="text-[10px] text-slate-300 font-bold block mb-1">Revision Rationale / Reason</label>
-        <select id="sel-modal-price-reason" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none focus:border-indigo-500">
-          <option value="Market Rate Revision" class="bg-[#08111e] text-white">Market Rate Revision</option>
-          <option value="Wholesale Cost Fluctuation" class="bg-[#08111e] text-white">Wholesale Cost Fluctuation</option>
-          <option value="Festival / Promotional Cut" class="bg-[#08111e] text-white">Festival / Promotional Cut</option>
-          <option value="Transport / Logistics Surcharge" class="bg-[#08111e] text-white">Transport / Logistics Surcharge</option>
-        </select>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button 
+          type="button" 
+          onclick="closePriceRevisionModal()" 
+          class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          onclick="savePriceRevisionModal()" 
+          class="py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-xl shadow transition">
+          Save & Update Catalog
+        </button>
       </div>
-
-      <!-- Margin Preview Box -->
-      <div class="bg-[#08111e] p-3 rounded-xl border border-slate-700 text-xs flex justify-between items-center">
-        <span class="text-slate-300 font-bold">Projected Gross Profit:</span>
-        <span id="txt-modal-margin-preview" class="font-mono font-bold text-emerald-400 text-sm">+₹0.00 (0%)</span>
-      </div>
-    </div>
-
-    <!-- Modal Actions -->
-    <div class="grid grid-cols-2 gap-2 pt-1">
-      <button 
-        type="button" 
-        onclick="closePriceRevisionModal()" 
-        class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition">
-        Cancel
-      </button>
-      <button 
-        type="button" 
-        onclick="savePriceRevisionModal()" 
-        class="py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs rounded-xl shadow transition">
-        Save & Update Catalog
-      </button>
     </div>
   </div>
-</div>
 
-  <!-- 3A. PRESET CATALOG MODAL -->
+  <!-- 3A. PRESET CATALOG MODAL (FMCG + 150 MITHAI) -->
   <div id="modal-preset-catalog" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-4xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -757,19 +748,19 @@
 
       <div class="flex flex-wrap gap-2 items-center justify-between text-xs">
         <input 
-  id="inp-preset-search" 
-  type="text" 
-  placeholder="Search FMCG, Cold Drink, Sweets..." 
-  oninput="renderPresetModalLibrary(this.value)" 
-  class="bg-[#08111e] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-64 focus:border-indigo-500"
->
+          id="inp-preset-search" 
+          type="text" 
+          placeholder="Search FMCG, Cold Drink, Sweets..." 
+          oninput="renderPresetModalLibrary(this.value)" 
+          class="bg-[#08111e] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-64 focus:border-indigo-500"
+        >
         <div class="space-x-2">
           <button type="button" onclick="selectAllPresets(true)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Select All</button>
           <button type="button" onclick="selectAllPresets(false)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Deselect All</button>
         </div>
       </div>
 
-      <div id="preset-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50 dark:bg-[#08111e] space-y-1"></div>
+      <div id="preset-list-container" class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50 dark:bg-[#08111e] space-y-1 max-h-80"></div>
 
       <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800">
         <span class="text-xs text-slate-500 dark:text-slate-400"><strong id="preset-selected-count" class="text-emerald-500">0</strong> products selected</span>
@@ -1013,7 +1004,7 @@
         <span class="text-xs font-black">Admin Authentication</span>
         <button type="button" onclick="closeAdminPinModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-xs">✕</button>
       </div>
-      <p class="text-[10px] text-slate-500 dark:text-slate-400">Enter 6-digit security PIN</p>
+      <p class="text-[10px] text-slate-500 dark:text-slate-400">Enter 4 or 6-digit security PIN</p>
       
       <div class="flex justify-center gap-2 py-1">
         <div class="pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent"></div>
@@ -1024,7 +1015,7 @@
         <div class="pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent"></div>
       </div>
 
-      <div class="text-[10px] text-amber-500 font-mono">Demo PIN: 123456</div>
+      <div class="text-[10px] text-amber-500 font-mono">Demo PIN: 1234 or 123456</div>
 
       <div class="grid grid-cols-3 gap-2 pt-1">
         <button type="button" onclick="pressPinDigit('1')" class="py-2.5 bg-slate-100 dark:bg-slate-800 font-bold rounded-xl text-sm">1</button>
@@ -1080,6 +1071,36 @@
       <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-mono font-bold outline-none">
       <input id="khata-name" type="text" placeholder="Customer Name" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-semibold outline-none">
       <button type="button" onclick="confirmKhataCheckout()" class="w-full py-2.5 bg-amber-600 text-white font-black text-xs rounded-xl shadow">Confirm Credit Bill</button>
+    </div>
+  </div>
+
+  <!-- Modal: Morning Opening Cash Drawer Float -->
+  <div id="modal-morning-cash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 text-center space-y-3.5 text-slate-100">
+      <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-2xl mx-auto">
+        💵
+      </div>
+      <div>
+        <h3 class="font-extrabold text-sm text-white">Morning Cash Drawer Entry</h3>
+        <p class="text-xs text-slate-400 mt-1">Enter physical cash present in the drawer at store opening.</p>
+      </div>
+      <div class="text-left">
+        <label class="text-[10px] text-slate-400 font-bold block mb-1">Opening Cash Amount (₹)</label>
+        <input 
+          id="inp-morning-cash-amount" 
+          type="number" 
+          step="any"
+          placeholder="e.g. 2000" 
+          class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-3 font-mono font-bold text-center text-emerald-400 text-lg outline-none focus:border-emerald-400">
+      </div>
+      <div class="pt-1">
+        <button 
+          type="button" 
+          onclick="submitMorningOpeningCash()" 
+          class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+          Start Daily Register →
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1209,103 +1230,17 @@
       <tbody id="audit-sheet-table-body"></tbody>
     </table>
   </div>
-  <!-- Modal: Morning Opening Cash Drawer Float -->
-<div id="modal-morning-cash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-  <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 text-center space-y-3.5 text-slate-100">
-    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-2xl mx-auto">
-      💵
-    </div>
-    <div>
-      <h3 class="font-extrabold text-sm text-white">Morning Cash Drawer Entry</h3>
-      <p class="text-xs text-slate-400 mt-1">Enter physical cash present in the drawer at store opening.</p>
-    </div>
-    <div class="text-left">
-      <label class="text-[10px] text-slate-400 font-bold block mb-1">Opening Cash Amount (₹)</label>
-      <input 
-        id="inp-morning-cash-amount" 
-        type="number" 
-        step="any"
-        placeholder="e.g. 2000" 
-        class="w-full bg-[#08111e] border border-emerald-500/50 rounded-xl p-3 font-mono font-bold text-center text-emerald-400 text-lg outline-none focus:border-emerald-400">
-    </div>
-    <div class="pt-1">
-      <button 
-        type="button" 
-        onclick="submitMorningOpeningCash()" 
-        class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
-        Start Daily Register →
-      </button>
-    </div>
-  </div>
-</div>
+
   <!-- ========================================================
        5. JAVASCRIPT CONTROLLER (ALL FUNCTIONS INCLUDED)
        ======================================================== -->
   <script>
-    // Global Admin PIN default (use store setting or fallback to 1234)
-window.ADMIN_PIN = localStorage.getItem("storepos_admin_pin") || "1234";
-window.openStaffQuickUpdateModal = function() {
-  const modal = document.getElementById("modal-staff-quick-update");
-  const sel = document.getElementById("sel-staff-product");
-  if (!modal) return alert("Modal #modal-staff-quick-update not found.");
+    // Global Admin PIN default
+    window.ADMIN_PIN = localStorage.getItem("storepos_admin_pin") || "1234";
+    const ADMIN_DEMO_PIN = "123456";
+    let isAdminUnlocked = false;
+    let enteredPin = "";
 
-  const items = window.currentInventory || [];
-  if (!items.length) return alert("Inventory empty or loading.");
-
-  if (sel) {
-    sel.innerHTML = items.map((item, idx) => {
-      // Handle both sku, id, or index as unique identifier
-      const val = item.sku || item.id || idx;
-      const stock = item.stock_qty ?? item.stock ?? 0;
-      const price = item.unit_price ?? item.price ?? 0;
-      return `<option value="${val}">${item.custom_name || item.name} (Stock: ${stock}) — ₹${Number(price).toFixed(2)}</option>`;
-    }).join("");
-  }
-
-  if (typeof populateStaffQuickFields === "function") {
-    populateStaffQuickFields();
-  }
-  modal.classList.remove("hidden");
-};
-
-window.saveStaffQuickUpdate = function() {
-  const sel = document.getElementById("sel-staff-product");
-  const items = window.currentInventory || [];
-  if (!sel || !sel.value) return alert("Please select a product.");
-
-  // Locate the item by sku, id, or position
-  const selectedVal = sel.value;
-  const item = items.find((i, idx) => String(i.sku || i.id || idx) === String(selectedVal));
-  if (!item) return alert("Product not found in inventory.");
-
-  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate")?.value);
-  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate")?.value);
-  const addStock = parseFloat(document.getElementById("inp-staff-add-stock")?.value) || 0;
-
-  if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
-
-  // Update properties on the object
-  item.unit_price = newPrice;
-  if (item.price !== undefined) item.price = newPrice;
-  if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
-
-  const currentQty = parseFloat(item.stock_qty ?? item.stock ?? 0);
-  const updatedQty = currentQty + addStock;
-  item.stock_qty = updatedQty;
-  if (item.stock !== undefined) item.stock = updatedQty;
-
-  // Persist locally & cloud
-  localStorage.setItem("storepos_inventory_data", JSON.stringify(items));
-  if (typeof saveInventoryState === "function") saveInventoryState();
-
-  // Re-render UI
-  if (typeof renderCatalogCards === "function") renderCatalogCards();
-  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
-
-  window.closeStaffQuickUpdateModal();
-  alert(`✅ Updated "${item.custom_name || item.name}"!\nStock is now: ${updatedQty} | Price: ₹${newPrice.toFixed(2)}`);
-};
- 
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
 
@@ -1322,10 +1257,7 @@ window.saveStaffQuickUpdate = function() {
     }
 
     let activeUser = null;
-    let isAdminUnlocked = false;
     let isRegistering = false;
-    let enteredPin = "";
-    const ADMIN_DEMO_PIN = "123456";
 
     let currentPaperWidth = localStorage.getItem("storepos_paper_width") || "58mm";
     let isKhataEnabled = localStorage.getItem("storepos_khata_enabled") !== "false";
@@ -1356,253 +1288,662 @@ window.saveStaffQuickUpdate = function() {
       { id: "p8", custom_name: "Assam CTC Leaf Tea 250g", barcode: "89012348", category: "Beverages", uom: "pack", unit_price: 125.00, cost_price: 95.00, current_stock: 21.0, min_stock_alert: 5, supplier_name: "Assam Tea Corporation", supplier_phone: "919876543215" }
     ];
 
-    let globalPresetCatalog = [];
-    let globalPresetsList = [];
-function generatePresetCatalog() {
-  const presets = [];
+    window.globalPresetCatalog = [];
+    window.globalPresetsList = [];
 
-  // 1. FMCG BASES (500 ITEMS)
-  const fmcgBases = [
-    "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2 Minute Masala Noodles",
-    "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
-    "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth", "Dettol Original Soap",
-    "Lifebuoy Total Soap", "Head & Shoulders Shampoo", "Sunsilk Black Shine", "Patanjali Dant Kanti",
-    "Haldiram's Bhujia Sev", "Haldiram's Khatta Meetha", "Kurkure Masala Munch", "Lay's India's Magic Masala",
-    "Cadbury Dairy Milk", "Nestle KitKat", "Tata Tea Gold", "Red Label Natural Care", "Bru Instant Coffee",
-    "Nescafe Classic", "Kissan Mixed Fruit Jam", "Kissan Tomato Ketchup", "Everest Garam Masala",
-    "Catch Sabzi Masala", "MDH Deggi Mirch", "Saffola Gold Pro Healthy", "Pillsbury Chakki Fresh"
-  ];
+    // ==========================================
+    // 650 PRESET GENERATOR (500 FMCG + 150 MITHAI)
+    // ==========================================
+    function generatePresetCatalog() {
+      const presets = [];
 
-  for (let i = 0; i < 500; i++) {
-    const base = fmcgBases[i % fmcgBases.length];
-    const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
-    const isLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
-    const price = Math.round(25 + ((i * 17) % 380));
-    const cost = Math.round(price * 0.82);
+      // 1. FMCG BASES (500 ITEMS)
+      const fmcgBases = [
+        "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2 Minute Masala Noodles",
+        "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
+        "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth", "Dettol Original Soap",
+        "Lifebuoy Total Soap", "Head & Shoulders Shampoo", "Sunsilk Black Shine", "Patanjali Dant Kanti",
+        "Haldiram's Bhujia Sev", "Haldiram's Khatta Meetha", "Kurkure Masala Munch", "Lay's India's Magic Masala",
+        "Cadbury Dairy Milk", "Nestle KitKat", "Tata Tea Gold", "Red Label Natural Care", "Bru Instant Coffee",
+        "Nescafe Classic", "Kissan Mixed Fruit Jam", "Kissan Tomato Ketchup", "Everest Garam Masala",
+        "Catch Sabzi Masala", "MDH Deggi Mirch", "Saffola Gold Pro Healthy", "Pillsbury Chakki Fresh"
+      ];
 
-    presets.push({
-      id: `fmcg-${i + 1}`,
-      custom_name: `${base} (${weightTag} - Batch #${i + 1})`,
-      barcode: `890${String(1000000 + i).slice(1)}`,
-      category: isLoose ? "Groceries" : "Packaged Goods",
-      uom: isLoose ? "kg/gm" : "pc",
-      unit_price: price,
-      cost_price: cost,
-      tax_rate: (i % 5 === 0) ? 0 : 5,
-      stock_qty: 25
-    });
-  }
+      for (let i = 0; i < 500; i++) {
+        const base = fmcgBases[i % fmcgBases.length];
+        const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
+        const isLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
+        const price = Math.round(25 + ((i * 17) % 380));
+        const cost = Math.round(price * 0.82);
 
-  // 2. 150 MITHAI & SWEET VARIETIES
-  const sweetBases = [
-    { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
-    { name: "Motichoor Desi Ghee Ladoo", uom: "kg/gm", price: 420, cost: 310 },
-    { name: "Besan Ladoo Pure Desi Ghee", uom: "kg/gm", price: 440, cost: 320 },
-    { name: "Atta Gond Dry Fruit Ladoo", uom: "kg/gm", price: 560, cost: 420 },
-    { name: "Tirupati Style Boondi Ladoo", uom: "kg/gm", price: 460, cost: 340 },
-    { name: "Gulab Jamun Khoya Pure Ghee", uom: "kg/gm", price: 380, cost: 270 },
-    { name: "Kala Jamun Mawa", uom: "kg/gm", price: 400, cost: 290 },
-    { name: "Mathura Peda Special", uom: "kg/gm", price: 460, cost: 340 },
-    { name: "Kesar Peda Malai", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Dharwad Peda Authentic", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Milk Cake Alwar Special", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Kalakand Fresh Malai", uom: "kg/gm", price: 500, cost: 370 },
-    { name: "Doda Barfi Desi Ghee", uom: "kg/gm", price: 540, cost: 410 },
-    { name: "White Mawa Barfi", uom: "kg/gm", price: 460, cost: 330 },
-    { name: "Pista Lauj Barfi", uom: "kg/gm", price: 1400, cost: 1150 },
-    { name: "Badam Katli Pure Almond", uom: "kg/gm", price: 950, cost: 770 },
-    { name: "Kaju Roll Pista Stuffed", uom: "kg/gm", price: 980, cost: 770 },
-    { name: "Kaju Anjeer Chakri", uom: "kg/gm", price: 980, cost: 790 },
-    { name: "Anjeer Dryfruit Barfi (Sugarfree)", uom: "kg/gm", price: 1100, cost: 890 },
-    { name: "Khajoor Dryfruit Roll", uom: "kg/gm", price: 850, cost: 680 },
-    { name: "Kolkata Spongy Rasgulla", uom: "pc", price: 20, cost: 12 },
-    { name: "Kesar Pista Rasmalai", uom: "pc", price: 40, cost: 25 },
-    { name: "Rajbhog Kesar Dry Fruit", uom: "pc", price: 35, cost: 21 },
-    { name: "Cham Cham Pink Cream", uom: "kg/gm", price: 440, cost: 320 },
-    { name: "Malai Chop Stuffed", uom: "kg/gm", price: 460, cost: 330 },
-    { name: "Chhena Poda Odia Baked", uom: "kg/gm", price: 500, cost: 370 },
-    { name: "Sandesh Nolen Gur", uom: "kg/gm", price: 540, cost: 400 },
-    { name: "Mysore Pak Traditional Ghee", uom: "kg/gm", price: 540, cost: 410 },
-    { name: "Sunnundalu (Andhra Urad Dal Ladoo)", uom: "kg/gm", price: 520, cost: 390 },
-    { name: "Balushahi Traditional", uom: "kg/gm", price: 380, cost: 260 }
-  ];
+        presets.push({
+          id: `fmcg-${i + 1}`,
+          custom_name: `${base} (${weightTag} - Batch #${i + 1})`,
+          barcode: `890${String(1000000 + i).slice(1)}`,
+          category: isLoose ? "Groceries" : "Packaged Goods",
+          uom: isLoose ? "kg/gm" : "pc",
+          unit_price: price,
+          cost_price: cost,
+          current_stock: 25,
+          min_stock_alert: 5,
+          supplier_name: "Wholesale FMCG Depot",
+          supplier_phone: "919876543210"
+        });
+      }
 
-  for (let s = 0; s < 150; s++) {
-    const item = sweetBases[s % sweetBases.length];
-    const tier = Math.floor(s / sweetBases.length) + 1;
-    const tierLabel = tier === 1 ? "Standard" : (tier === 2 ? "Special Desi Ghee" : (tier === 3 ? "Royal Festive" : (tier === 4 ? "Export Quality" : "Handcrafted")));
+      // 2. 150 MITHAI & SWEET VARIETIES
+      const sweetBases = [
+        { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
+        { name: "Motichoor Desi Ghee Ladoo", uom: "kg/gm", price: 420, cost: 310 },
+        { name: "Besan Ladoo Pure Desi Ghee", uom: "kg/gm", price: 440, cost: 320 },
+        { name: "Atta Gond Dry Fruit Ladoo", uom: "kg/gm", price: 560, cost: 420 },
+        { name: "Tirupati Style Boondi Ladoo", uom: "kg/gm", price: 460, cost: 340 },
+        { name: "Gulab Jamun Khoya Pure Ghee", uom: "kg/gm", price: 380, cost: 270 },
+        { name: "Kala Jamun Mawa", uom: "kg/gm", price: 400, cost: 290 },
+        { name: "Mathura Peda Special", uom: "kg/gm", price: 460, cost: 340 },
+        { name: "Kesar Peda Malai", uom: "kg/gm", price: 520, cost: 390 },
+        { name: "Dharwad Peda Authentic", uom: "kg/gm", price: 520, cost: 390 },
+        { name: "Milk Cake Alwar Special", uom: "kg/gm", price: 520, cost: 390 },
+        { name: "Kalakand Fresh Malai", uom: "kg/gm", price: 500, cost: 370 },
+        { name: "Doda Barfi Desi Ghee", uom: "kg/gm", price: 540, cost: 410 },
+        { name: "White Mawa Barfi", uom: "kg/gm", price: 460, cost: 330 },
+        { name: "Pista Lauj Barfi", uom: "kg/gm", price: 1400, cost: 1150 },
+        { name: "Badam Katli Pure Almond", uom: "kg/gm", price: 950, cost: 770 },
+        { name: "Kaju Roll Pista Stuffed", uom: "kg/gm", price: 980, cost: 770 },
+        { name: "Kaju Anjeer Chakri", uom: "kg/gm", price: 980, cost: 790 },
+        { name: "Anjeer Dryfruit Barfi (Sugarfree)", uom: "kg/gm", price: 1100, cost: 890 },
+        { name: "Khajoor Dryfruit Roll", uom: "kg/gm", price: 850, cost: 680 },
+        { name: "Kolkata Spongy Rasgulla", uom: "pc", price: 20, cost: 12 },
+        { name: "Kesar Pista Rasmalai", uom: "pc", price: 40, cost: 25 },
+        { name: "Rajbhog Kesar Dry Fruit", uom: "pc", price: 35, cost: 21 },
+        { name: "Cham Cham Pink Cream", uom: "kg/gm", price: 440, cost: 320 },
+        { name: "Malai Chop Stuffed", uom: "kg/gm", price: 460, cost: 330 },
+        { name: "Chhena Poda Odia Baked", uom: "kg/gm", price: 500, cost: 370 },
+        { name: "Sandesh Nolen Gur", uom: "kg/gm", price: 540, cost: 400 },
+        { name: "Mysore Pak Traditional Ghee", uom: "kg/gm", price: 540, cost: 410 },
+        { name: "Sunnundalu (Andhra Urad Dal Ladoo)", uom: "kg/gm", price: 520, cost: 390 },
+        { name: "Balushahi Traditional", uom: "kg/gm", price: 380, cost: 260 }
+      ];
 
-    presets.push({
-      id: `swt-${s + 1}`,
-      custom_name: `${item.name} [${tierLabel}]`,
-      barcode: `8909${String(1000 + s).slice(1)}`,
-      category: "Sweets",
-      uom: item.uom,
-      unit_price: item.price + ((tier - 1) * 20),
-      cost_price: item.cost + ((tier - 1) * 15),
-      tax_rate: 5,
-      stock_qty: 20
-    });
-  }
+      for (let s = 0; s < 150; s++) {
+        const item = sweetBases[s % sweetBases.length];
+        const tier = Math.floor(s / sweetBases.length) + 1;
+        const tierLabel = tier === 1 ? "Standard" : (tier === 2 ? "Special Desi Ghee" : (tier === 3 ? "Royal Festive" : (tier === 4 ? "Export Quality" : "Handcrafted")));
 
-  window.globalPresetCatalog = presets;
-  window.globalPresetsList = presets;
-  return presets;
-}
-// ==========================================
-// PRESET LIBRARY MODAL RENDER & IMPORT LOGIC
-// ==========================================
+        presets.push({
+          id: `swt-${s + 1}`,
+          custom_name: `${item.name} [${tierLabel}]`,
+          barcode: `8909${String(1000 + s).slice(1)}`,
+          category: "Sweets",
+          uom: item.uom,
+          unit_price: item.price + ((tier - 1) * 20),
+          cost_price: item.cost + ((tier - 1) * 15),
+          current_stock: 20,
+          min_stock_alert: 5,
+          supplier_name: "Bikaner Sweets Kitchen",
+          supplier_phone: "919876543214"
+        });
+      }
 
-window.renderPresetModalLibrary = function(filterQuery = "") {
-  // Finds whatever container exists inside your preset modal
-  const container = document.getElementById("preset-product-list-container") || 
-                    document.getElementById("preset-checklist-body") ||
-                    document.querySelector("#modal-bulk-preset .overflow-y-auto") ||
-                    document.querySelector("[id*='preset'] .overflow-y-auto");
-
-  if (!container) return;
-
-  // Generate catalog if not already cached
-  if (!window.globalPresetCatalog || window.globalPresetCatalog.length === 0) {
-    if (typeof generatePresetCatalog === "function") {
-      generatePresetCatalog();
+      window.globalPresetCatalog = presets;
+      window.globalPresetsList = presets;
+      return presets;
     }
-  }
 
-  const q = String(filterQuery || "").toLowerCase().trim();
-  const list = (window.globalPresetCatalog || []).filter(item => 
-    !q || 
-    (item.custom_name && item.custom_name.toLowerCase().includes(q)) || 
-    (item.category && item.category.toLowerCase().includes(q))
-  );
+    // ==========================================
+    // PRESET MODAL RENDER, FILTER & IMPORT
+    // ==========================================
+    let checkedPresetIds = new Set();
 
-  if (list.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No matching products found.</div>`;
-    return;
-  }
+    window.openBulkPresetModal = function() {
+      const modal = document.getElementById("modal-preset-catalog");
+      if (modal) {
+        modal.classList.remove("hidden");
+        if (!window.globalPresetCatalog || !window.globalPresetCatalog.length) {
+          generatePresetCatalog();
+        }
+        renderPresetModalLibrary();
+      }
+    };
 
-  container.innerHTML = list.map(item => `
-    <label class="flex items-center justify-between p-2.5 hover:bg-slate-800/60 rounded-xl cursor-pointer border border-slate-800/80 mb-1.5 transition">
-      <div class="flex items-center gap-3">
-        <input 
-          type="checkbox" 
-          value="${item.id}" 
-          class="preset-item-checkbox w-4 h-4 text-emerald-500 rounded border-slate-700 bg-slate-900 focus:ring-emerald-500 cursor-pointer"
-          onchange="updatePresetSelectedCount()"
-        />
-        <div>
-          <div class="text-xs font-bold text-slate-100">${item.custom_name}</div>
-          <div class="text-[10px] text-slate-400">${item.category} • Unit: ${item.uom || item.unit}</div>
-        </div>
-      </div>
-      <div class="text-right">
-        <div class="text-xs font-black text-emerald-400">₹${Number(item.unit_price).toFixed(2)}</div>
-        <div class="text-[9px] text-slate-500">Cost: ₹${Number(item.cost_price).toFixed(2)}</div>
-      </div>
-    </label>
-  `).join("");
+    window.closePresetModal = function() {
+      const modal = document.getElementById("modal-preset-catalog");
+      if (modal) modal.classList.add("hidden");
+      const searchInput = document.getElementById("inp-preset-search");
+      if (searchInput) searchInput.value = "";
+    };
 
-  updatePresetSelectedCount();
-};
-window.updatePresetSelectedCount = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") || 
-                document.getElementById("modal-preset-library") ||
-                document.querySelector("[id*='preset']");
+    window.renderPresetModalLibrary = function(filterQuery = "") {
+      const container = document.getElementById("preset-list-container");
+      if (!container) return;
 
-  // Select ANY checked checkbox inside the preset modal
-  const checkedBoxes = modal 
-    ? modal.querySelectorAll("input[type='checkbox']:checked")
-    : document.querySelectorAll("input[type='checkbox']:checked");
+      if (!window.globalPresetCatalog || !window.globalPresetCatalog.length) {
+        generatePresetCatalog();
+      }
 
-  const countSpan = document.getElementById("txt-preset-selected-count") || 
-                    modal?.querySelector(".text-emerald-400, [class*='selected']");
+      const q = String(filterQuery || "").toLowerCase().trim();
+      const list = window.globalPresetCatalog.filter(item => 
+        !q || 
+        (item.custom_name && item.custom_name.toLowerCase().includes(q)) || 
+        (item.category && item.category.toLowerCase().includes(q)) ||
+        (item.barcode && item.barcode.toLowerCase().includes(q))
+      );
 
-  if (countSpan) {
-    countSpan.innerText = `${checkedBoxes.length} products selected`;
-  }
-};
+      if (list.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No matching products found.</div>`;
+        updatePresetSelectedCount();
+        return;
+      }
 
-window.selectAllPresets = function(shouldSelect = true) {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") || 
-                document.getElementById("modal-preset-library") ||
-                document.querySelector("[id*='preset']");
+      container.innerHTML = list.map(item => {
+        const isChecked = checkedPresetIds.has(String(item.id)) ? "checked" : "";
+        return `
+          <label class="flex items-center justify-between p-2.5 hover:bg-slate-800/60 rounded-xl cursor-pointer border border-slate-800/80 mb-1.5 transition bg-slate-900/40">
+            <div class="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                value="${item.id}" 
+                ${isChecked}
+                onchange="handlePresetCheckboxChange(this)"
+                class="preset-item-checkbox w-4 h-4 text-emerald-500 rounded border-slate-700 bg-slate-900 focus:ring-0 cursor-pointer"
+              />
+              <div>
+                <div class="text-xs font-bold text-slate-100">${item.custom_name}</div>
+                <div class="text-[10px] text-slate-400 font-mono">${item.category} • Unit: ${item.uom}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-black text-emerald-400">₹${Number(item.unit_price).toFixed(2)}</div>
+              <div class="text-[9px] text-slate-400">${item.supplier_name || 'Wholesale Depot'}</div>
+            </div>
+          </label>
+        `;
+      }).join("");
 
-  const allCheckboxes = modal 
-    ? modal.querySelectorAll("input[type='checkbox']") 
-    : document.querySelectorAll("input[type='checkbox']");
+      updatePresetSelectedCount();
+    };
 
-  allCheckboxes.forEach(cb => cb.checked = shouldSelect);
-  updatePresetSelectedCount();
-};
+    window.handlePresetCheckboxChange = function(el) {
+      if (el.checked) {
+        checkedPresetIds.add(String(el.value));
+      } else {
+        checkedPresetIds.delete(String(el.value));
+      }
+      updatePresetSelectedCount();
+    };
 
-// Auto-update counter whenever any checkbox in the modal is toggled
-document.addEventListener("change", function(e) {
-  if (e.target && e.target.type === "checkbox" && e.target.closest("[id*='preset']")) {
-    updatePresetSelectedCount();
-  }
-});
-window.importSelectedPresets = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") || 
-                document.getElementById("modal-preset-library") ||
-                document.querySelector("[id*='preset']");
+    window.updatePresetSelectedCount = function() {
+      const countEl = document.getElementById("preset-selected-count");
+      if (countEl) countEl.innerText = checkedPresetIds.size;
+    };
 
-  const checkedBoxes = modal 
-    ? Array.from(modal.querySelectorAll("input[type='checkbox']:checked"))
-    : Array.from(document.querySelectorAll("input[type='checkbox']:checked"));
-
-  if (!checkedBoxes.length) {
-    return alert("Please check at least one item.");
-  }
-
-  // Get selected values (supports ID, custom_name, or barcode)
-  const selectedValues = new Set(checkedBoxes.map(cb => String(cb.value).trim()));
-  const catalogSource = window.globalPresetCatalog || window.globalPresetsList || window.PRESET_MASTER_LIBRARY || [];
-
-  const toAdd = catalogSource.filter(item => 
-    selectedValues.has(String(item.id)) || 
-    selectedValues.has(String(item.barcode)) ||
-    selectedValues.has(String(item.custom_name))
-  );
-
-  if (!Array.isArray(window.currentInventory)) window.currentInventory = [];
-
-  let addedCount = 0;
-  toAdd.forEach(item => {
-    const itemName = item.custom_name || item.name;
-    const exists = window.currentInventory.some(existing => (existing.custom_name || existing.name) === itemName);
-    if (!exists) {
-      window.currentInventory.push({
-        id: item.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-        sku: item.barcode || item.id,
-        barcode: item.barcode || item.id,
-        custom_name: itemName,
-        category: item.category || "General",
-        uom: item.uom || item.unit || "pc",
-        unit_price: parseFloat(item.unit_price || item.price || 0),
-        cost_price: parseFloat(item.cost_price || item.cost || 0),
-        tax_rate: parseFloat(item.tax_rate || item.gst || 0),
-        stock_qty: item.stock_qty || 25
+    window.selectAllPresets = function(select = true) {
+      const checkboxes = document.querySelectorAll(".preset-item-checkbox");
+      checkboxes.forEach(c => {
+        c.checked = select;
+        if (select) {
+          checkedPresetIds.add(String(c.value));
+        } else {
+          checkedPresetIds.delete(String(c.value));
+        }
       });
-      addedCount++;
+      updatePresetSelectedCount();
+    };
+
+    window.commitSelectedPresets = function() {
+      if (!checkedPresetIds || checkedPresetIds.size === 0) {
+        return alert("Please check at least one item.");
+      }
+
+      const masterSource = window.globalPresetCatalog && window.globalPresetCatalog.length
+        ? window.globalPresetCatalog
+        : generatePresetCatalog();
+
+      let addedCount = 0;
+      checkedPresetIds.forEach(id => {
+        const presetItem = masterSource.find(p => String(p.id) === String(id));
+        if (presetItem) {
+          const alreadyExists = currentInventory.some(
+            existing => String(existing.barcode) === String(presetItem.barcode) ||
+                        existing.custom_name.trim().toLowerCase() === presetItem.custom_name.trim().toLowerCase()
+          );
+
+          if (!alreadyExists) {
+            currentInventory.push({ ...presetItem });
+            addedCount++;
+          }
+        }
+      });
+
+      saveInventoryState();
+      checkedPresetIds.clear();
+      closePresetModal();
+      alert(`Success! Added ${addedCount} products (FMCG + Mithai) to your store catalog.`);
+    };
+
+    // ==========================================
+    // STAFF QUICK STOCK & PRICE EDIT CONTROLLER
+    // ==========================================
+    window.openStaffQuickUpdateModal = function() {
+      const sel = document.getElementById("sel-staff-product");
+      if (!sel || !currentInventory || !currentInventory.length) {
+        return alert("No inventory items found to edit.");
+      }
+
+      sel.innerHTML = currentInventory.map(item => `
+        <option value="${item.id}">
+          ${item.custom_name} (Stock: ${item.current_stock ?? item.stock_qty ?? 0}) — ₹${Number(item.unit_price).toFixed(2)}
+        </option>
+      `).join("");
+
+      populateStaffQuickFields();
+      document.getElementById("modal-staff-quick-update").classList.remove("hidden");
+    };
+
+    window.closeStaffQuickUpdateModal = function() {
+      const modal = document.getElementById("modal-staff-quick-update");
+      if (modal) modal.classList.add("hidden");
+    };
+
+    window.populateStaffQuickFields = function() {
+      const sel = document.getElementById("sel-staff-product");
+      if (!sel) return;
+      const item = currentInventory.find(i => String(i.id) === String(sel.value));
+      if (!item) return;
+
+      document.getElementById("inp-staff-selling-rate").value = item.unit_price;
+      document.getElementById("inp-staff-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
+      document.getElementById("inp-staff-current-stock").value = item.current_stock ?? item.stock_qty ?? 0;
+      document.getElementById("inp-staff-add-stock").value = "";
+    };
+
+    window.saveStaffQuickUpdate = function() {
+      const sel = document.getElementById("sel-staff-product");
+      if (!sel || !sel.value) return alert("Please select a product.");
+
+      const item = currentInventory.find(i => String(i.id) === String(sel.value));
+      if (!item) return alert("Product not found.");
+
+      const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate")?.value);
+      const newCost = parseFloat(document.getElementById("inp-staff-cost-rate")?.value);
+      const addStock = parseFloat(document.getElementById("inp-staff-add-stock")?.value) || 0;
+
+      if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
+
+      item.unit_price = newPrice;
+      if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
+      
+      const prevStock = parseFloat(item.current_stock ?? item.stock_qty ?? 0);
+      const updatedStock = prevStock + addStock;
+      item.current_stock = updatedStock;
+      item.stock_qty = updatedStock;
+
+      saveInventoryState();
+      window.closeStaffQuickUpdateModal();
+      alert(`✅ Updated "${item.custom_name}"!\nNew Stock: ${updatedStock} | Price: ₹${newPrice.toFixed(2)}`);
+    };
+
+    // ==========================================
+    // CASH DRAWER & EOD RECONCILIATION
+    // ==========================================
+    function checkMorningCashDrawerPrompt() {
+      const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+      if (!localStorage.getItem(todayKey)) {
+        const modal = document.getElementById("modal-morning-cash");
+        if (modal) {
+          modal.classList.remove("hidden");
+          const inp = document.getElementById("inp-morning-cash-amount");
+          if (inp) {
+            inp.value = "";
+            setTimeout(() => inp.focus(), 200);
+          }
+        }
+      } else {
+        updateAdminPaymentTotals();
+      }
     }
-  });
 
-  // Save to storage and refresh UI
-  localStorage.setItem("storepos_inventory_data", JSON.stringify(window.currentInventory));
-  if (typeof saveInventoryState === "function") saveInventoryState();
-  if (typeof renderCatalogCards === "function") renderCatalogCards();
-  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
+    function submitMorningOpeningCash() {
+      const inp = document.getElementById("inp-morning-cash-amount");
+      const amount = parseFloat(inp ? inp.value : 0);
 
-  if (modal) modal.classList.add("hidden");
-  alert(`✅ Successfully imported ${addedCount} products into your active counter catalog!`);
-};
-  window.openGeneralAddStockModal = function() {
+      if (isNaN(amount) || amount < 0) {
+        return alert("Please enter a valid cash amount (e.g. 1500 or 0).");
+      }
+
+      const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+      localStorage.setItem(todayKey, amount.toString());
+
+      document.getElementById("modal-morning-cash")?.classList.add("hidden");
+      updateAdminPaymentTotals();
+      alert(`✅ Morning cash float recorded: ₹${amount.toFixed(2)}. Counter register is now open.`);
+    }
+
+    window.updateAdminPaymentTotals = function() {
+      const now = new Date();
+      const todayIso = now.toISOString().slice(0, 10);
+      const todayUk = now.toLocaleDateString("en-GB");
+      const todayKey = "storepos_opening_cash_" + todayIso;
+      const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
+
+      let cashTotal = 0;
+      let upiTotal = 0;
+      let cardTotal = 0;
+
+      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+      bills.forEach(bill => {
+        const rawDate = String(bill.created_at || bill.date || "");
+        const isToday = rawDate.includes(todayIso) || rawDate.includes(todayUk);
+
+        if (isToday) {
+          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+          const amt = parseFloat(
+            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
+            (bill.total_amount ?? bill.total ?? 0)
+          );
+
+          if (mode.includes("CASH")) cashTotal += amt;
+          else if (mode.includes("UPI") || mode.includes("SOUNDBOX") || mode.includes("QR")) upiTotal += amt;
+          else cardTotal += amt;
+        }
+      });
+
+      const openElem = document.getElementById("adm-txt-opening-cash");
+      const cashElem = document.getElementById("adm-txt-cash-total");
+      const upiElem = document.getElementById("adm-txt-upi-total");
+      const cardElem = document.getElementById("adm-txt-card-total");
+
+      if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
+      if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
+      if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
+      if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
+    };
+
+    function generateEndOfDayReport() {
+      const now = new Date();
+      const todayIso = now.toISOString().slice(0, 10);
+      const todayUk = now.toLocaleDateString("en-GB");
+      const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
+
+      let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+      bills.forEach(bill => {
+        const rawDate = String(bill.created_at || bill.date || "");
+        if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+          billCount++;
+          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+          const amt = parseFloat(
+            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
+            (bill.total_amount ?? bill.total ?? 0)
+          );
+          totalSales += amt;
+          if (mode.includes("CASH")) cashSales += amt;
+          else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiSales += amt;
+          else cardSales += amt;
+        }
+      });
+
+      const expectedDrawerCash = openingCash + cashSales;
+
+      const shouldPrint = confirm(
+        `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayUk})\n\n` +
+        `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
+        `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
+        `--------------------------------------\n` +
+        `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
+        `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
+        `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
+        `--------------------------------------\n` +
+        `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}\n` +
+        `🧾 Total Bills:           ${billCount}\n\n` +
+        `Do you want to print the 58mm thermal EOD slip?`
+      );
+
+      if (shouldPrint && typeof printEodThermalSlip === "function") {
+        printEodThermalSlip();
+      }
+    }
+
+    function sendDailyWhatsappSummary() {
+      const now = new Date();
+      const todayIso = now.toISOString().slice(0, 10);
+      const todayUk = now.toLocaleDateString("en-GB");
+      const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
+
+      let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+      bills.forEach(bill => {
+        const rawDate = String(bill.created_at || bill.date || "");
+        if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+          billCount++;
+          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+          const amt = parseFloat(
+            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
+            (bill.total_amount ?? bill.total ?? 0)
+          );
+          totalSales += amt;
+          if (mode.includes("CASH")) cashSales += amt;
+          else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiSales += amt;
+          else cardSales += amt;
+        }
+      });
+
+      const expectedDrawerCash = openingCash + cashSales;
+      const storeName = (activeUser && activeUser.shopName) || "ShopMaster Supermarket";
+      const ownerPhone = localStorage.getItem("storepos_owner_phone") || "";
+
+      const summaryText = 
+`🏪 *DAILY CLOSE REPORT: ${storeName}*
+📅 Date: ${todayUk}
+
+💵 *Cash Drawer:*
+• Opening Float: ₹${openingCash.toFixed(2)}
+• Cash Sales: ₹${cashSales.toFixed(2)}
+👉 *Expected Cash in Hand:* ₹${expectedDrawerCash.toFixed(2)}
+
+📱 *Digital Payments:*
+• UPI / Soundbox: ₹${upiSales.toFixed(2)}
+• Card / Other: ₹${cardSales.toFixed(2)}
+
+----------------------------
+⭐ *Total Revenue:* ₹${totalSales.toFixed(2)}
+🧾 *Total Invoices:* ${billCount} bills
+----------------------------
+_Generated automatically via StorePOS Terminal_`;
+
+      const encodedText = encodeURIComponent(summaryText);
+      const targetUrl = ownerPhone 
+        ? `https://wa.me/${ownerPhone.replace(/\D/g, "")}?text=${encodedText}`
+        : `https://wa.me/?text=${encodedText}`;
+
+      window.open(targetUrl, "_blank");
+    }
+
+    function printEodThermalSlip() {
+      const now = new Date();
+      const todayIso = now.toISOString().slice(0, 10);
+      const todayUk = now.toLocaleDateString("en-GB");
+      const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
+
+      let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+      bills.forEach(bill => {
+        const rawDate = String(bill.created_at || bill.date || "");
+        if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+          billCount++;
+          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+          const amt = parseFloat(
+            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
+            (bill.total_amount ?? bill.total ?? 0)
+          );
+          totalSales += amt;
+          if (mode.includes("CASH")) cashSales += amt;
+          else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiSales += amt;
+          else cardSales += amt;
+        }
+      });
+
+      const expectedDrawerCash = openingCash + cashSales;
+      const storeName = (activeUser && activeUser.shopName) || "ShopMaster Supermarket";
+
+      const printWindow = window.open("", "_blank", "width=320,height=600");
+      if (!printWindow) return alert("Please allow popups to print EOD slip.");
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>EOD Reconciliation Slip</title>
+            <style>
+              body { font-family: 'Courier New', monospace; font-size: 12px; width: 58mm; padding: 4px; margin: 0; color: #000; }
+              .center { text-align: center; }
+              .bold { font-weight: bold; }
+              .line { border-top: 1px dashed #000; margin: 5px 0; }
+              .row { display: flex; justify-content: space-between; margin: 2px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="center bold" style="font-size:14px;">${storeName}</div>
+            <div class="center">DAILY REGISTER SUMMARY</div>
+            <div class="center">${todayUk} | ${now.toLocaleTimeString()}</div>
+            <div class="line"></div>
+            <div class="row"><span>Opening Cash:</span><span class="bold">INR ${openingCash.toFixed(2)}</span></div>
+            <div class="row"><span>Cash Sales:</span><span class="bold">INR ${cashSales.toFixed(2)}</span></div>
+            <div class="line"></div>
+            <div class="row bold"><span>Expected Drawer:</span><span>INR ${expectedDrawerCash.toFixed(2)}</span></div>
+            <div class="line"></div>
+            <div class="row"><span>UPI / Soundbox:</span><span>INR ${upiSales.toFixed(2)}</span></div>
+            <div class="row"><span>Card / Other:</span><span>INR ${cardSales.toFixed(2)}</span></div>
+            <div class="line"></div>
+            <div class="row bold" style="font-size:13px;"><span>TOTAL REVENUE:</span><span>INR ${totalSales.toFixed(2)}</span></div>
+            <div class="row"><span>Total Bills:</span><span>${billCount}</span></div>
+            <div class="line"></div>
+            <div class="center" style="margin-top:10px;">--- Cashier Signature ---</div>
+            <br><br>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
+    }
+
+    // ==========================================
+    // ADMIN MODE & PIN AUTHENTICATION
+    // ==========================================
+    window.handleAdminModeAccess = function() {
+      if (isAdminUnlocked) {
+        isAdminUnlocked = false;
+        document.getElementById("panel-owner")?.classList.add("hidden");
+        document.getElementById("panel-staff")?.classList.remove("hidden");
+        const rolePill = document.getElementById("role-pill-badge");
+        if (rolePill) rolePill.innerText = "Staff Mode";
+        const lockLabel = document.getElementById("admin-lock-label");
+        if (lockLabel) lockLabel.innerText = "Admin Mode";
+      } else {
+        window.openAdminPinModal();
+      }
+    };
+
+    window.openAdminPinModal = function() {
+      enteredPin = "";
+      updatePinDots();
+      const modal = document.getElementById("modal-admin-pin");
+      if (modal) modal.classList.remove("hidden");
+    };
+
+    window.closeAdminPinModal = function() {
+      const modal = document.getElementById("modal-admin-pin");
+      if (modal) modal.classList.add("hidden");
+      enteredPin = "";
+      updatePinDots();
+    };
+
+    window.pressPinDigit = function(d) {
+      if (enteredPin.length < 6) {
+        enteredPin += String(d);
+        updatePinDots();
+        if (enteredPin.length === 4 || enteredPin.length === 6) {
+          submitPinAuthentication();
+        }
+      }
+    };
+
+    window.clearPinInput = function() {
+      enteredPin = "";
+      updatePinDots();
+    };
+
+    window.updatePinDots = function() {
+      const pinLen = enteredPin.length;
+      document.querySelectorAll(".pin-dot").forEach((dot, idx) => {
+        dot.className = idx < pinLen 
+          ? "pin-dot w-3 h-3 rounded-full border border-emerald-400 bg-emerald-400" 
+          : "pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent";
+      });
+    };
+
+    window.submitPinAuthentication = function() {
+      const targetPin = window.ADMIN_PIN || "1234";
+
+      if (enteredPin === targetPin || enteredPin === ADMIN_DEMO_PIN || enteredPin === "1234") {
+        isAdminUnlocked = true;
+        closeAdminPinModal();
+
+        document.getElementById("panel-staff")?.classList.add("hidden");
+        document.getElementById("panel-owner")?.classList.remove("hidden");
+        
+        const rolePill = document.getElementById("role-pill-badge");
+        if (rolePill) rolePill.innerText = "Admin Master";
+        const lockLabel = document.getElementById("admin-lock-label");
+        if (lockLabel) lockLabel.innerText = "Lock / Staff";
+
+        if (typeof initSalesCharts === "function") initSalesCharts();
+        if (typeof updateAdminPaymentTotals === "function") updateAdminPaymentTotals();
+        checkMorningCashDrawerPrompt();
+      } else {
+        if (enteredPin.length >= 4) {
+          alert("Invalid PIN! Default PIN is 1234.");
+          clearPinInput();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", (e) => {
+      const pinModal = document.getElementById("modal-admin-pin");
+      if (!pinModal || pinModal.classList.contains("hidden")) return;
+
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        pressPinDigit(e.key);
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        if (enteredPin.length > 0) {
+          enteredPin = enteredPin.slice(0, -1);
+          updatePinDots();
+        }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        closeAdminPinModal();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        submitPinAuthentication();
+      }
+    });
+
+    // ==========================================
+    // INITIALIZATION & LIFECYCLE
+    // ==========================================
+    window.openGeneralAddStockModal = function() {
       openAddProductModal();
     };
-   window.addEventListener("DOMContentLoaded", () => {
+
+    window.addEventListener("DOMContentLoaded", () => {
       applyTheme();
       generatePresetCatalog();
       loadInventoryState();
@@ -1610,20 +1951,23 @@ window.importSelectedPresets = function() {
       loadStoredRecentBills();
       syncGstinUI();
       syncKhataUI();
+      initNetworkHandlers();
       
-    if (typeof renderCatalogCards === "function") renderCatalogCards();
-    if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
-    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
-    if (typeof initSalesCharts === "function") initSalesCharts();
-    if (typeof renderCartUI === "function") renderCartUI();
+      renderCatalogCards();
+      renderLiveInventoryTable();
+      populateCategoryDropdowns();
+      initCategoryTabs();
+      initSalesCharts();
+      renderCartUI();
+      updateAdminPaymentTotals();
 
-    if (typeof checkStoreSubscriptionStatus === "function") {
-      checkStoreSubscriptionStatus();
-    }
-    if (typeof syncLicenseStatusFromCloud === "function") {
-      syncLicenseStatusFromCloud();
-    }
-  });
+      if (typeof checkStoreSubscriptionStatus === "function") {
+        checkStoreSubscriptionStatus();
+      }
+      if (typeof syncLicenseStatusFromCloud === "function") {
+        syncLicenseStatusFromCloud();
+      }
+    });
 
     function toggleThemeMode() {
       isDarkMode = !isDarkMode;
@@ -1646,160 +1990,7 @@ window.importSelectedPresets = function() {
       }
       if (dailyRevenueChart) initSalesCharts();
     }
-  // ==========================================
-// CASH DRAWER & EOD RECONCILIATION FUNCTIONS
-// ==========================================
 
-// Check and prompt for morning cash once per calendar day
-function checkMorningCashDrawerPrompt() {
-  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-  if (!localStorage.getItem(todayKey)) {
-    document.getElementById("modal-morning-cash")?.classList.remove("hidden");
-  } else {
-    updateAdminPaymentTotals();
-  }
-}
-
-function submitMorningOpeningCash() {
-  const amount = parseFloat(document.getElementById("inp-morning-cash-amount").value);
-  if (isNaN(amount) || amount < 0) return alert("Please enter a valid amount.");
-  
-  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-  localStorage.setItem(todayKey, amount.toString());
-  document.getElementById("modal-morning-cash")?.classList.add("hidden");
-  updateAdminPaymentTotals();
-}
-
-function updateAdminPaymentTotals() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayKey = "storepos_opening_cash_" + todayStr;
-  const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
-
-  let cashTotal = 0;
-  let upiTotal = 0;
-  let cardTotal = 0;
-
-  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-  bills.forEach(bill => {
-    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
-    if (billDate === todayStr) {
-      const mode = (bill.payment_mode || "").toLowerCase();
-      const amt = parseFloat(bill.total_amount || bill.total || 0);
-      if (mode.includes("cash")) cashTotal += amt;
-      else if (mode.includes("upi")) upiTotal += amt;
-      else cardTotal += amt;
-    }
-  });
-
-  const openElem = document.getElementById("adm-txt-opening-cash");
-  const cashElem = document.getElementById("adm-txt-cash-total");
-  const upiElem = document.getElementById("adm-txt-upi-total");
-  const cardElem = document.getElementById("adm-txt-card-total");
-
-  if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
-  if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
-  if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
-  if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
-}
-
-// End-Of-Day Total & Register Reconciliation
-function generateEndOfDayReport() {
-  const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-  const todayUk = now.toLocaleDateString("en-GB");
-  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
-
-  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
-  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-
-  bills.forEach(bill => {
-    const rawDate = String(bill.created_at || bill.date || "");
-    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
-      billCount++;
-      const mode = String(bill.payment_mode || "").toUpperCase();
-      const amt = parseFloat(bill.total_amount || bill.total || 0);
-      totalSales += amt;
-      if (mode.includes("CASH")) cashSales += amt;
-      else if (mode.includes("UPI")) upiSales += amt;
-      else cardSales += amt;
-    }
-  });
-
-  const expectedDrawerCash = openingCash + cashSales;
-
-  const shouldPrint = confirm(
-    `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayUk})\n\n` +
-    `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
-    `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
-    `--------------------------------------\n` +
-    `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
-    `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
-    `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
-    `--------------------------------------\n` +
-    `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}\n` +
-    `🧾 Total Bills:           ${billCount}\n\n` +
-    `Do you want to print the 58mm thermal EOD slip?`
-  );
-
-  if (shouldPrint && typeof printEodThermalSlip === "function") {
-    printEodThermalSlip();
-  }
-}
-// ==========================================
-// WHATSAPP EOD DAILY SUMMARY DISPATCH
-// ==========================================
-function sendDailyWhatsappSummary() {
-  const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-  const todayUk = now.toLocaleDateString("en-GB");
-  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
-
-  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
-  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-
-  bills.forEach(bill => {
-    const rawDate = String(bill.created_at || bill.date || "");
-    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
-      billCount++;
-      const mode = String(bill.payment_mode || "").toUpperCase();
-      const amt = parseFloat(bill.total_amount || bill.total || 0);
-      totalSales += amt;
-      if (mode.includes("CASH")) cashSales += amt;
-      else if (mode.includes("UPI")) upiSales += amt;
-      else cardSales += amt;
-    }
-  });
-
-  const expectedDrawerCash = openingCash + cashSales;
-  const storeName = localStorage.getItem("storepos_store_name") || "StorePOS Supermarket";
-  const ownerPhone = localStorage.getItem("storepos_owner_phone") || "";
-
-  const summaryText = 
-`🏪 *DAILY CLOSE REPORT: ${storeName}*
-📅 Date: ${todayUk}
-
-💵 *Cash Drawer:*
-• Opening Float: ₹${openingCash.toFixed(2)}
-• Cash Sales: ₹${cashSales.toFixed(2)}
-👉 *Expected Cash in Hand:* ₹${expectedDrawerCash.toFixed(2)}
-
-📱 *Digital Payments:*
-• UPI / Soundbox: ₹${upiSales.toFixed(2)}
-• Card / Other: ₹${cardSales.toFixed(2)}
-
-----------------------------
-⭐ *Total Revenue:* ₹${totalSales.toFixed(2)}
-🧾 *Total Invoices:* ${billCount} bills
-----------------------------
-_Generated automatically via StorePOS Terminal_`;
-
-  const encodedText = encodeURIComponent(summaryText);
-  const targetUrl = ownerPhone 
-    ? `https://wa.me/${ownerPhone.replace(/\D/g, "")}?text=${encodedText}`
-    : `https://wa.me/?text=${encodedText}`;
-
-  window.open(targetUrl, "_blank");
-}
     function syncGstinUI() {
       const el = document.getElementById("inp-store-gstin");
       if (el) el.value = storeGstin;
@@ -1838,330 +2029,238 @@ _Generated automatically via StorePOS Terminal_`;
     }
 
     function loadInventoryState() {
-  const saved = localStorage.getItem("storepos_catalog_inventory_v3");
-  if (saved) {
-    currentInventory = JSON.parse(saved);
-  } else {
-    // Only use default items if user has never onboarded
-    const hasOnboarded = localStorage.getItem("storepos_onboarded_flag_v3");
-    currentInventory = hasOnboarded ? [] : [...defaultInitialInventory];
-    localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
-  }
-}
+      const saved = localStorage.getItem("storepos_catalog_inventory_v3") || 
+                    localStorage.getItem("storepos_custom_inventory") ||
+                    localStorage.getItem("storepos_inventory_data");
+      if (saved) {
+        currentInventory = JSON.parse(saved);
+      } else {
+        currentInventory = [...defaultInitialInventory];
+        localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
+      }
+      window.currentInventory = currentInventory;
+    }
 
     function saveInventoryState() {
+      window.currentInventory = currentInventory;
+      localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
       localStorage.setItem("storepos_custom_inventory", JSON.stringify(currentInventory));
+      localStorage.setItem("storepos_inventory_data", JSON.stringify(currentInventory));
       renderCatalogCards();
       renderLiveInventoryTable();
       updateKpis();
     }
+
     // ==========================================
-// 3-DAY TRIAL & SUBSCRIPTION GATEWAY
-// ==========================================
-const TRIAL_DURATION_DAYS = 3;
+    // 3-DAY TRIAL & SUBSCRIPTION GATEWAY
+    // ==========================================
+    const TRIAL_DURATION_DAYS = 3;
 
-function checkStoreSubscriptionStatus() {
-  const isSubscribed = localStorage.getItem("storepos_is_paid_license") === "true";
-  const banner = document.getElementById("trial-remaining-banner");
-  const bannerText = document.getElementById("trial-remaining-text");
+    function checkStoreSubscriptionStatus() {
+      const isSubscribed = localStorage.getItem("storepos_is_paid_license") === "true";
+      const banner = document.getElementById("trial-remaining-banner");
+      const bannerText = document.getElementById("trial-remaining-text");
 
-  // If already paid Pro license:
-  if (isSubscribed) {
-    if (banner) {
-      banner.classList.remove("hidden");
-      banner.className = "flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold";
-      if (bannerText) bannerText.innerHTML = "👑 <span>Pro Active</span>";
+      if (isSubscribed) {
+        if (banner) {
+          banner.classList.remove("hidden");
+          banner.className = "flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold";
+          if (bannerText) bannerText.innerHTML = "👑 <span>Pro Active</span>";
+        }
+        return true;
+      }
+
+      const userCreatedAt = localStorage.getItem("storepos_registered_date") || new Date().toISOString();
+      if (!localStorage.getItem("storepos_registered_date")) {
+        localStorage.setItem("storepos_registered_date", userCreatedAt);
+      }
+
+      const createdTime = new Date(userCreatedAt).getTime();
+      const trialExpiryTime = createdTime + (3 * 24 * 60 * 60 * 1000);
+      const currentTime = Date.now();
+      const diffMs = trialExpiryTime - currentTime;
+
+      if (diffMs <= 0) {
+        if (banner) {
+          banner.classList.remove("hidden");
+          banner.className = "flex items-center gap-1.5 px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold cursor-pointer animate-pulse";
+          if (bannerText) bannerText.innerText = "Trial Expired — Upgrade Now";
+        }
+        showSubscriptionPaymentModal();
+        return false;
+      }
+
+      const remainingHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const remainingDays = Math.floor(remainingHours / 24);
+      const leftoverHours = remainingHours % 24;
+
+      let displayTime = remainingDays > 0 
+        ? `${remainingDays}d ${leftoverHours}h left` 
+        : `${remainingHours} hours left`;
+
+      if (banner) {
+        banner.classList.remove("hidden");
+        banner.classList.add("flex");
+        if (bannerText) bannerText.innerText = `⏳ Free Trial: ${displayTime}`;
+      }
+
+      return true;
     }
-    return true;
-  }
 
-  // Normal trial calculation for free tier
-  const userCreatedAt = localStorage.getItem("storepos_registered_date") || new Date().toISOString();
-  if (!localStorage.getItem("storepos_registered_date")) {
-    localStorage.setItem("storepos_registered_date", userCreatedAt);
-  }
+    function showSubscriptionPaymentModal() {
+      const isPaid = localStorage.getItem("storepos_is_paid_license") === "true";
+      const activatedAt = localStorage.getItem("storepos_license_activated_at") || new Date().toISOString();
+      const subDurationDays = parseInt(localStorage.getItem("storepos_license_duration_days") || "30", 10);
+      const nextRenewalDate = new Date(new Date(activatedAt).getTime() + (subDurationDays * 24 * 60 * 60 * 1000));
+      const daysLeft = Math.max(0, Math.ceil((nextRenewalDate - Date.now()) / (1000 * 60 * 60 * 24)));
 
-  const createdTime = new Date(userCreatedAt).getTime();
-  const trialExpiryTime = createdTime + (3 * 24 * 60 * 60 * 1000);
-  const currentTime = Date.now();
-  const diffMs = trialExpiryTime - currentTime;
-
-  if (diffMs <= 0) {
-    if (banner) {
-      banner.classList.remove("hidden");
-      banner.className = "flex items-center gap-1.5 px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl text-xs font-bold cursor-pointer animate-pulse";
-      if (bannerText) bannerText.innerText = "Trial Expired — Upgrade Now";
-    }
-    showSubscriptionPaymentModal();
-    return false;
-  }
-
-  const remainingHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const remainingDays = Math.floor(remainingHours / 24);
-  const leftoverHours = remainingHours % 24;
-
-  let displayTime = remainingDays > 0 
-    ? `${remainingDays}d ${leftoverHours}h left` 
-    : `${remainingHours} hours left`;
-
-  if (banner) {
-    banner.classList.remove("hidden");
-    banner.classList.add("flex");
-    if (bannerText) bannerText.innerText = `⏳ Free Trial: ${displayTime}`;
-  }
-
-  return true;
-}
-
-function showSubscriptionPaymentModal() {
-  const isPaid = localStorage.getItem("storepos_is_paid_license") === "true";
-  const activatedAt = localStorage.getItem("storepos_license_activated_at") || new Date().toISOString();
-  const subDurationDays = parseInt(localStorage.getItem("storepos_license_duration_days") || "30", 10);
-  const nextRenewalDate = new Date(new Date(activatedAt).getTime() + (subDurationDays * 24 * 60 * 60 * 1000));
-  const daysLeft = Math.max(0, Math.ceil((nextRenewalDate - Date.now()) / (1000 * 60 * 60 * 24)));
-
-  let modal = document.getElementById("modal-subscription-lock");
-  if (!modal) {
-    const modalHtml = `
-      <div id="modal-subscription-lock" style="z-index: 99999;" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100 relative">
-          <!-- Close / Back Button -->
-          <button type="button" onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-black text-sm bg-slate-800/80 px-2.5 py-1 rounded-lg">✕</button>
-
-          <div class="w-14 h-14 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">
-            👑
-          </div>
-
-          <div id="sub-modal-header">
-            <h3 class="text-base font-black text-white" id="sub-modal-title">Upgrade Your StorePOS License</h3>
-            <p class="text-xs text-slate-400 mt-1" id="sub-modal-desc">Select a plan to unlock uninterrupted billing, inventory, and cloud sync.</p>
-          </div>
-
-          <!-- Active License Status Indicator -->
-          <div id="sub-active-status-card" class="${isPaid ? 'block' : 'hidden'} bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 text-left space-y-1">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-emerald-300 font-bold">✔ Current Plan: Pro Active</span>
-              <span class="text-slate-300 font-mono text-[11px]">${daysLeft} days remaining</span>
-            </div>
-            <p class="text-[10px] text-slate-400">Next renewal date: <strong class="text-white">${nextRenewalDate.toLocaleDateString()}</strong></p>
-          </div>
-
-          <!-- Subscription Plan Picker -->
-          <div class="grid grid-cols-2 gap-2 text-left text-xs">
-            <!-- Monthly -->
-            <div onclick="selectLicensePlan(299, 30, this)" class="sub-plan-card cursor-pointer border-2 border-indigo-500 bg-[#08111e] p-3 rounded-xl transition">
-              <div class="text-[10px] text-indigo-400 font-bold uppercase">Monthly Plan</div>
-              <div class="text-lg font-black font-mono text-white mt-0.5">₹299<span class="text-[10px] text-slate-400 font-normal">/mo</span></div>
-              <p class="text-[9px] text-slate-400 mt-1">30 days counter access</p>
-            </div>
-
-            <!-- Yearly -->
-            <div onclick="selectLicensePlan(2499, 365, this)" class="sub-plan-card cursor-pointer border border-slate-700 bg-[#08111e] p-3 rounded-xl transition hover:border-slate-500">
-              <div class="flex justify-between items-center">
-                <span class="text-[10px] text-amber-400 font-bold uppercase">Yearly Plan</span>
-                <span class="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 rounded font-bold">SAVE 30%</span>
+      let modal = document.getElementById("modal-subscription-lock");
+      if (!modal) {
+        const modalHtml = `
+          <div id="modal-subscription-lock" style="z-index: 99999;" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+            <div class="w-full max-w-md bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100 relative">
+              <button type="button" onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-black text-sm bg-slate-800/80 px-2.5 py-1 rounded-lg">✕</button>
+              <div class="w-14 h-14 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">👑</div>
+              <div id="sub-modal-header">
+                <h3 class="text-base font-black text-white" id="sub-modal-title">Upgrade Your StorePOS License</h3>
+                <p class="text-xs text-slate-400 mt-1" id="sub-modal-desc">Select a plan to unlock uninterrupted billing, inventory, and cloud sync.</p>
               </div>
-              <div class="text-lg font-black font-mono text-white mt-0.5">₹2,499<span class="text-[10px] text-slate-400 font-normal">/yr</span></div>
-              <p class="text-[9px] text-slate-400 mt-1">365 days full access</p>
+              <div id="sub-active-status-card" class="${isPaid ? 'block' : 'hidden'} bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 text-left space-y-1">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-emerald-300 font-bold">✔ Current Plan: Pro Active</span>
+                  <span class="text-slate-300 font-mono text-[11px]">${daysLeft} days remaining</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Next renewal date: <strong class="text-white">${nextRenewalDate.toLocaleDateString()}</strong></p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-left text-xs">
+                <div onclick="selectLicensePlan(299, 30, this)" class="sub-plan-card cursor-pointer border-2 border-indigo-500 bg-[#08111e] p-3 rounded-xl transition">
+                  <div class="text-[10px] text-indigo-400 font-bold uppercase">Monthly Plan</div>
+                  <div class="text-lg font-black font-mono text-white mt-0.5">₹299<span class="text-[10px] text-slate-400 font-normal">/mo</span></div>
+                  <p class="text-[9px] text-slate-400 mt-1">30 days counter access</p>
+                </div>
+                <div onclick="selectLicensePlan(2499, 365, this)" class="sub-plan-card cursor-pointer border border-slate-700 bg-[#08111e] p-3 rounded-xl transition hover:border-slate-500">
+                  <div class="flex justify-between items-center">
+                    <span class="text-[10px] text-amber-400 font-bold uppercase">Yearly Plan</span>
+                    <span class="text-[8px] bg-emerald-500/20 text-emerald-300 px-1 rounded font-bold">SAVE 30%</span>
+                  </div>
+                  <div class="text-lg font-black font-mono text-white mt-0.5">₹2,499<span class="text-[10px] text-slate-400 font-normal">/yr</span></div>
+                  <p class="text-[9px] text-slate-400 mt-1">365 days full access</p>
+                </div>
+              </div>
+              <div class="space-y-2 pt-1">
+                <button type="button" onclick="launchSubscriptionPaymentWithCurrentPlan()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                  <span>⚡</span> Pay via UPI QR (<span id="txt-sub-btn-amount">₹299</span>) →
+                </button>
+                <button type="button" onclick="setupUpiAutoPay()" class="w-full py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl border border-indigo-500/40 transition flex items-center justify-center gap-2">
+                  <span>🔄</span> Setup UPI Autopay (Recurring e-Mandate)
+                </button>
+                <button type="button" onclick="closeSubscriptionModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+                  Back to Counter
+                </button>
+              </div>
             </div>
           </div>
-
-          <!-- Autopay / Instant UPI Unlock Options -->
-          <div class="space-y-2 pt-1">
-            <button type="button" onclick="launchSubscriptionPaymentWithCurrentPlan()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-              <span>⚡</span> Pay via UPI QR (<span id="txt-sub-btn-amount">₹299</span>) →
-            </button>
-            <button type="button" onclick="setupUpiAutoPay()" class="w-full py-2 bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl border border-indigo-500/40 transition flex items-center justify-center gap-2">
-              <span>🔄</span> Setup UPI Autopay (Recurring e-Mandate)
-            </button>
-            <button type="button" onclick="closeSubscriptionModal()" class="w-full py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
-              Back to Counter
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML("beforeend", modalHtml);
-  } else {
-    modal.classList.remove("hidden");
-  }
-}
-
-// Variables & Helpers for Plan Picker
-let selectedPlanAmount = 299;
-let selectedPlanDays = 30;
-
-function selectLicensePlan(amount, days, element) {
-  selectedPlanAmount = amount;
-  selectedPlanDays = days;
-  document.querySelectorAll(".sub-plan-card").forEach(c => {
-    c.classList.remove("border-2", "border-indigo-500");
-    c.classList.add("border", "border-slate-700");
-  });
-  element.classList.remove("border-slate-700");
-  element.classList.add("border-2", "border-indigo-500");
-  const btnTxt = document.getElementById("txt-sub-btn-amount");
-  if (btnTxt) btnTxt.innerText = `₹${amount}`;
-}
-
-function closeSubscriptionModal() {
-  const modal = document.getElementById("modal-subscription-lock");
-  if (modal) modal.classList.add("hidden");
-}
-
-function launchSubscriptionPaymentWithCurrentPlan() {
-  closeSubscriptionModal();
-  const subUpiUri = `upi://pay?pa=${PLATFORM_ADMIN_UPI}&pn=${encodeURIComponent(PLATFORM_ADMIN_NAME)}&am=${selectedPlanAmount}.00&cu=INR&tn=StorePOS_Pro_${selectedPlanDays}Days`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(subUpiUri)}`;
-
-  const qrImg = document.getElementById("img-sub-qr-display");
-  if (qrImg) qrImg.src = qrUrl;
-
-  const utrInp = document.getElementById("inp-sub-utr-number");
-  if (utrInp) utrInp.value = "";
-
-  const unlockModal = document.getElementById("modal-utr-unlock");
-  if (unlockModal) unlockModal.classList.remove("hidden");
-}
-
-function setupUpiAutoPay() {
-  alert(`UPI Autopay (NPCI e-Mandate) will register recurring authorization of ₹${selectedPlanAmount} every ${selectedPlanDays === 365 ? '12 months' : 'month'}. Redirecting to Autopay gateway...`);
-  window.open(`https://wa.me/919876543210?text=${encodeURIComponent("Hi, I want to set up UPI Autopay e-mandate for StorePOS " + (selectedPlanDays === 365 ? "Yearly Plan" : "Monthly Plan"))}`, "_blank");
-}
-// ==========================================
-// PLATFORM OWNER UPI (FOR YOUR ₹299 SUBSCRIPTION)
-// ==========================================
-const PLATFORM_ADMIN_UPI = "yourname@okhdfcbank"; // Put your real UPI ID here
-const PLATFORM_ADMIN_NAME = "StorePOS Technologies"; // Put your business name here
-
-function launchSubscriptionPayment() {
-  // Hide trial ended lock modal if open
-  const trialModal = document.getElementById("modal-subscription-lock");
-  if (trialModal) trialModal.classList.add("hidden");
-
-  // Generate UPI URI targeting your VPA
-  const subUpiUri = `upi://pay?pa=${PLATFORM_ADMIN_UPI}&pn=${encodeURIComponent(PLATFORM_ADMIN_NAME)}&am=299.00&cu=INR&tn=StorePOS_Pro_30Days`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(subUpiUri)}`;
-
-  const qrImg = document.getElementById("img-sub-qr-display");
-  if (qrImg) qrImg.src = qrUrl;
-
-  const utrInp = document.getElementById("inp-sub-utr-number");
-  if (utrInp) utrInp.value = "";
-
-  const modal = document.getElementById("modal-utr-unlock");
-  if (modal) modal.classList.remove("hidden");
-}
-// ==========================================
-// VERIFY & UNLOCK PRO LICENSE VIA 12-DIGIT UTR
-// ==========================================
-window.verifyAndUnlockSubscription = async function() {
-  const utrInp = document.getElementById("inp-sub-utr-number");
-  const utrInput = utrInp ? utrInp.value.trim() : "";
-
-  // 1. Validate 12-digit numeric UPI reference number
-  if (!/^\d{12}$/.test(utrInput)) {
-    return alert("Please enter a valid 12-digit numeric UPI Ref / UTR number from your payment app.");
-  }
-
-  const ownerEmail = localStorage.getItem("storepos_owner_email") || "counter1@storepos.com";
-  const storeName = localStorage.getItem("storepos_store_name") || "ShopMaster Supermarket";
-
-  // 2. Insert into Supabase table if client is present
-  if (typeof supabaseClient !== "undefined" && supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from("license_payments")
-        .insert([{
-          store_owner_email: ownerEmail,
-          store_name: storeName,
-          amount: 299.00,
-          utr_number: utrInput,
-          payment_status: "pending_verification",
-          paid_at: new Date().toISOString()
-        }]);
-
-      if (error) {
-        console.error("Supabase insert error:", error);
+        `;
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
       } else {
-        console.log("Supabase payment logged:", data);
+        modal.classList.remove("hidden");
       }
-    } catch (err) {
-      console.warn("Could not write to Supabase:", err);
-    }
-  }
-
-  // 3. Mark terminal as paid locally
-  localStorage.setItem("storepos_is_paid_license", "true");
-  localStorage.setItem("storepos_active_utr", utrInput);
-
-  // 4. Close the modal
-  const modal = document.getElementById("modal-utr-unlock");
-  if (modal) modal.classList.add("hidden");
-
-  // 5. Hide any trial expiry lock screens
-  const subLock = document.getElementById("modal-subscription-lock");
-  if (subLock) subLock.classList.add("hidden");
-
-  // 6. Hide trial countdown banner directly
-  const banner = document.getElementById("trial-remaining-banner");
-  if (banner) {
-    banner.classList.add("hidden");
-    banner.classList.remove("flex");
-  }
-
-  alert("🎉 Success! Your 12-digit UTR has been recorded. StorePOS Pro License is now active.");
-  
-  // Do NOT do location.reload(); — call your UI refresh directly instead:
-  if (typeof renderInventoryTable === "function") renderInventoryTable();
-  if (typeof checkStoreSubscriptionStatus === "function") checkStoreSubscriptionStatus();
-};
-// ==========================================
-// CLOUD LICENSE SYNC (CROSS-DEVICE VALIDATION)
-// ==========================================
-async function syncLicenseStatusFromCloud() {
-  const ownerEmail = localStorage.getItem("storepos_owner_email") || "counter1@storepos.com";
-  if (!ownerEmail || typeof supabaseClient === "undefined" || !supabaseClient) return;
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("store_profiles")
-      .select("is_active_pro, trial_ends_at")
-      .eq("owner_email", ownerEmail)
-      .maybeSingle();
-
-    if (error) {
-      console.warn("Supabase license sync notice:", error.message);
-      return;
     }
 
-    // If the account is marked active Pro in Supabase, activate locally
-    if (data && data.is_active_pro) {
+    let selectedPlanAmount = 299;
+    let selectedPlanDays = 30;
+
+    function selectLicensePlan(amount, days, element) {
+      selectedPlanAmount = amount;
+      selectedPlanDays = days;
+      document.querySelectorAll(".sub-plan-card").forEach(c => {
+        c.classList.remove("border-2", "border-indigo-500");
+        c.classList.add("border", "border-slate-700");
+      });
+      element.classList.remove("border-slate-700");
+      element.classList.add("border-2", "border-indigo-500");
+      const btnTxt = document.getElementById("txt-sub-btn-amount");
+      if (btnTxt) btnTxt.innerText = `₹${amount}`;
+    }
+
+    function closeSubscriptionModal() {
+      const modal = document.getElementById("modal-subscription-lock");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    const PLATFORM_ADMIN_UPI = "yourname@okhdfcbank";
+    const PLATFORM_ADMIN_NAME = "StorePOS Technologies";
+
+    function launchSubscriptionPaymentWithCurrentPlan() {
+      closeSubscriptionModal();
+      const subUpiUri = `upi://pay?pa=${PLATFORM_ADMIN_UPI}&pn=${encodeURIComponent(PLATFORM_ADMIN_NAME)}&am=${selectedPlanAmount}.00&cu=INR&tn=StorePOS_Pro_${selectedPlanDays}Days`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(subUpiUri)}`;
+
+      const qrImg = document.getElementById("img-sub-qr-display");
+      if (qrImg) qrImg.src = qrUrl;
+
+      const utrInp = document.getElementById("inp-sub-utr-number");
+      if (utrInp) utrInp.value = "";
+
+      const unlockModal = document.getElementById("modal-utr-unlock");
+      if (unlockModal) unlockModal.classList.remove("hidden");
+    }
+
+    function setupUpiAutoPay() {
+      alert(`UPI Autopay will register recurring authorization of ₹${selectedPlanAmount} every ${selectedPlanDays === 365 ? '12 months' : 'month'}. Redirecting to Autopay gateway...`);
+      window.open(`https://wa.me/919876543210?text=${encodeURIComponent("Hi, I want to set up UPI Autopay e-mandate for StorePOS " + (selectedPlanDays === 365 ? "Yearly Plan" : "Monthly Plan"))}`, "_blank");
+    }
+
+    window.verifyAndUnlockSubscription = async function() {
+      const utrInp = document.getElementById("inp-sub-utr-number");
+      const utrInput = utrInp ? utrInp.value.trim() : "";
+
+      if (!/^\d{12}$/.test(utrInput)) {
+        return alert("Please enter a valid 12-digit numeric UPI Ref / UTR number from your payment app.");
+      }
+
       localStorage.setItem("storepos_is_paid_license", "true");
-      if (typeof checkStoreSubscriptionStatus === "function") {
-        checkStoreSubscriptionStatus();
+      localStorage.setItem("storepos_active_utr", utrInput);
+
+      document.getElementById("modal-utr-unlock")?.classList.add("hidden");
+      document.getElementById("modal-subscription-lock")?.classList.add("hidden");
+
+      const banner = document.getElementById("trial-remaining-banner");
+      if (banner) {
+        banner.classList.add("hidden");
+        banner.classList.remove("flex");
+      }
+
+      alert("🎉 Success! Your 12-digit UTR has been recorded. StorePOS Pro License is now active.");
+      checkStoreSubscriptionStatus();
+    };
+
+    async function syncLicenseStatusFromCloud() {
+      const ownerEmail = localStorage.getItem("storepos_owner_email") || "counter1@storepos.com";
+      const db = getDb();
+      if (!ownerEmail || !db) return;
+
+      try {
+        const { data, error } = await db
+          .from("store_profiles")
+          .select("is_active_pro, trial_ends_at")
+          .eq("owner_email", ownerEmail)
+          .maybeSingle();
+
+        if (error) return console.warn("Supabase sync notice:", error.message);
+        if (data && data.is_active_pro) {
+          localStorage.setItem("storepos_is_paid_license", "true");
+          checkStoreSubscriptionStatus();
+        }
+      } catch (err) {
+        console.warn("Cloud sync offline mode.", err);
       }
     }
-  } catch (err) {
-    console.warn("Running in offline mode; could not sync license from cloud.", err);
-  }
-}
 
-window.closeUtrUnlockModal = function() {
-  const modal = document.getElementById("modal-utr-unlock");
-  if (modal) modal.classList.add("hidden");
-};
-
-function closeUtrUnlockModal() {
-  const modal = document.getElementById("modal-utr-unlock");
-  if (modal) modal.classList.add("hidden");
-}
-
-function contactSupportWhatsApp() {
-  const shop = document.getElementById("header-shop-name")?.innerText || "StorePOS Outlet";
-  const msg = encodeURIComponent(`Hello, I would like to activate my StorePOS license for ${shop}.`);
-  window.open(`https://wa.me/919876543210?text=${msg}`, "_blank");
-}
+    window.closeUtrUnlockModal = function() {
+      const modal = document.getElementById("modal-utr-unlock");
+      if (modal) modal.classList.add("hidden");
+    };
 
     function loadStoredRecentBills() {
       const saved = localStorage.getItem("storepos_recent_bills_v2");
@@ -2270,15 +2369,6 @@ function contactSupportWhatsApp() {
       deferredInstallPrompt = e;
     });
 
-    function triggerPwaInstall() {
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        deferredInstallPrompt = null;
-      } else {
-        alert("Standalone PWA Mode:\nTap your browser menu (⋮) -> 'Add to Home Screen' or 'Install App' for zero-latency offline billing with a 3-Day Free Trial activated.");
-      }
-    }
-
     function initNetworkHandlers() {
       window.addEventListener('online', syncOfflineBills);
       window.addEventListener('offline', updateNetworkBadge);
@@ -2315,430 +2405,93 @@ function contactSupportWhatsApp() {
 
       localStorage.removeItem("storepos_offline_bills");
     }
-// ==========================================
-// MORNING CASH FLOAT & PAYMENT RECONCILIATION
-// ==========================================
 
-// Check if opening cash has already been recorded for today
-function checkMorningCashDrawerPrompt() {
-  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-  const existingFloat = localStorage.getItem(todayKey);
-
-  // If no entry for today, prompt staff
-  if (!existingFloat) {
-    const modal = document.getElementById("modal-morning-cash");
-    if (modal) {
-      modal.classList.remove("hidden");
-      const inp = document.getElementById("inp-morning-cash-amount");
-      if (inp) {
-        inp.value = "";
-        setTimeout(() => inp.focus(), 200);
+    // ==========================================
+    // PRICE REVISION MODAL
+    // ==========================================
+    function openPriceRevisionModal(targetProductId = null) {
+      const sel = document.getElementById("sel-price-modal-product");
+      if (!sel || !currentInventory.length) {
+        return alert("No products currently available in catalog to edit.");
       }
+
+      sel.innerHTML = currentInventory.map(item => `
+        <option value="${item.id}" ${targetProductId && String(item.id) === String(targetProductId) ? 'selected' : ''}>
+          ${item.custom_name} — (Current: ₹${Number(item.unit_price).toFixed(2)})
+        </option>
+      `).join("");
+
+      loadPriceRevisionModalFields();
+
+      const sellInp = document.getElementById("inp-modal-selling-rate");
+      const costInp = document.getElementById("inp-modal-cost-rate");
+      sellInp.oninput = calculatePriceModalMargin;
+      costInp.oninput = calculatePriceModalMargin;
+
+      document.getElementById("modal-edit-price").classList.remove("hidden");
     }
-  } else {
-    updateAdminPaymentTotals();
-  }
-}
 
-// Save the morning float amount
-function submitMorningOpeningCash() {
-  const inp = document.getElementById("inp-morning-cash-amount");
-  const amount = parseFloat(inp ? inp.value : 0);
+    function closePriceRevisionModal() {
+      document.getElementById("modal-edit-price").classList.add("hidden");
+    }
 
-  if (isNaN(amount) || amount < 0) {
-    return alert("Please enter a valid cash amount (e.g. 1500 or 0).");
-  }
+    function loadPriceRevisionModalFields() {
+      const sel = document.getElementById("sel-price-modal-product");
+      const item = currentInventory.find(p => String(p.id) === String(sel.value));
+      if (!item) return;
 
-  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-  localStorage.setItem(todayKey, amount.toString());
+      document.getElementById("inp-modal-selling-rate").value = item.unit_price;
+      document.getElementById("inp-modal-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
+      calculatePriceModalMargin();
+    }
 
-  // Hide the modal
-  const modal = document.getElementById("modal-morning-cash");
-  if (modal) modal.classList.add("hidden");
-
-  // Refresh totals
-  updateAdminPaymentTotals();
-
-  alert(`✅ Morning cash float recorded: ₹${amount.toFixed(2)}. Counter register is now open.`);
-}
-
-// Compute real-time payment mode totals
-window.updateAdminPaymentTotals = function() {
-  const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-  const todayUk = now.toLocaleDateString("en-GB");
-  const todayKey = "storepos_opening_cash_" + todayIso;
-  const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
-
-  let cashTotal = 0;
-  let upiTotal = 0;
-  let cardTotal = 0;
-
-  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-  bills.forEach(bill => {
-    const rawDate = String(bill.created_at || bill.date || "");
-    const isToday = rawDate.includes(todayIso) || rawDate.includes(todayUk);
-
-    if (isToday) {
-      // Check every common payment mode string
-      const mode = String(bill.payment_mode || bill.paymentMode || bill.mode || "").toUpperCase();
+    function calculatePriceModalMargin() {
+      const sell = parseFloat(document.getElementById("inp-modal-selling-rate").value) || 0;
+      const cost = parseFloat(document.getElementById("inp-modal-cost-rate").value) || 0;
+      const margin = (sell - cost).toFixed(2);
+      const marginPct = sell > 0 ? (((sell - cost) / sell) * 100).toFixed(1) : 0;
       
-      // Check every possible amount key used across versions
-      const amt = parseFloat(
-        bill.total_amount ?? bill.grand_total ?? bill.final_total ?? bill.total ?? bill.amount ?? 0
-      );
-
-      if (mode.includes("CASH")) {
-        cashTotal += amt;
-      } else if (mode.includes("UPI") || mode.includes("SOUNDBOX") || mode.includes("QR")) {
-        upiTotal += amt;
-      } else {
-        cardTotal += amt;
+      const preview = document.getElementById("txt-modal-margin-preview");
+      if (preview) {
+        preview.innerText = `+₹${margin} (${marginPct}%)`;
+        preview.className = margin >= 0 ? "font-mono font-bold text-emerald-400 text-sm" : "font-mono font-bold text-red-400 text-sm";
       }
     }
-  });
 
-  const openElem = document.getElementById("adm-txt-opening-cash");
-  const cashElem = document.getElementById("adm-txt-cash-total");
-  const upiElem = document.getElementById("adm-txt-upi-total");
-  const cardElem = document.getElementById("adm-txt-card-total");
+    function savePriceRevisionModal() {
+      const sel = document.getElementById("sel-price-modal-product");
+      const item = currentInventory.find(p => String(p.id) === String(sel.value));
+      if (!item) return;
 
-  if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
-  if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
-  if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
-  if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
-};
-  function openBulkPresetModal() {
-  // Guard: Never open if user has already completed onboarding or has products
-  const hasOnboarded = localStorage.getItem("storepos_onboarding_completed") === "true";
-  const hasItems = Array.isArray(currentInventory) && currentInventory.length > 0;
-  if (hasOnboarded || hasItems) {
-    return;
-  }
+      const newSelling = parseFloat(document.getElementById("inp-modal-selling-rate").value);
+      const newCost = parseFloat(document.getElementById("inp-modal-cost-rate").value);
+      const reason = document.getElementById("sel-modal-price-reason").value;
 
-  const modal = document.getElementById("modal-preset-catalog");
-  if (modal) {
-    modal.classList.remove("hidden");
-  }
-}
-    function closePresetModal() {
-  const modal = document.getElementById("modal-preset-catalog");
-  if (modal) modal.classList.add("hidden");
-  const searchInput = document.getElementById("inp-preset-search");
-  if (searchInput) searchInput.value = "";
-}
-
-    // A persistent Set to track checked item IDs even when filtering/searching
-let checkedPresetIds = new Set();
-
-function renderPresetList(items) {
-  const container = document.getElementById("preset-list-container");
-  if (!container) return;
-
-  container.innerHTML = items.map((item) => {
-    const isChecked = checkedPresetIds.has(String(item.id)) ? "checked" : "";
-    return `
-      <label class="flex items-center justify-between p-2.5 hover:bg-slate-800/40 rounded-xl cursor-pointer transition border-b border-slate-800/60">
-        <div class="flex items-center gap-3">
-          <input 
-            type="checkbox" 
-            value="${item.id}"
-            ${isChecked}
-            onchange="handlePresetCheckboxChange(this)"
-            class="preset-item-checkbox w-4 h-4 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer"
-          >
-          <div>
-            <div class="font-bold text-xs text-slate-100">${item.custom_name}</div>
-            <div class="text-[10px] text-slate-400 font-mono">${item.category} • ${item.uom || 'pc'}</div>
-          </div>
-        </div>
-        <div class="text-right">
-          <span class="font-mono font-bold text-emerald-400 text-xs">₹${item.unit_price}</span>
-          <span class="text-[9px] text-slate-400 block">${item.supplier_name || 'Direct Wholesale'}</span>
-        </div>
-      </label>
-    `;
-  }).join("");
-
-  updatePresetSelectedCount();
-}
-
-function handlePresetCheckboxChange(el) {
-  if (el.checked) {
-    checkedPresetIds.add(String(el.value));
-  } else {
-    checkedPresetIds.delete(String(el.value));
-  }
-  updatePresetSelectedCount();
-}
-
-function updatePresetSelectedCount() {
-  const countEl = document.getElementById("preset-selected-count");
-  if (countEl) countEl.innerText = checkedPresetIds.size;
-}
-
-function toggleSelectAllPresets(select) {
-  const checkboxes = document.querySelectorAll(".preset-item-checkbox");
-  checkboxes.forEach(c => {
-    c.checked = select;
-    if (select) {
-      checkedPresetIds.add(String(c.value));
-    } else {
-      checkedPresetIds.delete(String(c.value));
-    }
-  });
-  updatePresetSelectedCount();
-}
-// Preset real-time search & filter function
-function filterPresetCatalogUI() {
-  const master = (typeof globalPresetCatalog !== "undefined" && globalPresetCatalog.length)
-    ? globalPresetCatalog
-    : (typeof globalPresetsList !== "undefined" ? globalPresetsList : []);
-
-  const searchInput = document.getElementById("inp-preset-search");
-  const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
-
-  let filtered = master.filter((item) => {
-    const nameMatch = item.custom_name && item.custom_name.toLowerCase().includes(query);
-    const catMatch = item.category && item.category.toLowerCase().includes(query);
-    const barcodeMatch = item.barcode && item.barcode.toLowerCase().includes(query);
-    return nameMatch || catMatch || barcodeMatch;
-  });
-
-  if (typeof presetViewMode !== "undefined" && presetViewMode === "ALPHABETICAL") {
-    filtered.sort((a, b) => a.custom_name.localeCompare(b.custom_name));
-  } else {
-    filtered.sort((a, b) => (a.category || "").localeCompare(b.category || ""));
-  }
-
-  renderPresetList(filtered);
-}
-// ==========================================
-// STAFF QUICK STOCK & PRICE EDIT CONTROLLER
-// ==========================================
-window.openBulkPresetModal = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") ||
-                document.getElementById("modal-preset-library");
-  if (modal) {
-    modal.classList.remove("hidden");
-  } else {
-    alert("Preset Catalog modal element not found in HTML. Check modal ID.");
-  }
-};
-
-window.closeBulkPresetModal = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") ||
-                document.getElementById("modal-preset-library");
-  if (modal) modal.classList.add("hidden");
-};
-window.openStaffQuickUpdateModal = function() {
-  const sel = document.getElementById("sel-staff-product");
-  if (!sel || !currentInventory || !currentInventory.length) {
-    return alert("No inventory items found to edit.");
-  }
-
-  sel.innerHTML = currentInventory.map(item => `
-    <option value="${item.id}">
-      ${item.custom_name} (Stock: ${item.stock_qty || 0}) — ₹${Number(item.unit_price).toFixed(2)}
-    </option>
-  `).join("");
-
-  populateStaffQuickFields();
-  document.getElementById("modal-staff-quick-update").classList.remove("hidden");
-};
-
-window.closeStaffQuickUpdateModal = function() {
-  const modal = document.getElementById("modal-staff-quick-update");
-  if (modal) modal.classList.add("hidden");
-};
-
-window.populateStaffQuickFields = function() {
-  const sel = document.getElementById("sel-staff-product");
-  if (!sel) return;
-  const item = currentInventory.find(i => String(i.id) === String(sel.value));
-  if (!item) return;
-
-  document.getElementById("inp-staff-selling-rate").value = item.unit_price;
-  document.getElementById("inp-staff-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
-  document.getElementById("inp-staff-current-stock").value = item.stock_qty || 0;
-  document.getElementById("inp-staff-add-stock").value = "";
-};
-
-window.saveStaffQuickUpdate = function() {
-  const sel = document.getElementById("sel-staff-product");
-  const items = window.currentInventory || [];
-  if (!sel || items.length === 0) return alert("Please select a product.");
-
-  const item = items.find(i => String(i.id) === String(sel.value));
-  if (!item) return alert("Product not found.");
-
-  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate")?.value);
-  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate")?.value);
-  const addStock = parseFloat(document.getElementById("inp-staff-add-stock")?.value) || 0;
-
-  if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
-
-  // Update item properties
-  item.unit_price = newPrice;
-  if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
-  if (addStock > 0) {
-    item.stock_qty = (parseFloat(item.stock_qty) || 0) + addStock;
-  }
-
-  // 1. Save directly into localStorage so it survives refresh
-  localStorage.setItem("storepos_inventory_data", JSON.stringify(items));
-
-  // 2. Persist via cloud/save handler if present
-  if (typeof saveInventoryState === "function") saveInventoryState();
-
-  // 3. Immediately re-render the main catalog cards and inventory table
-  if (typeof renderCatalogCards === "function") renderCatalogCards();
-  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
-
-  // 4. Close modal and alert
-  window.closeStaffQuickUpdateModal();
-  alert(`✅ Updated "${item.custom_name}"!\nNew Stock: ${item.stock_qty} | Price: ₹${newPrice.toFixed(2)}`);
-};
-function openPriceRevisionModal(targetProductId = null) {
-  const sel = document.getElementById("sel-price-modal-product");
-  if (!sel || !currentInventory.length) {
-    return alert("No products currently available in catalog to edit.");
-  }
-
-  sel.innerHTML = currentInventory.map(item => `
-    <option value="${item.id}" ${targetProductId && String(item.id) === String(targetProductId) ? 'selected' : ''}>
-      ${item.custom_name} — (Current: ₹${Number(item.unit_price).toFixed(2)})
-    </option>
-  `).join("");
-
-  loadPriceRevisionModalFields();
-
-  const sellInp = document.getElementById("inp-modal-selling-rate");
-  const costInp = document.getElementById("inp-modal-cost-rate");
-  sellInp.oninput = calculatePriceModalMargin;
-  costInp.oninput = calculatePriceModalMargin;
-
-  document.getElementById("modal-edit-price").classList.remove("hidden");
-}
-
-function closePriceRevisionModal() {
-  document.getElementById("modal-edit-price").classList.add("hidden");
-}
-
-function loadPriceRevisionModalFields() {
-  const sel = document.getElementById("sel-price-modal-product");
-  const item = currentInventory.find(p => String(p.id) === String(sel.value));
-  if (!item) return;
-
-  document.getElementById("inp-modal-selling-rate").value = item.unit_price;
-  document.getElementById("inp-modal-cost-rate").value = item.cost_price || (item.unit_price * 0.8).toFixed(2);
-  calculatePriceModalMargin();
-}
-
-function calculatePriceModalMargin() {
-  const sell = parseFloat(document.getElementById("inp-modal-selling-rate").value) || 0;
-  const cost = parseFloat(document.getElementById("inp-modal-cost-rate").value) || 0;
-  const margin = (sell - cost).toFixed(2);
-  const marginPct = sell > 0 ? (((sell - cost) / sell) * 100).toFixed(1) : 0;
-  
-  const preview = document.getElementById("txt-modal-margin-preview");
-  if (preview) {
-    preview.innerText = `+₹${margin} (${marginPct}%)`;
-    preview.className = margin >= 0 ? "font-mono font-bold text-emerald-400 text-sm" : "font-mono font-bold text-red-400 text-sm";
-  }
-}
-
-function savePriceRevisionModal() {
-  const sel = document.getElementById("sel-price-modal-product");
-  const item = currentInventory.find(p => String(p.id) === String(sel.value));
-  if (!item) return;
-
-  const newSelling = parseFloat(document.getElementById("inp-modal-selling-rate").value);
-  const newCost = parseFloat(document.getElementById("inp-modal-cost-rate").value);
-  const reason = document.getElementById("sel-modal-price-reason").value;
-
-  if (isNaN(newSelling) || newSelling <= 0) {
-    return alert("Please enter a valid selling price greater than 0.");
-  }
-
-  const oldPrice = item.unit_price;
-  item.unit_price = newSelling;
-  if (!isNaN(newCost) && newCost >= 0) {
-    item.cost_price = newCost;
-  }
-
-  saveInventoryState();
-
-  recordAuditEntry({
-    type: "PRICE REVISE",
-    title: `Price Edited: ${item.custom_name}`,
-    details: `Rate changed from ₹${oldPrice} to ₹${newSelling} (Cost: ₹${item.cost_price}). Reason: ${reason}`
-  });
-
-  closePriceRevisionModal();
-  alert(`Updated price for "${item.custom_name}" to ₹${newSelling.toFixed(2)}.`);
-}
-function commitSelectedPresets() {
-  if (!checkedPresetIds || checkedPresetIds.size === 0) {
-    return alert("Please check at least one item.");
-  }
-
-  // Support both variable names so it never throws ReferenceError again
-  const masterSource = (typeof globalPresetCatalog !== "undefined" && globalPresetCatalog.length)
-    ? globalPresetCatalog
-    : (typeof globalPresetsList !== "undefined" ? globalPresetsList : []);
-
-  if (!masterSource.length) {
-    return alert("Preset catalog data is still loading. Please try again in a moment.");
-  }
-
-  // Load existing catalog from localStorage
-  let existingCatalog = JSON.parse(
-    localStorage.getItem("storepos_catalog_inventory_v3") || 
-    localStorage.getItem("storepos_custom_inventory") || 
-    "[]"
-  );
-
-  let addedCount = 0;
-  checkedPresetIds.forEach((id) => {
-    const presetItem = masterSource.find((p) => String(p.id) === String(id));
-    if (presetItem) {
-      // Check for duplicate by barcode or exact name
-      const alreadyExists = existingCatalog.some(
-        (existing) =>
-          String(existing.barcode) === String(presetItem.barcode) ||
-          existing.custom_name.trim().toLowerCase() === presetItem.custom_name.trim().toLowerCase()
-      );
-
-      if (!alreadyExists) {
-        existingCatalog.push({ ...presetItem });
-        addedCount++;
+      if (isNaN(newSelling) || newSelling <= 0) {
+        return alert("Please enter a valid selling price greater than 0.");
       }
+
+      const oldPrice = item.unit_price;
+      item.unit_price = newSelling;
+      if (!isNaN(newCost) && newCost >= 0) {
+        item.cost_price = newCost;
+      }
+
+      saveInventoryState();
+
+      recordAuditEntry({
+        type: "PRICE REVISE",
+        title: `Price Edited: ${item.custom_name}`,
+        details: `Rate changed from ₹${oldPrice} to ₹${newSelling} (Cost: ₹${item.cost_price}). Reason: ${reason}`
+      });
+
+      closePriceRevisionModal();
+      alert(`Updated price for "${item.custom_name}" to ₹${newSelling.toFixed(2)}.`);
     }
-  });
 
-  // Save to active storage key
-  currentInventory = existingCatalog;
-  localStorage.setItem("storepos_catalog_inventory_v3", JSON.stringify(currentInventory));
-  localStorage.setItem("storepos_custom_inventory", JSON.stringify(currentInventory));
-  localStorage.setItem("storepos_onboarded_flag_v3", "true");
-
-  // Re-render UI grids immediately
-  if (typeof renderCatalogCards === "function") renderCatalogCards();
-  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
-  if (typeof populateFastEntryBar === "function") populateFastEntryBar();
-  if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
-  if (typeof updateKpis === "function") updateKpis();
-
-  // Clear selections and close modal
-  checkedPresetIds.clear();
-  if (typeof closePresetModal === "function") closePresetModal();
-
-  alert(`Success! Added ${addedCount} products to your store catalog.`);
-}
-
+    // ==========================================
+    // PRODUCT CREATION
+    // ==========================================
     function openAddProductModal() {
       populateCategoryDropdowns();
       document.getElementById("modal-add-product").classList.remove("hidden");
@@ -2821,69 +2574,74 @@ function commitSelectedPresets() {
       document.querySelectorAll(".cat-pill").forEach(p => {
         p.className = "cat-pill px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-[#0e1a2b] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-[#1e324f] whitespace-nowrap transition";
       });
-      event.target.className = "cat-pill active px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white whitespace-nowrap shadow";
+      if (event && event.target) {
+        event.target.className = "cat-pill active px-3 py-1.5 rounded-xl font-bold bg-indigo-600 text-white whitespace-nowrap shadow";
+      }
       renderCatalogCards(cat);
     }
 
+    // ==========================================
+    // CATALOG CARDS & COUNTER DISPLAY
+    // ==========================================
     function renderCatalogCards(categoryFilter = "All Items") {
-  const grid = document.getElementById("catalog-cards-grid");
-  if (!grid) return;
-  const filtered = categoryFilter === "All Items" 
-    ? currentInventory 
-    : currentInventory.filter(i => i.category === categoryFilter);
+      const grid = document.getElementById("catalog-cards-grid");
+      if (!grid) return;
+      const filtered = categoryFilter === "All Items" 
+        ? currentInventory 
+        : currentInventory.filter(i => i.category === categoryFilter);
 
-  grid.innerHTML = filtered.map(item => {
-    const isLoose = item.uom === "kg/gm";
-    const isLowStock = Number(item.current_stock) <= Number(item.min_stock_alert || 5);
+      grid.innerHTML = filtered.map(item => {
+        const isLoose = item.uom === "kg/gm";
+        const currentStock = item.current_stock ?? item.stock_qty ?? 0;
+        const isLowStock = Number(currentStock) <= Number(item.min_stock_alert || 5);
 
-    return `
-      <div onclick="handleCatalogCardClick('${item.id}')" class="card-bg border ${
-        isLowStock 
-          ? 'border-red-500/50 bg-red-950/10 hover:border-red-400' 
-          : (isLoose ? 'border-amber-500/40 hover:border-amber-400' : 'hover:border-indigo-500')
-      } rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow">
-        <div>
-          <div class="flex justify-between items-start">
-            <span class="text-[9px] font-mono subtext-color">${item.barcode || 'NO-SKU'}</span>
-            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${
-              isLowStock 
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' 
-                : (isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300')
-            }">
-              ${isLowStock ? '⚠️ LOW STOCK' : item.uom}
-            </span>
-          </div>
-          <h4 class="font-extrabold text-xs mt-1 line-clamp-1">${item.custom_name}</h4>
-          
-          <!-- Stock text turns bright red and bold when stock is low -->
-          <span class="text-[10px] block mt-0.5 ${isLowStock ? 'text-red-400 font-extrabold' : 'subtext-color'}">
-            ${item.category} • ${
-              isLowStock 
-                ? `<span class="text-red-400 font-black underline">${item.current_stock} ${item.uom} left</span>` 
-                : `${item.current_stock} left`
-            }
-          </span>
-        </div>
-        <div class="mt-2 pt-2 border-t border-slate-700/60 flex items-center justify-between">
-          <span class="font-black text-xs text-emerald-400 font-mono">₹${item.unit_price}</span>
-          <button type="button" class="px-2 py-0.5 ${
+        return `
+          <div onclick="handleCatalogCardClick('${item.id}')" class="bg-white dark:bg-[#0e1a2b] border ${
             isLowStock 
-              ? 'bg-red-600 hover:bg-red-500' 
-              : (isLoose ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500')
-          } text-white font-extrabold text-[11px] rounded shadow">
-            ${isLoose ? '⚖️ Scale' : '+ Add'}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
+              ? 'border-red-500/50 bg-red-950/10 hover:border-red-400' 
+              : (isLoose ? 'border-amber-500/40 hover:border-amber-400' : 'border-slate-200 dark:border-[#1e324f] hover:border-indigo-500')
+          } rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition shadow">
+            <div>
+              <div class="flex justify-between items-start">
+                <span class="text-[9px] font-mono text-slate-400">${item.barcode || 'NO-SKU'}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                  isLowStock 
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' 
+                    : (isLoose ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300')
+                }">
+                  ${isLowStock ? '⚠️ LOW STOCK' : item.uom}
+                </span>
+              </div>
+              <h4 class="font-extrabold text-xs mt-1 line-clamp-1">${item.custom_name}</h4>
+              <span class="text-[10px] block mt-0.5 ${isLowStock ? 'text-red-400 font-extrabold' : 'text-slate-400'}">
+                ${item.category} • ${
+                  isLowStock 
+                    ? `<span class="text-red-400 font-black underline">${currentStock} ${item.uom} left</span>` 
+                    : `${currentStock} left`
+                }
+              </span>
+            </div>
+            <div class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+              <span class="font-black text-xs text-emerald-500 dark:text-emerald-400 font-mono">₹${Number(item.unit_price).toFixed(2)}</span>
+              <button type="button" class="px-2 py-0.5 ${
+                isLowStock 
+                  ? 'bg-red-600 hover:bg-red-500' 
+                  : (isLoose ? 'bg-amber-600 hover:bg-amber-500' : 'bg-indigo-600 hover:bg-indigo-500')
+              } text-white font-extrabold text-[11px] rounded shadow">
+                ${isLoose ? '⚖️ Scale' : '+ Add'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
 
     function handleLiveCatalogSearch(val) {
       const q = val.trim().toLowerCase();
       if (!q) return renderCatalogCards();
       const filtered = currentInventory.filter(i => 
-        i.custom_name.toLowerCase().includes(q) || i.barcode.toLowerCase().includes(q)
+        (i.custom_name && i.custom_name.toLowerCase().includes(q)) || 
+        (i.barcode && i.barcode.toLowerCase().includes(q))
       );
       const grid = document.getElementById("catalog-cards-grid");
       if (grid) {
@@ -2891,7 +2649,7 @@ function commitSelectedPresets() {
           <div onclick="handleCatalogCardClick('${item.id}')" class="bg-white dark:bg-[#0e1a2b] border border-indigo-500 rounded-2xl p-3 flex flex-col justify-between cursor-pointer shadow-sm">
             <h4 class="font-bold text-xs">${item.custom_name}</h4>
             <div class="flex justify-between items-center mt-2 text-xs">
-              <span class="font-mono text-emerald-500 font-bold">₹${item.unit_price}</span>
+              <span class="font-mono text-emerald-500 font-bold">₹${Number(item.unit_price).toFixed(2)}</span>
               <span class="text-[10px] text-slate-400">${item.uom}</span>
             </div>
           </div>
@@ -2906,7 +2664,7 @@ function commitSelectedPresets() {
     }
 
     function handleCatalogCardClick(productId) {
-      const item = currentInventory.find(p => p.id === productId);
+      const item = currentInventory.find(p => String(p.id) === String(productId));
       if (!item) return;
 
       if (item.uom === "kg/gm") {
@@ -2916,6 +2674,9 @@ function commitSelectedPresets() {
       }
     }
 
+    // ==========================================
+    // LOOSE WEIGHT SCALE CALCULATOR
+    // ==========================================
     function openLooseScaleForWeight(grams) {
       const looseItem = currentInventory.find(p => p.uom === "kg/gm") || currentInventory[0];
       if (looseItem) {
@@ -2995,77 +2756,6 @@ function commitSelectedPresets() {
       runLooseWeightInput();
     }
 
-    // ----------------------------------------------------
-    // CART ENGINE WITH STRICT NEGATIVE THRESHOLD (CLAMPING)
-    // ----------------------------------------------------
-    function addItemToCart(productId, qty) {
-      const product = currentInventory.find(p => p.id === productId);
-      if (!product) return;
-
-      if (product.current_stock <= 0) {
-        alert(`⚠️ Out of Stock!\n"${product.custom_name}" has 0 ${product.uom} left in stock.`);
-        return;
-      }
-
-      const existing = activeCart.find(c => c.id === productId);
-      const currentCartQty = existing ? existing.qty : 0;
-      const requestedTotalQty = parseFloat((currentCartQty + qty).toFixed(3));
-
-      // Threshold check: Strict Clamp
-      if (requestedTotalQty > product.current_stock) {
-        const allowedAdd = parseFloat((product.current_stock - currentCartQty).toFixed(3));
-        
-        if (allowedAdd <= 0) {
-          alert(
-            `⛔ Stock Limit Reached!\n\n` +
-            `Only ${product.current_stock} ${product.uom} available for "${product.custom_name}".\n` +
-            `You already have ${currentCartQty} ${product.uom} in cart.`
-          );
-          return;
-        }
-
-        if (existing) {
-          existing.qty = product.current_stock;
-        } else {
-          activeCart.push({
-            id: product.id,
-            name: product.custom_name,
-            price: product.unit_price,
-            uom: product.uom,
-            qty: product.current_stock
-          });
-        }
-
-        alert(
-          `⚠️ Stock Limit Applied!\n\n` +
-          `Requested quantity exceeded inventory.\n` +
-          `Added the maximum remaining amount: ${product.current_stock} ${product.uom}.`
-        );
-      } else {
-        if (existing) {
-          existing.qty = requestedTotalQty;
-        } else {
-          activeCart.push({
-            id: product.id,
-            name: product.custom_name,
-            price: product.unit_price,
-            uom: product.uom,
-            qty: qty
-          });
-        }
-      }
-
-      const finalCartQty = existing ? existing.qty : qty;
-      const remainingStock = parseFloat((product.current_stock - finalCartQty).toFixed(3));
-      const minThreshold = product.min_stock_alert || 5;
-
-      if (remainingStock <= minThreshold) {
-        console.warn(`[LOW STOCK REMINDER] ${product.custom_name}: Only ${remainingStock} ${product.uom} left.`);
-      }
-
-      renderCartUI();
-    }
-
     function addCalculatedLooseToCart() {
       if (!activeScaleProduct) return;
 
@@ -3080,15 +2770,16 @@ function commitSelectedPresets() {
 
       if (qtyKg <= 0) return alert("Please specify a valid weight/amount.");
 
+      const itemStock = activeScaleProduct.current_stock ?? activeScaleProduct.stock_qty ?? 0;
       const existing = activeCart.find(c => c.id === activeScaleProduct.id);
       const currentCartQty = existing ? existing.qty : 0;
       const totalWanted = parseFloat((currentCartQty + qtyKg).toFixed(3));
 
-      if (totalWanted > activeScaleProduct.current_stock) {
-        const available = parseFloat((activeScaleProduct.current_stock - currentCartQty).toFixed(3));
+      if (totalWanted > itemStock) {
+        const available = parseFloat((itemStock - currentCartQty).toFixed(3));
         alert(
           `⛔ Insufficient Stock!\n\n` +
-          `Available: ${activeScaleProduct.current_stock} kg\n` +
+          `Available: ${itemStock} kg\n` +
           `In Cart: ${currentCartQty} kg\n` +
           `Remaining that can be added: ${Math.max(0, available)} kg.`
         );
@@ -3097,6 +2788,58 @@ function commitSelectedPresets() {
 
       addItemToCart(activeScaleProduct.id, qtyKg);
       closeLooseScaleCalculator();
+    }
+
+    // ==========================================
+    // CART ENGINE
+    // ==========================================
+    function addItemToCart(productId, qty) {
+      const product = currentInventory.find(p => String(p.id) === String(productId));
+      if (!product) return;
+
+      const productStock = product.current_stock ?? product.stock_qty ?? 0;
+      if (productStock <= 0) {
+        alert(`⚠️ Out of Stock!\n"${product.custom_name}" has 0 ${product.uom} left in stock.`);
+        return;
+      }
+
+      const existing = activeCart.find(c => String(c.id) === String(productId));
+      const currentCartQty = existing ? existing.qty : 0;
+      const requestedTotalQty = parseFloat((currentCartQty + qty).toFixed(3));
+
+      if (requestedTotalQty > productStock) {
+        const allowedAdd = parseFloat((productStock - currentCartQty).toFixed(3));
+        if (allowedAdd <= 0) {
+          alert(`⛔ Stock Limit Reached!\nOnly ${productStock} ${product.uom} available for "${product.custom_name}".`);
+          return;
+        }
+
+        if (existing) {
+          existing.qty = productStock;
+        } else {
+          activeCart.push({
+            id: product.id,
+            name: product.custom_name,
+            price: product.unit_price,
+            uom: product.uom,
+            qty: productStock
+          });
+        }
+      } else {
+        if (existing) {
+          existing.qty = requestedTotalQty;
+        } else {
+          activeCart.push({
+            id: product.id,
+            name: product.custom_name,
+            price: product.unit_price,
+            uom: product.uom,
+            qty: qty
+          });
+        }
+      }
+
+      renderCartUI();
     }
 
     function renderCartUI() {
@@ -3117,7 +2860,7 @@ function commitSelectedPresets() {
           <tr class="border-b border-slate-200 dark:border-slate-800/40">
             <td class="py-2 font-bold text-[11px]">${item.name}</td>
             <td class="py-2 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]">${item.qty} ${item.uom}</td>
-            <td class="py-2 text-right font-mono text-[11px]">₹${item.price}</td>
+            <td class="py-2 text-right font-mono text-[11px]">₹${Number(item.price).toFixed(2)}</td>
             <td class="py-2 text-right font-mono font-black text-emerald-600 dark:text-emerald-400 text-[11px]">₹${lineTotal.toFixed(2)}</td>
             <td class="py-2 text-center">
               <button type="button" onclick="removeCartLine(${idx})" class="text-red-500 font-bold">✕</button>
@@ -3141,9 +2884,9 @@ function commitSelectedPresets() {
 
     function calculateCartTotals() {
       const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-      const discountPct = parseFloat(document.getElementById("sel-discount-scheme").value) || 0;
-      const taxPct = parseFloat(document.getElementById("sel-tax-scheme").value) || 0;
-      const settle = parseFloat(document.getElementById("inp-cash-settle").value) || 0;
+      const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+      const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+      const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
 
       const discountAmount = subtotal * (discountPct / 100);
       const taxable = subtotal - discountAmount;
@@ -3160,81 +2903,73 @@ function commitSelectedPresets() {
       if (taxEl) taxEl.innerText = `+₹${taxAmount.toFixed(2)}`;
       if (totalEl) totalEl.innerText = `₹${grandTotal.toFixed(2)}`;
     }
+
     // ==========================================
-// COUNTER UPI (SHOP OWNER'S PHYSICAL QR & SOUNDBOX)
-// ==========================================
-function processCounterUpiSale() {
-  if (!activeCart || !activeCart.length) {
-    return alert("Cart is empty. Add products before billing.");
-  }
+    // CHECKOUT PROCESSOR
+    // ==========================================
+    function processCounterUpiSale() {
+      if (!activeCart || !activeCart.length) {
+        return alert("Cart is empty. Add products before billing.");
+      }
+      const billTotal = activeCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      openSoundboxConfirmModal(billTotal.toFixed(2));
+    }
 
-  // Calculate bill total
-  const billTotal = activeCart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
-  const formattedTotal = billTotal.toFixed(2);
-
-  // Open Soundbox payment confirmation dialog
-  openSoundboxConfirmModal(formattedTotal);
-}
-
-function openSoundboxConfirmModal(amount) {
-  let modal = document.getElementById("modal-soundbox-confirm");
-  if (!modal) {
-    const modalHtml = `
-      <div id="modal-soundbox-confirm" style="z-index: 9999;" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
-          <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">
-            🔊
+    function openSoundboxConfirmModal(amount) {
+      let modal = document.getElementById("modal-soundbox-confirm");
+      if (!modal) {
+        const modalHtml = `
+          <div id="modal-soundbox-confirm" style="z-index: 9999;" class="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-6 text-center space-y-4 text-slate-100">
+              <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto">🔊</div>
+              <div>
+                <h3 class="text-base font-black text-white">Scan Counter QR & Check Soundbox</h3>
+                <p class="text-xs text-slate-400 mt-1">Ask customer to scan your printed desk QR standee.</p>
+              </div>
+              <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3.5 space-y-1">
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Payable Amount</span>
+                <div id="txt-soundbox-payable" class="text-3xl font-black font-mono text-emerald-400">₹${amount}</div>
+              </div>
+              <div class="bg-indigo-950/30 border border-indigo-800/40 rounded-xl p-3 text-[11px] text-indigo-200">
+                📢 Listen for voice announcement on your <strong>Paytm / PhonePe / GPay Soundbox</strong> before clicking confirm.
+              </div>
+              <div class="space-y-2 pt-1">
+                <button type="button" onclick="confirmSoundboxSaleComplete()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+                  ✔ Audio Confirmed — Save & Print Bill
+                </button>
+                <button type="button" onclick="closeSoundboxModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
+                  Cancel / Switch to Cash
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 class="text-base font-black text-white">Scan Counter QR & Check Soundbox</h3>
-            <p class="text-xs text-slate-400 mt-1">Ask customer to scan your printed desk QR standee.</p>
-          </div>
+        `;
+        document.body.insertAdjacentHTML("beforeend", modalHtml);
+      } else {
+        document.getElementById("txt-soundbox-payable").innerText = `₹${amount}`;
+        modal.classList.remove("hidden");
+      }
+    }
 
-          <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3.5 space-y-1">
-            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Payable Amount</span>
-            <div id="txt-soundbox-payable" class="text-3xl font-black font-mono text-emerald-400">₹${amount}</div>
-          </div>
+    function closeSoundboxModal() {
+      const modal = document.getElementById("modal-soundbox-confirm");
+      if (modal) modal.classList.add("hidden");
+    }
 
-          <div class="bg-indigo-950/30 border border-indigo-800/40 rounded-xl p-3 text-[11px] text-indigo-200">
-            📢 Listen for voice announcement on your <strong>Paytm / PhonePe / GPay Soundbox</strong> before clicking confirm.
-          </div>
+    function confirmSoundboxSaleComplete() {
+      closeSoundboxModal();
+      processSale("UPI");
+    }
 
-          <div class="space-y-2 pt-1">
-            <button type="button" onclick="confirmSoundboxSaleComplete()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
-              ✔ Audio Confirmed — Save & Print Bill
-            </button>
-            <button type="button" onclick="closeSoundboxModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700">
-              Cancel / Switch to Cash
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML("beforeend", modalHtml);
-  } else {
-    document.getElementById("txt-soundbox-payable").innerText = `₹${amount}`;
-    modal.classList.remove("hidden");
-  }
-}
-
-function closeSoundboxModal() {
-  const modal = document.getElementById("modal-soundbox-confirm");
-  if (modal) modal.classList.add("hidden");
-}
-
-function confirmSoundboxSaleComplete() {
-  closeSoundboxModal();
-  // Calls your existing checkout function
-  processSale("UPI");
-}
     function processSale(paymentMode, custName = null, custPhone = null) {
       if (!checkStoreSubscriptionStatus()) return;
       if (!activeCart.length) return alert("Invoice is empty.");
 
       for (const ci of activeCart) {
-        const item = currentInventory.find(p => p.id === ci.id);
-        if (item && ci.qty > item.current_stock) {
-          alert(`Cannot checkout: "${ci.name}" exceeds current stock (${item.current_stock} available).`);
+        const item = currentInventory.find(p => String(p.id) === String(ci.id));
+        const stock = item ? (item.current_stock ?? item.stock_qty ?? 0) : 0;
+        if (item && ci.qty > stock) {
+          alert(`Cannot checkout: "${ci.name}" exceeds current stock (${stock} available).`);
           return;
         }
       }
@@ -3261,10 +2996,13 @@ function confirmSoundboxSaleComplete() {
       };
 
       activeCart.forEach(ci => {
-        const item = currentInventory.find(p => p.id === ci.id);
+        const item = currentInventory.find(p => String(p.id) === String(ci.id));
         if (item) {
-          item.current_stock = Math.max(0, parseFloat((item.current_stock - ci.qty).toFixed(3)));
-          
+          const oldStock = item.current_stock ?? item.stock_qty ?? 0;
+          const newStock = Math.max(0, parseFloat((oldStock - ci.qty).toFixed(3)));
+          item.current_stock = newStock;
+          item.stock_qty = newStock;
+
           if (item.current_stock <= (item.min_stock_alert || 5)) {
             recordAuditEntry({
               type: "LOW STOCK WARNING",
@@ -3292,82 +3030,10 @@ function confirmSoundboxSaleComplete() {
       renderAndPrintThermal(billRecord);
 
       clearCart();
-      if (typeof updateAdminPaymentTotals === "function") {
-  updateAdminPaymentTotals();
-}
+      updateAdminPaymentTotals();
       saveInventoryState();
     }
-// ==========================================
-// END-OF-DAY (EOD) THERMAL PRINT SLIP
-// ==========================================
-function printEodThermalSlip() {
-  const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-  const todayUk = now.toLocaleDateString("en-GB");
-  const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
 
-  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
-  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-
-  bills.forEach(bill => {
-    const rawDate = String(bill.created_at || bill.date || "");
-    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
-      billCount++;
-      const mode = String(bill.payment_mode || "").toUpperCase();
-      const amt = parseFloat(bill.total_amount || bill.total || 0);
-      totalSales += amt;
-      if (mode.includes("CASH")) cashSales += amt;
-      else if (mode.includes("UPI")) upiSales += amt;
-      else cardSales += amt;
-    }
-  });
-
-  const expectedDrawerCash = openingCash + cashSales;
-  const storeName = localStorage.getItem("storepos_store_name") || "ShopMaster Supermarket";
-
-  const printWindow = window.open("", "_blank", "width=320,height=600");
-  if (!printWindow) return alert("Please allow popups to print EOD slip.");
-
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>EOD Reconciliation Slip</title>
-        <style>
-          body { font-family: 'Courier New', monospace; font-size: 12px; width: 58mm; padding: 4px; margin: 0; color: #000; }
-          .center { text-align: center; }
-          .bold { font-weight: bold; }
-          .line { border-top: 1px dashed #000; margin: 5px 0; }
-          .row { display: flex; justify-content: space-between; margin: 2px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="center bold" style="font-size:14px;">${storeName}</div>
-        <div class="center">DAILY REGISTER SUMMARY</div>
-        <div class="center">${todayUk} | ${now.toLocaleTimeString()}</div>
-        <div class="line"></div>
-        <div class="row"><span>Opening Cash:</span><span class="bold">INR ${openingCash.toFixed(2)}</span></div>
-        <div class="row"><span>Cash Sales:</span><span class="bold">INR ${cashSales.toFixed(2)}</span></div>
-        <div class="line"></div>
-        <div class="row bold"><span>Expected Drawer:</span><span>INR ${expectedDrawerCash.toFixed(2)}</span></div>
-        <div class="line"></div>
-        <div class="row"><span>UPI / Soundbox:</span><span>INR ${upiSales.toFixed(2)}</span></div>
-        <div class="row"><span>Card / Other:</span><span>INR ${cardSales.toFixed(2)}</span></div>
-        <div class="line"></div>
-        <div class="row bold" style="font-size:13px;"><span>TOTAL REVENUE:</span><span>INR ${totalSales.toFixed(2)}</span></div>
-        <div class="row"><span>Total Bills:</span><span>${billCount}</span></div>
-        <div class="line"></div>
-        <div class="center" style="margin-top:10px;">--- Cashier Signature ---</div>
-        <br><br>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 300);
-}
     function renderAndPrintThermal(bill) {
       document.body.setAttribute("data-print-format", "thermal");
       document.body.setAttribute("data-paper-width", currentPaperWidth);
@@ -3416,12 +3082,16 @@ function printEodThermalSlip() {
       }
     }
 
+    // ==========================================
+    // INVENTORY TABLE & KPI METRICS
+    // ==========================================
     function renderLiveInventoryTable() {
       const tbody = document.getElementById("inventory-table-body");
       if (!tbody) return;
 
       tbody.innerHTML = currentInventory.map(item => {
-        const isLow = item.current_stock <= (item.min_stock_alert || 5);
+        const stock = item.current_stock ?? item.stock_qty ?? 0;
+        const isLow = stock <= (item.min_stock_alert || 5);
         const isLoose = item.uom === "kg/gm";
 
         return `
@@ -3436,13 +3106,13 @@ function printEodThermalSlip() {
                 ${isLoose ? '⚖️ By Weight (kg/gm)' : item.uom}
               </span>
             </td>
-            <td class="py-2.5 px-3 font-mono font-bold">${item.current_stock} <span class="text-[10px] text-slate-400 font-normal">${item.uom}</span></td>
+            <td class="py-2.5 px-3 font-mono font-bold">${stock} <span class="text-[10px] text-slate-400 font-normal">${item.uom}</span></td>
             <td class="py-2.5 px-3">
               <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isLow ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'}">
                 ${isLow ? '⚠️ LOW STOCK' : '✅ HEALTHY'}
               </span>
             </td>
-            <td class="py-2.5 px-3 font-mono">₹${item.unit_price.toFixed(2)}</td>
+            <td class="py-2.5 px-3 font-mono">₹${Number(item.unit_price).toFixed(2)}</td>
             <td class="py-2.5 px-3">
               <div class="font-semibold">${item.supplier_name || 'Direct Wholesale'}</div>
               <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">${item.supplier_phone || '9876543210'}</div>
@@ -3463,20 +3133,35 @@ function printEodThermalSlip() {
     }
 
     function updateKpis() {
-      const lowCount = currentInventory.filter(i => i.current_stock <= (i.min_stock_alert || 5)).length;
+      const lowCount = currentInventory.filter(i => (i.current_stock ?? i.stock_qty ?? 0) <= (i.min_stock_alert || 5)).length;
       const lowEl = document.getElementById("kpi-low-stock");
       if (lowEl) lowEl.innerText = `${lowCount} items`;
       const skuEl = document.getElementById("kpi-sku-count");
       if (skuEl) skuEl.innerText = `${currentInventory.length} goods`;
+
+      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+      let totalRev = 0;
+      let totalUnits = 0;
+      bills.forEach(b => {
+        totalRev += parseFloat(b.grandTotal ? String(b.grandTotal).replace(/[^0-9.]/g, '') : (b.total_amount || 0));
+        if (Array.isArray(b.items)) {
+          b.items.forEach(it => totalUnits += (parseFloat(it.qty) || 1));
+        }
+      });
+
+      const revEl = document.getElementById("kpi-revenue");
+      if (revEl) revEl.innerText = `₹${totalRev.toFixed(2)}`;
+      const unitsEl = document.getElementById("kpi-units");
+      if (unitsEl) unitsEl.innerHTML = `${Math.round(totalUnits)} <span class="text-xs font-normal text-slate-400">units</span>`;
     }
 
     function openReorderModal(productId) {
-      const item = currentInventory.find(p => p.id === productId);
+      const item = currentInventory.find(p => String(p.id) === String(productId));
       if (!item) return;
       activeReorderProductId = productId;
 
       document.getElementById("reorder-item-name").innerText = item.custom_name;
-      document.getElementById("reorder-item-current").innerText = `${item.current_stock} ${item.uom}`;
+      document.getElementById("reorder-item-current").innerText = `${item.current_stock ?? item.stock_qty ?? 0} ${item.uom}`;
       document.getElementById("reorder-supp-name").innerText = item.supplier_name || "Direct Supplier";
       document.getElementById("reorder-supp-phone").innerText = item.supplier_phone || "+91 98765 43210";
       document.getElementById("reorder-input-qty").value = "20";
@@ -3490,7 +3175,7 @@ function printEodThermalSlip() {
     }
 
     function dispatchSupplierWhatsAppOrder() {
-      const item = currentInventory.find(p => p.id === activeReorderProductId);
+      const item = currentInventory.find(p => String(p.id) === String(activeReorderProductId));
       if (!item) return;
       const qty = document.getElementById("reorder-input-qty").value;
       const phone = (item.supplier_phone || "919876543210").replace(/[^0-9]/g, "");
@@ -3502,7 +3187,7 @@ function printEodThermalSlip() {
         `Good: *${item.custom_name}*\n` +
         `SKU: ${item.barcode}\n` +
         `Required Inward Qty: *${qty} ${item.uom}*\n` +
-        `Current On-Hand Stock: ${item.current_stock} ${item.uom}\n` +
+        `Current On-Hand Stock: ${item.current_stock ?? item.stock_qty ?? 0} ${item.uom}\n` +
         `---------------------------\n` +
         `Kindly dispatch at wholesale rate and share delivery timeline.`
       );
@@ -3511,30 +3196,32 @@ function printEodThermalSlip() {
     }
 
     function submitReorderInward() {
-      const item = currentInventory.find(p => p.id === activeReorderProductId);
+      const item = currentInventory.find(p => String(p.id) === String(activeReorderProductId));
       if (!item) return;
       const qty = parseFloat(document.getElementById("reorder-input-qty").value);
       if (isNaN(qty) || qty <= 0) return alert("Specify valid quantity.");
 
-      const oldStock = item.current_stock;
-      item.current_stock = parseFloat((item.current_stock + qty).toFixed(2));
+      const oldStock = item.current_stock ?? item.stock_qty ?? 0;
+      const updatedStock = parseFloat((oldStock + qty).toFixed(2));
+      item.current_stock = updatedStock;
+      item.stock_qty = updatedStock;
 
       recordAuditEntry({
         type: "STOCK INWARD",
         title: `Restocked ${item.custom_name}`,
-        details: `Added +${qty} ${item.uom}. Balance: ${oldStock} -> ${item.current_stock}. Vendor: ${item.supplier_name}`
+        details: `Added +${qty} ${item.uom}. Balance: ${oldStock} -> ${updatedStock}. Vendor: ${item.supplier_name}`
       });
 
       saveInventoryState();
       closeReorderModal();
-      alert(`Stock inward confirmed! New balance: ${item.current_stock} ${item.uom}`);
+      alert(`Stock inward confirmed! New balance: ${updatedStock} ${item.uom}`);
     }
 
     function deleteInventoryItem(productId) {
-      const item = currentInventory.find(p => p.id === productId);
+      const item = currentInventory.find(p => String(p.id) === String(productId));
       if (!item || !confirm(`Permanently remove "${item.custom_name}" from inventory catalog?`)) return;
 
-      const idx = currentInventory.findIndex(p => p.id === productId);
+      const idx = currentInventory.findIndex(p => String(p.id) === String(productId));
       currentInventory.splice(idx, 1);
 
       recordAuditEntry({
@@ -3546,6 +3233,9 @@ function printEodThermalSlip() {
       saveInventoryState();
     }
 
+    // ==========================================
+    // CHARTS & AUDIT LEDGER
+    // ==========================================
     function initSalesCharts() {
       const ctxRev = document.getElementById("chart-daily-revenue");
       const ctxVol = document.getElementById("chart-sales-volume");
@@ -3670,132 +3360,10 @@ function printEodThermalSlip() {
 
       window.print();
     }
-// ==========================================
-// ADMIN MODE & PIN AUTHENTICATION
-// ==========================================
 
-window.handleAdminModeAccess = function() {
-  if (window.isAdminUnlocked) {
-    // Switch back to Staff Mode
-    window.isAdminUnlocked = false;
-    document.getElementById("panel-owner")?.classList.add("hidden");
-    document.getElementById("panel-staff")?.classList.remove("hidden");
-    const rolePill = document.getElementById("role-pill-badge");
-    if (rolePill) rolePill.innerText = "Staff Mode";
-    const lockLabel = document.getElementById("admin-lock-label");
-    if (lockLabel) lockLabel.innerText = "Admin Mode";
-  } else {
-    // Open the PIN modal
-    window.openAdminPinModal();
-  }
-};
-
-window.openAdminPinModal = function() {
-  window.enteredPin = "";
-  if (typeof updatePinDots === "function") updatePinDots();
-  const modal = document.getElementById("modal-admin-pin");
-  if (modal) modal.classList.remove("hidden");
-};
-
-window.closeAdminPinModal = function() {
-  const modal = document.getElementById("modal-admin-pin");
-  if (modal) modal.classList.add("hidden");
-  window.enteredPin = "";
-  if (typeof updatePinDots === "function") updatePinDots();
-};
-
-window.pressPinDigit = function(d) {
-  if (typeof window.enteredPin !== "string") window.enteredPin = "";
-  if (window.enteredPin.length < 6) {
-    window.enteredPin += String(d);
-    if (typeof updatePinDots === "function") updatePinDots();
-    if (window.enteredPin.length === 4 || window.enteredPin.length === 6) {
-      // Auto check when length reaches 4 or 6 digits
-      submitPinAuthentication();
-    }
-  }
-};
-
-window.clearPinInput = function() {
-  window.enteredPin = "";
-  if (typeof updatePinDots === "function") updatePinDots();
-};
-
-window.updatePinDots = function() {
-  const pinLen = (window.enteredPin || "").length;
-  document.querySelectorAll(".pin-dot").forEach((dot, idx) => {
-    dot.className = idx < pinLen 
-      ? "pin-dot w-3 h-3 rounded-full border border-emerald-400 bg-emerald-400" 
-      : "pin-dot w-3 h-3 rounded-full border border-indigo-500 bg-transparent";
-  });
-};
-
-window.submitPinAuthentication = function() {
-  const targetPin = window.ADMIN_PIN || localStorage.getItem("storepos_admin_pin") || "1234";
-
-  if (window.enteredPin === targetPin || window.enteredPin === "1234" || window.enteredPin === "123456") {
-    window.isAdminUnlocked = true;
-    window.closeAdminPinModal();
-
-    document.getElementById("panel-staff")?.classList.add("hidden");
-    document.getElementById("panel-owner")?.classList.remove("hidden");
-    
-    const rolePill = document.getElementById("role-pill-badge");
-    if (rolePill) rolePill.innerText = "Admin Master";
-    const lockLabel = document.getElementById("admin-lock-label");
-    if (lockLabel) lockLabel.innerText = "Lock / Staff";
-
-    if (typeof initSalesCharts === "function") initSalesCharts();
-    if (typeof updateAdminPaymentTotals === "function") updateAdminPaymentTotals();
-
-    // Morning Cash Prompt triggers right after successful login
-    if (typeof checkMorningCashDrawerPrompt === "function") {
-      checkMorningCashDrawerPrompt();
-    }
-  } else {
-    // Only alert if they have typed at least 4 digits
-    if ((window.enteredPin || "").length >= 4) {
-      alert("Invalid PIN! Default PIN is 1234.");
-      window.clearPinInput();
-    }
-  }
-};
     // ==========================================
-// KEYBOARD LISTENER FOR ADMIN 6-DIGIT PIN
-// ==========================================
-document.addEventListener("keydown", (e) => {
-  const pinModal = document.getElementById("modal-admin-pin");
-  
-  // Only intercept keys when the Admin PIN popup is actually open
-  if (!pinModal || pinModal.classList.contains("hidden")) return;
-
-  // 1. Numeric keys (0-9) from both main keyboard and Numpad
-  if (/^[0-9]$/.test(e.key)) {
-    e.preventDefault();
-    pressPinDigit(e.key);
-  } 
-  // 2. Backspace: remove the last entered digit
-  else if (e.key === "Backspace") {
-    e.preventDefault();
-    if (enteredPin.length > 0) {
-      enteredPin = enteredPin.slice(0, -1);
-      updatePinDots();
-    }
-  } 
-  // 3. Escape: close the modal immediately
-  else if (e.key === "Escape") {
-    e.preventDefault();
-    closeAdminPinModal();
-  } 
-  // 4. Enter: submit the PIN if 6 digits have been typed
-  else if (e.key === "Enter") {
-    e.preventDefault();
-    if (enteredPin.length === 6) {
-      submitPinAuthentication();
-    }
-  }
-});
-
+    // KHATA, WHATSAPP & CSV TOOLS
+    // ==========================================
     function openKhataModal() {
       if (!isKhataEnabled) return alert("Khata / Credit Billing is currently switched OFF by the Store Owner.");
       if (!activeCart.length) return alert("Cart is empty.");
@@ -3816,10 +3384,10 @@ document.addEventListener("keydown", (e) => {
     }
 
     function openWhatsAppAlertsModal() {
-      const lowItems = currentInventory.filter(i => i.current_stock <= (i.min_stock_alert || 5));
+      const lowItems = currentInventory.filter(i => (i.current_stock ?? i.stock_qty ?? 0) <= (i.min_stock_alert || 5));
       document.getElementById("wa-preview-body").value = 
         `🚨 *STOREPOS SYSTEM - URGENT LOW STOCK ALERT*\n📅 Date: ${new Date().toLocaleDateString("en-IN")}\n\n` +
-        lowItems.map((item, idx) => `${idx + 1}. *${item.custom_name}*\n   • Stock: ${item.current_stock} ${item.uom}\n   • Supplier: ${item.supplier_name} (${item.supplier_phone})`).join("\n\n") +
+        lowItems.map((item, idx) => `${idx + 1}. *${item.custom_name}*\n   • Stock: ${item.current_stock ?? item.stock_qty ?? 0} ${item.uom}\n   • Supplier: ${item.supplier_name} (${item.supplier_phone})`).join("\n\n") +
         `\n\n📌 Immediate replenishment recommended.`;
       document.getElementById("modal-whatsapp-engine").classList.remove("hidden");
     }
@@ -3886,7 +3454,7 @@ document.addEventListener("keydown", (e) => {
         Category: i.category,
         Sale_Basis: i.uom,
         Selling_Price: i.unit_price,
-        Stock: i.current_stock,
+        Stock: i.current_stock ?? i.stock_qty ?? 0,
         Supplier: i.supplier_name,
         Supplier_Phone: i.supplier_phone
       }));
