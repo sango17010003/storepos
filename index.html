@@ -1247,17 +1247,19 @@ window.ADMIN_PIN = localStorage.getItem("storepos_admin_pin") || "1234";
 window.openStaffQuickUpdateModal = function() {
   const modal = document.getElementById("modal-staff-quick-update");
   const sel = document.getElementById("sel-staff-product");
-  if (!modal) return alert("Modal element #modal-staff-quick-update not found in HTML.");
+  if (!modal) return alert("Modal #modal-staff-quick-update not found.");
 
-  const items = (typeof currentInventory !== "undefined" && Array.isArray(currentInventory)) ? currentInventory : [];
-  if (items.length === 0) return alert("Inventory is loading or empty.");
+  const items = window.currentInventory || [];
+  if (!items.length) return alert("Inventory empty or loading.");
 
   if (sel) {
-    sel.innerHTML = items.map(item => `
-      <option value="${item.id}">
-        ${item.custom_name} (Stock: ${item.stock_qty || 0}) — ₹${Number(item.unit_price).toFixed(2)}
-      </option>
-    `).join("");
+    sel.innerHTML = items.map((item, idx) => {
+      // Handle both sku, id, or index as unique identifier
+      const val = item.sku || item.id || idx;
+      const stock = item.stock_qty ?? item.stock ?? 0;
+      const price = item.unit_price ?? item.price ?? 0;
+      return `<option value="${val}">${item.custom_name || item.name} (Stock: ${stock}) — ₹${Number(price).toFixed(2)}</option>`;
+    }).join("");
   }
 
   if (typeof populateStaffQuickFields === "function") {
@@ -1266,10 +1268,44 @@ window.openStaffQuickUpdateModal = function() {
   modal.classList.remove("hidden");
 };
 
-window.closeStaffQuickUpdateModal = function() {
-  const modal = document.getElementById("modal-staff-quick-update");
-  if (modal) modal.classList.add("hidden");
+window.saveStaffQuickUpdate = function() {
+  const sel = document.getElementById("sel-staff-product");
+  const items = window.currentInventory || [];
+  if (!sel || !sel.value) return alert("Please select a product.");
+
+  // Locate the item by sku, id, or position
+  const selectedVal = sel.value;
+  const item = items.find((i, idx) => String(i.sku || i.id || idx) === String(selectedVal));
+  if (!item) return alert("Product not found in inventory.");
+
+  const newPrice = parseFloat(document.getElementById("inp-staff-selling-rate")?.value);
+  const newCost = parseFloat(document.getElementById("inp-staff-cost-rate")?.value);
+  const addStock = parseFloat(document.getElementById("inp-staff-add-stock")?.value) || 0;
+
+  if (isNaN(newPrice) || newPrice <= 0) return alert("Please enter a valid selling price.");
+
+  // Update properties on the object
+  item.unit_price = newPrice;
+  if (item.price !== undefined) item.price = newPrice;
+  if (!isNaN(newCost) && newCost >= 0) item.cost_price = newCost;
+
+  const currentQty = parseFloat(item.stock_qty ?? item.stock ?? 0);
+  const updatedQty = currentQty + addStock;
+  item.stock_qty = updatedQty;
+  if (item.stock !== undefined) item.stock = updatedQty;
+
+  // Persist locally & cloud
+  localStorage.setItem("storepos_inventory_data", JSON.stringify(items));
+  if (typeof saveInventoryState === "function") saveInventoryState();
+
+  // Re-render UI
+  if (typeof renderCatalogCards === "function") renderCatalogCards();
+  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
+
+  window.closeStaffQuickUpdateModal();
+  alert(`✅ Updated "${item.custom_name || item.name}"!\nStock is now: ${updatedQty} | Price: ₹${newPrice.toFixed(2)}`);
 };
+ 
     const SUPABASE_URL = "https://tbuwxlqxctgenvhsbjhi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_I4VCbjgkHMLWZ2JHZgRWtw_wDmTSTWl";
 
@@ -2167,9 +2203,11 @@ function submitMorningOpeningCash() {
 }
 
 // Compute real-time payment mode totals
-function updateAdminPaymentTotals() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayKey = "storepos_opening_cash_" + todayStr;
+window.updateAdminPaymentTotals = function() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const todayKey = "storepos_opening_cash_" + todayIso;
   const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
 
   let cashTotal = 0;
@@ -2178,13 +2216,25 @@ function updateAdminPaymentTotals() {
 
   const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
   bills.forEach(bill => {
-    const billDate = (bill.created_at || bill.date || "").slice(0, 10);
-    if (billDate === todayStr) {
-      const mode = (bill.payment_mode || "").toLowerCase();
-      const amt = parseFloat(bill.total_amount || bill.total || 0);
-      if (mode.includes("cash")) cashTotal += amt;
-      else if (mode.includes("upi")) upiTotal += amt;
-      else cardTotal += amt;
+    const rawDate = String(bill.created_at || bill.date || "");
+    const isToday = rawDate.includes(todayIso) || rawDate.includes(todayUk);
+
+    if (isToday) {
+      // Check every common payment mode string
+      const mode = String(bill.payment_mode || bill.paymentMode || bill.mode || "").toUpperCase();
+      
+      // Check every possible amount key used across versions
+      const amt = parseFloat(
+        bill.total_amount ?? bill.grand_total ?? bill.final_total ?? bill.total ?? bill.amount ?? 0
+      );
+
+      if (mode.includes("CASH")) {
+        cashTotal += amt;
+      } else if (mode.includes("UPI") || mode.includes("SOUNDBOX") || mode.includes("QR")) {
+        upiTotal += amt;
+      } else {
+        cardTotal += amt;
+      }
     }
   });
 
@@ -2197,8 +2247,8 @@ function updateAdminPaymentTotals() {
   if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
   if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
   if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
-}
-    function openBulkPresetModal() {
+};
+  function openBulkPresetModal() {
   // Guard: Never open if user has already completed onboarding or has products
   const hasOnboarded = localStorage.getItem("storepos_onboarding_completed") === "true";
   const hasItems = Array.isArray(currentInventory) && currentInventory.length > 0;
@@ -2306,6 +2356,23 @@ function filterPresetCatalogUI() {
 // ==========================================
 // STAFF QUICK STOCK & PRICE EDIT CONTROLLER
 // ==========================================
+window.openBulkPresetModal = function() {
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") ||
+                document.getElementById("modal-preset-library");
+  if (modal) {
+    modal.classList.remove("hidden");
+  } else {
+    alert("Preset Catalog modal element not found in HTML. Check modal ID.");
+  }
+};
+
+window.closeBulkPresetModal = function() {
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") ||
+                document.getElementById("modal-preset-library");
+  if (modal) modal.classList.add("hidden");
+};
 window.openStaffQuickUpdateModal = function() {
   const sel = document.getElementById("sel-staff-product");
   if (!sel || !currentInventory || !currentInventory.length) {
