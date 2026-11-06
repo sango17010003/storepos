@@ -760,12 +760,12 @@
   id="inp-preset-search" 
   type="text" 
   placeholder="Search FMCG, Cold Drink, Sweets..." 
-  oninput="filterPresetCatalogUI()" 
+  oninput="renderPresetModalLibrary(this.value)" 
   class="bg-[#08111e] border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-64 focus:border-indigo-500"
 >
         <div class="space-x-2">
-          <button type="button" onclick="toggleSelectAllPresets(true)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Select All</button>
-          <button type="button" onclick="toggleSelectAllPresets(false)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Deselect All</button>
+          <button type="button" onclick="selectAllPresets(true)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Select All</button>
+          <button type="button" onclick="selectAllPresets(false)" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-xs">Deselect All</button>
         </div>
       </div>
 
@@ -1359,90 +1359,224 @@ window.saveStaffQuickUpdate = function() {
     let globalPresetCatalog = [];
     let globalPresetsList = [];
     function generatePresetCatalog() {
-      const presets = [];
-      const fmcgBases = [
-        "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2-Minute Masala Noodles",
-        "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
-        "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth", "Dettol Original Soap",
-        "Lifebuoy Total Soap", "Head & Shoulders Shampoo", "Sunsilk Black Shine", "Patanjali Dant Kanti",
-        "Haldiram's Bhujia Sev", "Haldiram's Khatta Meetha", "Kurkure Masala Munch", "Lay's India's Magic Masala",
-        "Cadbury Dairy Milk", "Nestle KitKat", "Tata Tea Gold", "Red Label Natural Care", "Bru Instant Coffee",
-        "Nescafe Classic", "Kissan Mixed Fruit Jam", "Kissan Tomato Ketchup", "Everest Garam Masala",
-        "Catch Sabzi Masala", "MDH Deggi Mirch", "Saffola Gold Pro Healthy", "Pillsbury Chakki Fresh"
-      ];
+  const presets = [];
 
-      for (let i = 0; i < 500; i++) {
-        const base = fmcgBases[i % fmcgBases.length];
-        const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
-        const isWeightLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
-        presets.push({
-          id: `fmcg-preset-${i}`,
-          custom_name: `${base} ${weightTag} #${i + 1}`,
-          barcode: `890${10000 + i}`,
-          category: i % 2 === 0 ? "Groceries" : "Snacks",
-          uom: isWeightLoose ? "kg/gm" : "pack",
-          unit_price: 30 + (i % 40) * 10,
-          cost_price: 24 + (i % 40) * 8,
-          current_stock: 40,
-          min_stock_alert: 5,
-          supplier_name: "Metro FMCG Wholesalers",
-          supplier_phone: "919876543299"
-        });
-      }
+  // --- 1. 500 FMCG / GROCERY VARIETIES ---
+  const fmcgBases = [
+    "Aashirvaad Shudh Chakki Atta", "Fortune Sunlite Sunflower Oil", "Maggi 2 Minute Masala Noodles",
+    "Parle-G Glucose Biscuits", "Britannia Good Day Butter", "Amul Butter Pasteurised", "Surf Excel Easy Wash",
+    "Rin Detergent Bar", "Vim Dishwash Gel Lemon", "Colgate Strong Teeth", "Dettol Original Soap",
+    "Lifebuoy Total Soap", "Head & Shoulders Shampoo", "Sunsilk Black Shine", "Patanjali Dant Kanti",
+    "Haldiram's Bhujia Sev", "Haldiram's Khatta Meetha", "Kurkure Masala Munch", "Lay's India's Magic Masala",
+    "Cadbury Dairy Milk", "Nestle KitKat", "Tata Tea Gold", "Red Label Natural Care", "Bru Instant Coffee",
+    "Nescafe Classic", "Kissan Mixed Fruit Jam", "Kissan Tomato Ketchup", "Everest Garam Masala",
+    "Catch Sabzi Masala", "MDH Deggi Mirch", "Saffola Gold Pro Healthy", "Pillsbury Chakki Fresh"
+  ];
 
-      const sweetBases = [
-        "Kaju Katli Special", "Motichoor Laddu Desi Ghee", "Gulab Jamun Soft", "Rasgulla Kolkata",
-        "Besan Laddu Dryfruit", "Milk Cake Alwar", "Kaju Roll Pista", "Dodha Barfi Desi", "Soan Papdi Ghee",
-        "Dry Fruit Halwa", "Peda Mathura", "Rasmalai Saffron", "Cham Cham Bengali", "Kaju Barfi Pure"
-      ];
-      for (let i = 0; i < 150; i++) {
-        const sweet = sweetBases[i % sweetBases.length];
-        presets.push({
-          id: `sweet-preset-${i}`,
-          custom_name: `${sweet} Batch #${i + 1}`,
-          barcode: `891${20000 + i}`,
-          category: "Sweets",
-          uom: "kg/gm",
-          unit_price: 380 + (i % 20) * 30,
-          cost_price: 300 + (i % 20) * 24,
-          current_stock: 20,
-          min_stock_alert: 4,
-          supplier_name: "Raj Sweets Manufacturing",
-          supplier_phone: "919876543288"
-        });
-      }
+  for (let i = 0; i < 500; i++) {
+    const base = fmcgBases[i % fmcgBases.length];
+    const weightTag = (i % 3 === 0) ? "1kg" : (i % 3 === 1 ? "500g" : "Pack");
+    const isWeightLoose = i % 4 === 0 && (base.includes("Atta") || base.includes("Masala"));
+    const price = Math.round(25 + ((i * 17) % 380));
+    const cost = Math.round(price * 0.82);
 
-      const drinkBases = [
-        "Coca Cola Bottle 750ml", "Thums Up Bottle 750ml", "Sprite Bottle 750ml", "Limca Lime 750ml",
-        "Frooti Mango Drink 600ml", "Maaza Mango 600ml", "Red Bull Energy Can", "Sting Energy 250ml",
-        "Amul Kool Kesar Badam", "Bisleri Mineral Water 1L", "Aquafina 1L", "Kinley Club Soda"
-      ];
-      for (let i = 0; i < 50; i++) {
-        const drink = drinkBases[i % drinkBases.length];
-        presets.push({
-          id: `drink-preset-${i}`,
-          custom_name: `${drink} (Chilled) #${i + 1}`,
-          barcode: `892${30000 + i}`,
-          category: "Beverages",
-          uom: "pc",
-          unit_price: 20 + (i % 10) * 5,
-          cost_price: 15 + (i % 10) * 4,
-          current_stock: 35,
-          min_stock_alert: 6,
-          supplier_name: "Apex Cold Drink Agency",
-          supplier_phone: "919876543277"
-        });
-      }
+    presets.push({
+      id: `fmcg-${i + 1}`,
+      custom_name: `${base} (${weightTag} - Batch #${i + 1})`,
+      barcode: `890${String(1000000 + i).slice(1)}`,
+      category: isWeightLoose ? "Groceries" : "Packaged Goods",
+      uom: isWeightLoose ? "kg/gm" : "pc",
+      unit_price: price,
+      cost_price: cost,
+      tax_rate: (i % 5 === 0) ? 0 : (i % 2 === 0 ? 5 : 18),
+      stock_qty: 25
+    });
+  }
+// ==========================================
+// PRESET LIBRARY MODAL RENDER & IMPORT LOGIC
+// ==========================================
 
-      globalPresetCatalog = presets;
-      globalPresetsList = presets;
+window.renderPresetModalLibrary = function(filterQuery = "") {
+  // Finds whatever container exists inside your preset modal
+  const container = document.getElementById("preset-product-list-container") || 
+                    document.getElementById("preset-checklist-body") ||
+                    document.querySelector("#modal-bulk-preset .overflow-y-auto") ||
+                    document.querySelector("[id*='preset'] .overflow-y-auto");
+
+  if (!container) return;
+
+  // Generate catalog if not already cached
+  if (!window.globalPresetCatalog || window.globalPresetCatalog.length === 0) {
+    if (typeof generatePresetCatalog === "function") {
+      generatePresetCatalog();
     }
+  }
 
-    window.openGeneralAddStockModal = function() {
+  const q = String(filterQuery).toLowerCase().trim();
+  const list = (window.globalPresetCatalog || []).filter(item => 
+    !q || 
+    (item.custom_name && item.custom_name.toLowerCase().includes(q)) || 
+    (item.category && item.category.toLowerCase().includes(q))
+  );
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No matching products found.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(item => `
+    <label class="flex items-center justify-between p-2.5 hover:bg-slate-800/60 rounded-xl cursor-pointer border border-slate-800/80 mb-1.5 transition">
+      <div class="flex items-center gap-3">
+        <input 
+          type="checkbox" 
+          value="${item.id}" 
+          class="preset-item-checkbox w-4 h-4 text-emerald-500 rounded border-slate-700 bg-slate-900 focus:ring-emerald-500 cursor-pointer"
+          onchange="updatePresetSelectedCount()"
+        />
+        <div>
+          <div class="text-xs font-bold text-slate-100">${item.custom_name}</div>
+          <div class="text-[10px] text-slate-400">${item.category} • Unit: ${item.uom || item.unit}</div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs font-black text-emerald-400">₹${Number(item.unit_price).toFixed(2)}</div>
+        <div class="text-[9px] text-slate-500">Cost: ₹${Number(item.cost_price).toFixed(2)}</div>
+      </div>
+    </label>
+  `).join("");
+
+  updatePresetSelectedCount();
+};
+
+window.updatePresetSelectedCount = function() {
+  const checked = document.querySelectorAll(".preset-item-checkbox:checked");
+  const countSpan = document.getElementById("txt-preset-selected-count") || 
+                    document.querySelector("#modal-bulk-preset [class*='selected']");
+  if (countSpan) {
+    countSpan.innerText = `${checked.length} products selected`;
+  }
+};
+
+window.selectAllPresets = function(shouldSelect = true) {
+  document.querySelectorAll(".preset-item-checkbox").forEach(cb => cb.checked = shouldSelect);
+  updatePresetSelectedCount();
+};
+
+window.openBulkPresetModal = function() {
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") ||
+                document.getElementById("modal-preset-library");
+  if (modal) {
+    modal.classList.remove("hidden");
+    renderPresetModalLibrary();
+  }
+};
+
+window.closeBulkPresetModal = function() {
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") ||
+                document.getElementById("modal-preset-library");
+  if (modal) modal.classList.add("hidden");
+};
+
+window.importSelectedPresets = function() {
+  const checkedBoxes = Array.from(document.querySelectorAll(".preset-item-checkbox:checked"));
+  if (checkedBoxes.length === 0) {
+    return alert("Please select at least one product to import.");
+  }
+
+  const selectedIds = new Set(checkedBoxes.map(cb => cb.value));
+  const toAdd = (window.globalPresetCatalog || []).filter(i => selectedIds.has(i.id));
+
+  if (!Array.isArray(window.currentInventory)) window.currentInventory = [];
+
+  toAdd.forEach(item => {
+    const exists = window.currentInventory.find(existing => 
+      (existing.custom_name || existing.name) === item.custom_name
+    );
+    if (!exists) {
+      window.currentInventory.push({
+        id: item.id,
+        sku: item.barcode || item.id,
+        barcode: item.barcode || item.id,
+        custom_name: item.custom_name,
+        category: item.category,
+        uom: item.uom || "pc",
+        unit_price: item.unit_price,
+        cost_price: item.cost_price,
+        tax_rate: item.tax_rate || 5,
+        stock_qty: item.stock_qty || 25
+      });
+    }
+  });
+
+  localStorage.setItem("storepos_inventory_data", JSON.stringify(window.currentInventory));
+  if (typeof saveInventoryState === "function") saveInventoryState();
+  if (typeof renderCatalogCards === "function") renderCatalogCards();
+  if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
+
+  window.closeBulkPresetModal();
+  alert(`✅ Successfully imported ${toAdd.length} items (FMCG & Mithai) into active inventory!`);
+};
+  // --- 2. 150 MITHAI & SWEET VARIETIES ---
+  const sweetBases = [
+    { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
+    { name: "Motichoor Desi Ghee Ladoo", uom: "kg/gm", price: 420, cost: 310 },
+    { name: "Besan Ladoo Pure Desi Ghee", uom: "kg/gm", price: 440, cost: 320 },
+    { name: "Atta Gond Dry Fruit Ladoo", uom: "kg/gm", price: 560, cost: 420 },
+    { name: "Tirupati Style Boondi Ladoo", uom: "kg/gm", price: 460, cost: 340 },
+    { name: "Gulab Jamun Khoya Pure Ghee", uom: "kg/gm", price: 380, cost: 270 },
+    { name: "Kala Jamun Mawa", uom: "kg/gm", price: 400, cost: 290 },
+    { name: "Mathura Peda Special", uom: "kg/gm", price: 460, cost: 340 },
+    { name: "Kesar Peda Malai", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Dharwad Peda Authentic", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Milk Cake Alwar Special", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Kalakand Fresh Malai", uom: "kg/gm", price: 500, cost: 370 },
+    { name: "Doda Barfi Desi Ghee", uom: "kg/gm", price: 540, cost: 410 },
+    { name: "White Mawa Barfi", uom: "kg/gm", price: 460, cost: 330 },
+    { name: "Pista Lauj Barfi", uom: "kg/gm", price: 1400, cost: 1150 },
+    { name: "Badam Katli Pure Almond", uom: "kg/gm", price: 950, cost: 770 },
+    { name: "Kaju Roll Pista Stuffed", uom: "kg/gm", price: 980, cost: 770 },
+    { name: "Kaju Anjeer Chakri", uom: "kg/gm", price: 980, cost: 790 },
+    { name: "Anjeer Dryfruit Barfi (Sugarfree)", uom: "kg/gm", price: 1100, cost: 890 },
+    { name: "Khajoor Dryfruit Roll", uom: "kg/gm", price: 850, cost: 680 },
+    { name: "Kolkata Spongy Rasgulla", uom: "pc", price: 20, cost: 12 },
+    { name: "Kesar Pista Rasmalai", uom: "pc", price: 40, cost: 25 },
+    { name: "Rajbhog Kesar Dry Fruit", uom: "pc", price: 35, cost: 21 },
+    { name: "Cham Cham Pink Cream", uom: "kg/gm", price: 440, cost: 320 },
+    { name: "Malai Chop Stuffed", uom: "kg/gm", price: 460, cost: 330 },
+    { name: "Chhena Poda Odia Baked", uom: "kg/gm", price: 500, cost: 370 },
+    { name: "Sandesh Nolen Gur", uom: "kg/gm", price: 540, cost: 400 },
+    { name: "Mysore Pak Traditional Ghee", uom: "kg/gm", price: 540, cost: 410 },
+    { name: "Sunnundalu (Andhra Urad Dal Ladoo)", uom: "kg/gm", price: 520, cost: 390 },
+    { name: "Balushahi Traditional", uom: "kg/gm", price: 380, cost: 260 }
+  ];
+
+  for (let s = 0; s < 150; s++) {
+    const item = sweetBases[s % sweetBases.length];
+    const tier = Math.floor(s / sweetBases.length) + 1;
+    const tierLabel = tier === 1 ? "Standard" : (tier === 2 ? "Special Desi Ghee" : (tier === 3 ? "Royal Festive" : (tier === 4 ? "Export Quality" : "Handcrafted")));
+
+    presets.push({
+      id: `swt-${s + 1}`,
+      custom_name: `${item.name} [${tierLabel}]`,
+      barcode: `8909${String(1000 + s).slice(1)}`,
+      category: "Sweets",
+      uom: item.uom,
+      unit_price: item.price + ((tier - 1) * 20),
+      cost_price: item.cost + ((tier - 1) * 15),
+      tax_rate: 5,
+      stock_qty: 20
+    });
+  }
+  window.globalPresetCatalog = presets;
+  window.globalPresetsList = presets;
+  return presets;
+}
+  window.openGeneralAddStockModal = function() {
       openAddProductModal();
     };
-
-    window.addEventListener("DOMContentLoaded", () => {
+   window.addEventListener("DOMContentLoaded", () => {
       applyTheme();
       generatePresetCatalog();
       loadInventoryState();
