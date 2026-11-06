@@ -1447,77 +1447,101 @@ window.renderPresetModalLibrary = function(filterQuery = "") {
 
   updatePresetSelectedCount();
 };
-
 window.updatePresetSelectedCount = function() {
-  const checked = document.querySelectorAll(".preset-item-checkbox:checked");
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") || 
+                document.getElementById("modal-preset-library") ||
+                document.querySelector("[id*='preset']");
+
+  // Select ANY checked checkbox inside the preset modal
+  const checkedBoxes = modal 
+    ? modal.querySelectorAll("input[type='checkbox']:checked")
+    : document.querySelectorAll("input[type='checkbox']:checked");
+
   const countSpan = document.getElementById("txt-preset-selected-count") || 
-                    document.querySelector("#modal-bulk-preset [class*='selected']");
+                    modal?.querySelector(".text-emerald-400, [class*='selected']");
+
   if (countSpan) {
-    countSpan.innerText = `${checked.length} products selected`;
+    countSpan.innerText = `${checkedBoxes.length} products selected`;
   }
 };
 
 window.selectAllPresets = function(shouldSelect = true) {
-  document.querySelectorAll(".preset-item-checkbox").forEach(cb => cb.checked = shouldSelect);
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") || 
+                document.getElementById("modal-preset-library") ||
+                document.querySelector("[id*='preset']");
+
+  const allCheckboxes = modal 
+    ? modal.querySelectorAll("input[type='checkbox']") 
+    : document.querySelectorAll("input[type='checkbox']");
+
+  allCheckboxes.forEach(cb => cb.checked = shouldSelect);
   updatePresetSelectedCount();
 };
 
-window.openBulkPresetModal = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") ||
-                document.getElementById("modal-preset-library");
-  if (modal) {
-    modal.classList.remove("hidden");
-    renderPresetModalLibrary();
+// Auto-update counter whenever any checkbox in the modal is toggled
+document.addEventListener("change", function(e) {
+  if (e.target && e.target.type === "checkbox" && e.target.closest("[id*='preset']")) {
+    updatePresetSelectedCount();
   }
-};
-
-window.closeBulkPresetModal = function() {
-  const modal = document.getElementById("modal-bulk-preset") || 
-                document.getElementById("modal-preset-catalog") ||
-                document.getElementById("modal-preset-library");
-  if (modal) modal.classList.add("hidden");
-};
-
+});
 window.importSelectedPresets = function() {
-  const checkedBoxes = Array.from(document.querySelectorAll(".preset-item-checkbox:checked"));
-  if (checkedBoxes.length === 0) {
-    return alert("Please select at least one product to import.");
+  const modal = document.getElementById("modal-bulk-preset") || 
+                document.getElementById("modal-preset-catalog") || 
+                document.getElementById("modal-preset-library") ||
+                document.querySelector("[id*='preset']");
+
+  const checkedBoxes = modal 
+    ? Array.from(modal.querySelectorAll("input[type='checkbox']:checked"))
+    : Array.from(document.querySelectorAll("input[type='checkbox']:checked"));
+
+  if (!checkedBoxes.length) {
+    return alert("Please check at least one item.");
   }
 
-  const selectedIds = new Set(checkedBoxes.map(cb => cb.value));
-  const toAdd = (window.globalPresetCatalog || []).filter(i => selectedIds.has(i.id));
+  // Get selected values (supports ID, custom_name, or barcode)
+  const selectedValues = new Set(checkedBoxes.map(cb => String(cb.value).trim()));
+  const catalogSource = window.globalPresetCatalog || window.globalPresetsList || window.PRESET_MASTER_LIBRARY || [];
+
+  const toAdd = catalogSource.filter(item => 
+    selectedValues.has(String(item.id)) || 
+    selectedValues.has(String(item.barcode)) ||
+    selectedValues.has(String(item.custom_name))
+  );
 
   if (!Array.isArray(window.currentInventory)) window.currentInventory = [];
 
+  let addedCount = 0;
   toAdd.forEach(item => {
-    const exists = window.currentInventory.find(existing => 
-      (existing.custom_name || existing.name) === item.custom_name
-    );
+    const itemName = item.custom_name || item.name;
+    const exists = window.currentInventory.some(existing => (existing.custom_name || existing.name) === itemName);
     if (!exists) {
       window.currentInventory.push({
-        id: item.id,
+        id: item.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         sku: item.barcode || item.id,
         barcode: item.barcode || item.id,
-        custom_name: item.custom_name,
-        category: item.category,
-        uom: item.uom || "pc",
-        unit_price: item.unit_price,
-        cost_price: item.cost_price,
-        tax_rate: item.tax_rate || 5,
+        custom_name: itemName,
+        category: item.category || "General",
+        uom: item.uom || item.unit || "pc",
+        unit_price: parseFloat(item.unit_price || item.price || 0),
+        cost_price: parseFloat(item.cost_price || item.cost || 0),
+        tax_rate: parseFloat(item.tax_rate || item.gst || 0),
         stock_qty: item.stock_qty || 25
       });
+      addedCount++;
     }
   });
 
+  // Save to storage and refresh UI
   localStorage.setItem("storepos_inventory_data", JSON.stringify(window.currentInventory));
   if (typeof saveInventoryState === "function") saveInventoryState();
   if (typeof renderCatalogCards === "function") renderCatalogCards();
   if (typeof renderLiveInventoryTable === "function") renderLiveInventoryTable();
 
-  window.closeBulkPresetModal();
-  alert(`✅ Successfully imported ${toAdd.length} items (FMCG & Mithai) into active inventory!`);
-};
+  if (modal) modal.classList.add("hidden");
+  alert(`✅ Successfully imported ${addedCount} products into your active counter catalog!`);
+};     
   // --- 2. 150 MITHAI & SWEET VARIETIES ---
   const sweetBases = [
     { name: "Kaju Katli Special", uom: "kg/gm", price: 900, cost: 720 },
