@@ -1898,56 +1898,27 @@ window.closeMorningCashModal = function() {
 // 2. AUTHENTICATION & LOGIN FLOW (1st LOGIN, THEN CASH ENTRY)
 // ==========================================
 window.checkMorningCashDrawerPrompt = function() {
-  // Only execute if activeUser is logged in
-  if (!window.activeUser) return;
+  // 1. Guard: Only run if user is logged into the app view
+  const landing = document.getElementById("view-landing");
+  if (landing && !landing.classList.contains("hidden")) return;
 
   const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
   const todayIso = new Date().toISOString().slice(0, 10);
-  const todayKey = `storepos_opening_cash_${currentGstin}_${todayIso}`;
-  const existingFloat = localStorage.getItem(todayKey);
+  const existingFloat = localStorage.getItem(`storepos_opening_cash_${currentGstin}_${todayIso}`) || localStorage.getItem("storepos_opening_cash_" + todayIso);
 
+  // 2. If no float recorded for today, display the modal
   if (!existingFloat) {
     const modal = document.getElementById("modal-morning-cash");
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
   } else {
     const openElem = document.getElementById("adm-txt-opening-cash");
     if (openElem) openElem.innerText = `₹${parseFloat(existingFloat).toFixed(2)}`;
-    if (typeof updateAdminPaymentTotals === "function") updateAdminPaymentTotals();
+    if (typeof window.updateAdminPaymentTotals === "function") {
+      window.updateAdminPaymentTotals();
+    }
   }
-};
-
-window.submitAuthentication = async function() {
-  const gstinInput = document.getElementById("inp-auth-gstin")?.value.trim().toUpperCase();
-  const email = document.getElementById("inp-email").value.trim();
-  const password = document.getElementById("inp-password").value.trim();
-  const shopName = document.getElementById("inp-shop-name").value.trim();
-  const msg = document.getElementById("auth-status-msg");
-
-  msg.innerText = "";
-  if (!email || !password) {
-    msg.innerText = "Please provide email and password.";
-    return;
-  }
-  if (!gstinInput || gstinInput.length < 15) {
-    msg.innerText = "Please enter a valid 15-digit unique Store GSTIN.";
-    return;
-  }
-
-  // Bind store data to unique GSTIN tenant
-  localStorage.setItem("storepos_gstin", gstinInput);
-  window.storeGstin = gstinInput;
-  window.activeUser = { email, shopName: shopName || "ShopMaster Supermarket", gstin: gstinInput };
-
-  // Switch views
-  document.getElementById("view-landing")?.classList.add("hidden");
-  document.getElementById("view-app")?.classList.remove("hidden");
-  document.getElementById("header-shop-name").innerText = window.activeUser.shopName;
-  document.getElementById("header-user-email").innerText = window.activeUser.email;
-  syncGstinUI();
-  renderCoAdminList();
-
-  // 1st Login completes -> THEN prompt for Morning Cash Entry
-  window.checkMorningCashDrawerPrompt();
 };
 
 // ==========================================
@@ -2318,10 +2289,10 @@ _Generated automatically via StorePOS Terminal_`;
       initSalesCharts();
       renderCartUI();
       updateAdminPaymentTotals();
-
-      if (typeof window.checkMorningCashDrawerPrompt === "function") {
-         window.checkMorningCashDrawerPrompt();
-      }
+      syncGstinUI();
+      syncKhataUI();
+      
+      if (typeof renderCoAdminList === "function") renderCoAdminList();
       if (typeof checkStoreSubscriptionStatus === "function") {
         checkStoreSubscriptionStatus();
       }
@@ -2679,41 +2650,56 @@ _Generated automatically via StorePOS Terminal_`;
       document.getElementById("auth-submit-btn").innerText = isRegistering ? "Create Store & Account →" : "Sign In & Open Counter →";
     }
 
-    async function submitAuthentication() {
-      const email = document.getElementById("inp-email").value.trim();
-      const password = document.getElementById("inp-password").value.trim();
-      const shopName = document.getElementById("inp-shop-name").value.trim();
-      const msg = document.getElementById("auth-status-msg");
+    window.submitAuthentication = async function() {
+  const gstinInput = document.getElementById("inp-auth-gstin")?.value.trim().toUpperCase() || 
+                     document.getElementById("inp-store-gstin")?.value.trim().toUpperCase() || 
+                     "23AAAAA0000A1Z5";
+  const email = document.getElementById("inp-email")?.value.trim();
+  const password = document.getElementById("inp-password")?.value.trim();
+  const shopName = document.getElementById("inp-shop-name")?.value.trim();
+  const msg = document.getElementById("auth-status-msg");
 
-      msg.innerText = "";
-      if (!email || !password) {
-        msg.innerText = "Please provide email and password.";
-        return;
-      }
+  if (msg) msg.innerText = "";
+  if (!email || !password) {
+    if (msg) msg.innerText = "Please provide email and password.";
+    return;
+  }
 
-      activeUser = { email, shopName: shopName || "ShopMaster Supermarket" };
+  // Bind store data to unique GSTIN tenant
+  localStorage.setItem("storepos_gstin", gstinInput);
+  window.storeGstin = gstinInput;
+  window.activeUser = { email, shopName: shopName || "ShopMaster Supermarket", gstin: gstinInput };
 
-      recordAuditEntry({
-        type: "SESSION LOGIN",
-        title: `Terminal Session Started: ${email}`,
-        details: `User logged in from ${navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop Counter"} at ${new Date().toLocaleTimeString("en-IN")}.`
-      });
+  // Switch views from Landing to Main POS App
+  document.getElementById("view-landing")?.classList.add("hidden");
+  document.getElementById("view-app")?.classList.remove("hidden");
+  
+  const headerShop = document.getElementById("header-shop-name");
+  const headerUser = document.getElementById("header-user-email");
+  if (headerShop) headerShop.innerText = window.activeUser.shopName;
+  if (headerUser) headerUser.innerText = window.activeUser.email;
 
-      document.getElementById("view-landing").classList.add("hidden");
-      document.getElementById("view-app").classList.remove("hidden");
-      document.getElementById("header-shop-name").innerText = activeUser.shopName;
-      document.getElementById("header-user-email").innerText = activeUser.email;
+  // Sync UI components
+  if (typeof syncGstinUI === "function") syncGstinUI();
+  if (typeof renderCoAdminList === "function") renderCoAdminList();
 
-      const hasOnboarded = localStorage.getItem("storepos_onboarded_v2");
-      if (!hasOnboarded) {
-        openBulkPresetModal();
-        localStorage.setItem("storepos_onboarded_v2", "true");
-      }
-      // 🚨 Trigger Morning Cash Float popup right after sign-in
-      if (typeof window.checkMorningCashDrawerPrompt === "function") {
-        window.checkMorningCashDrawerPrompt();
-      }
+  // Onboarding check: DO NOT show 650 preset library if store already has products
+  const hasOnboardedFlag = localStorage.getItem("storepos_onboarded_v2") === "true";
+  const hasExistingInventory = Array.isArray(window.currentInventory) && window.currentInventory.length > 0;
+  const hasSavedCatalog = !!(localStorage.getItem("storepos_catalog_inventory_v3") || localStorage.getItem("storepos_custom_inventory"));
+
+  if (!hasOnboardedFlag && !hasExistingInventory && !hasSavedCatalog) {
+    if (typeof openBulkPresetModal === "function") {
+      openBulkPresetModal();
     }
+  }
+  localStorage.setItem("storepos_onboarded_v2", "true");
+
+  // Trigger Morning Cash Float ONLY AFTER Successful Login
+  if (typeof window.checkMorningCashDrawerPrompt === "function") {
+    window.checkMorningCashDrawerPrompt();
+  }
+};
     // ==========================================
 // MORNING CASH FLOAT & DENOMINATIONS LOGIC
 // ==========================================
@@ -3540,24 +3526,27 @@ function computeChangeReturn() {
   // ==========================================
     // CHECKOUT PROCESSOR WITH CASH CALCULATOR & WHATSAPP
     // ==========================================
-    function processSale(paymentMode, custName = null, custPhone = null) {
-      if (!checkStoreSubscriptionStatus()) return;
-      if (!activeCart.length) return alert("Invoice is empty.");
+    window.processSale = function(paymentMode, custName = null, custPhone = null) {
+  if (!checkStoreSubscriptionStatus()) return;
+  if (!activeCart || !activeCart.length) return alert("Invoice is empty.");
 
-      // If Cash sale and Admin enabled Cash Return Calculator, open calculator first
-      if (paymentMode === "CASH" && isCashCalcEnabled) {
-        const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-        const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
-        const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
-        const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
-        const grandTotal = settle > 0 ? settle : (subtotal * (1 - discountPct / 100) * (1 + taxPct / 100));
+  // Check if Cash Calculator is enabled in Admin settings
+  const isCalcActive = localStorage.getItem("storepos_cash_calc_enabled") === "true";
 
-        openCashCalculatorModal(grandTotal);
-        return;
-      }
+  if (paymentMode === "CASH" && isCalcActive) {
+    const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+    const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+    const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
+    const grandTotal = settle > 0 ? settle : (subtotal * (1 - discountPct / 100) * (1 + taxPct / 100));
 
-      executeActualSale(paymentMode, custName, custPhone);
-    }
+    window.openCashCalculatorModal(grandTotal);
+    return;
+  }
+
+  // Otherwise, proceed to checkout directly
+  window.executeActualSale(paymentMode, custName, custPhone);
+};
 
     function confirmCashSaleWithCalculator() {
       closeCashCalculatorModal();
