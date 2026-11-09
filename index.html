@@ -2429,7 +2429,12 @@ _Generated automatically via StorePOS Terminal_`;
         openBulkPresetModal();
         localStorage.setItem("storepos_onboarded_v2", "true");
       }
+      // 🚨 Trigger Morning Cash Float popup right after sign-in
+      if (typeof checkMorningCashDrawerPrompt === "function") {
+        checkMorningCashDrawerPrompt();
+      }
     }
+    
 
     function executeLogout() {
       if (!confirm("Are you sure you want to end shift and exit StorePOS System?")) return;
