@@ -107,7 +107,10 @@
             🛡️ Secure Cloud Sync
           </span>
         </div>
-
+        <div class="space-y-1">
+          <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Store GSTIN (Unique Store ID)</label>
+          <input id="inp-auth-gstin" type="text" maxlength="15" value="23AAAAA0000A1Z5" placeholder="15-Digit GSTIN (e.g. 23AAAAA0000A1Z5)" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl py-2 px-3 text-xs font-mono font-bold uppercase outline-none focus:border-emerald-500">
+        </div>
         <div id="field-shop-name" class="space-y-1">
           <label class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Shop / Store Name</label>
           <input id="inp-shop-name" type="text" value="ShopMaster Supermarket" placeholder="e.g. Mahalakshmi Kirana" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:border-emerald-500">
@@ -411,6 +414,19 @@
               </label>
             </div>
           </div>
+        </div>
+        <!-- Co-Admin WhatsApp Dispatch Manager -->
+        <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-4 shadow space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xs font-black">👥 Co-Admin / Partner Notifications</h3>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400">Co-owners added here receive daily WhatsApp closing summaries automatically.</p>
+            </div>
+            <button type="button" onclick="promptAddCoAdmin()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition shadow">
+              + Add Co-Admin
+            </button>
+          </div>
+          <div id="co-admin-list-container" class="space-y-1.5 text-xs"></div>
         </div>
         <!-- Register Controls & Subscription Management Row -->
           <div class="border-t border-slate-200 dark:border-slate-800 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1098,8 +1114,7 @@
     </div>
   </div>
 
-  <!-- Modal: Morning Opening Cash Drawer Float -->
-  <!-- Modal: Detailed Morning Cash Float & Change Breakdown -->
+<!-- Modal: Morning Opening Cash Drawer Float -->
   <div id="modal-morning-cash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
@@ -1107,37 +1122,171 @@
           <span class="text-emerald-400">💵</span>
           <h3 class="font-extrabold text-sm text-white">Morning Drawer Denominations</h3>
         </div>
-        <button type="button" onclick="document.getElementById('modal-morning-cash').classList.add('hidden')" class="text-slate-400 font-bold text-xs">✕</button>
+        <button type="button" onclick="closeMorningCashModal()" class="text-slate-400 font-bold text-xs">✕</button>
       </div>
 
-      <p class="text-[11px] text-slate-400">Enter loose coins and change notes present before opening the register:</p>
+      <p class="text-[11px] text-slate-400">Record cash float in drawer before billing starts:</p>
 
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div>
-          <label class="text-[10px] text-slate-400 font-bold block mb-1">Coins (₹1, ₹2, ₹5)</label>
-          <input id="inp-float-coins" type="number" step="any" placeholder="₹ Total" oninput="computeFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-emerald-400 outline-none">
+      <!-- Coins Row with Calculator Trigger Button -->
+      <div class="bg-[#08111e] p-3 rounded-xl border border-slate-700/70 space-y-2">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-xs font-bold text-amber-300">🪙 Loose Coins Total</span>
+            <span class="text-[10px] text-slate-400 block">₹1, ₹2, ₹5, ₹10, ₹20 coins</span>
+          </div>
+          <button type="button" onclick="openCoinsBreakdownModal()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-bold transition flex items-center gap-1">
+            <span>🧮</span> Count Coins
+          </button>
         </div>
-        <div>
-          <label class="text-[10px] text-slate-400 font-bold block mb-1">₹10 Notes (Count)</label>
-          <input id="inp-float-10" type="number" placeholder="Count" oninput="computeFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-white outline-none">
+        <div class="flex justify-between items-center pt-1 border-t border-slate-800">
+          <span class="text-[11px] text-slate-400">Coins Amount:</span>
+          <span id="txt-display-coins-total" class="font-mono font-bold text-emerald-400 text-sm">₹0.00</span>
         </div>
-        <div>
-          <label class="text-[10px] text-slate-400 font-bold block mb-1">₹20 Notes (Count)</label>
-          <input id="inp-float-20" type="number" placeholder="Count" oninput="computeFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-white outline-none">
+      </div>
+  <!-- Modal: Coins Denomination Detail Table -->
+  <div id="modal-coins-table" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-amber-400">🪙</span>
+          <h3 class="font-extrabold text-sm text-white">Loose Coin Calculator</h3>
         </div>
-        <div>
-          <label class="text-[10px] text-slate-400 font-bold block mb-1">₹50 Notes (Count)</label>
-          <input id="inp-float-50" type="number" placeholder="Count" oninput="computeFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-white outline-none">
+        <button type="button" onclick="closeCoinsBreakdownModal()" class="text-slate-400 font-bold text-xs">✕</button>
+      </div>
+
+      <table class="w-full text-xs text-left">
+        <thead>
+          <tr class="text-slate-400 text-[10px] border-b border-slate-800">
+            <th class="py-1">Denomination</th>
+            <th class="py-1 text-center">Coin Count</th>
+            <th class="py-1 text-right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800 font-mono">
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹1 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-1" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-1" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹2 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-2" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-2" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹5 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-5" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-5" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹10 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-10" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-10" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹20 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-20" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-20" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="bg-[#08111e] border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
+        <span class="text-slate-400 font-bold">Total Coins Sum:</span>
+        <span id="txt-coin-table-total" class="font-mono font-black text-amber-400 text-sm">₹0.00</span>
+      </div>
+
+      <button type="button" onclick="commitCoinsTable()" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+        Apply Coins to Register Float →
+      </button>
+    </div>
+  </div>
+      <!-- Change Notes Grid -->
+      <div class="space-y-1">
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Change Notes (Count)</span>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <div>
+            <label class="text-[10px] text-slate-400 font-bold block mb-1">₹10 Note</label>
+            <input id="inp-float-10" type="number" min="0" placeholder="0" oninput="computeMasterFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-center text-white outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 font-bold block mb-1">₹20 Note</label>
+            <input id="inp-float-20" type="number" min="0" placeholder="0" oninput="computeMasterFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-center text-white outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 font-bold block mb-1">₹50 Note</label>
+            <input id="inp-float-50" type="number" min="0" placeholder="0" oninput="computeMasterFloatTotal()" class="w-full bg-[#08111e] border border-slate-700 rounded-xl p-2 font-mono font-bold text-center text-white outline-none focus:border-indigo-500">
+          </div>
         </div>
       </div>
 
+      <!-- Total Summary Display -->
       <div class="bg-[#08111e] border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs">
         <span class="text-slate-400 font-bold">Total Opening Float:</span>
-        <span id="txt-float-total-computed" class="font-mono font-black text-emerald-400 text-sm">₹0.00</span>
+        <span id="txt-float-total-computed" class="font-mono font-black text-emerald-400 text-base">₹0.00</span>
       </div>
 
       <button type="button" onclick="submitDetailedMorningCash()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
-        Save Float & Open Register →
+         Float & Open Register →
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Coins Denomination Detail Table -->
+  <div id="modal-coins-table" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-amber-400">🪙</span>
+          <h3 class="font-extrabold text-sm text-white">Loose Coin Calculator</h3>
+        </div>
+        <button type="button" onclick="closeCoinsBreakdownModal()" class="text-slate-400 font-bold text-xs">✕</button>
+      </div>
+
+      <table class="w-full text-xs text-left">
+        <thead>
+          <tr class="text-slate-400 text-[10px] border-b border-slate-800">
+            <th class="py-1">Denomination</th>
+            <th class="py-1 text-center">Coin Count</th>
+            <th class="py-1 text-right">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800 font-mono">
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹1 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-1" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-1" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹2 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-2" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-2" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹5 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-5" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-5" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹10 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-10" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-10" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+          <tr>
+            <td class="py-1.5 font-bold text-white">₹20 Coin</td>
+            <td class="py-1.5 text-center"><input id="coin-qty-20" type="number" min="0" placeholder="0" oninput="calculateSubCoinsTable()" class="w-16 bg-[#08111e] border border-slate-700 rounded p-1 text-center text-white font-bold outline-none"></td>
+            <td id="coin-sub-20" class="py-1.5 text-right font-bold text-emerald-400">₹0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="bg-[#08111e] border border-slate-800 p-2.5 rounded-xl flex justify-between items-center text-xs">
+        <span class="text-slate-400 font-bold">Total Coins Sum:</span>
+        <span id="txt-coin-table-total" class="font-mono font-black text-amber-400 text-sm">₹0.00</span>
+      </div>
+
+      <button type="button" onclick="commitCoinsTable()" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition">
+        Apply Coins to Register Float →
       </button>
     </div>
   </div>
@@ -1664,128 +1813,257 @@
       alert(`✅ Updated "${item.custom_name}"!\nNew Stock: ${updatedStock} | Price: ₹${newPrice.toFixed(2)}`);
     };
 
-    // ==========================================
-    // CASH DRAWER & EOD RECONCILIATION
-    // ==========================================
-    function submitMorningOpeningCash() {
-      const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-      if (!localStorage.getItem(todayKey)) {
-        const modal = document.getElementById("modal-morning-cash");
-        if (modal) {
-          modal.classList.remove("hidden");
-          const inp = document.getElementById("inp-morning-cash-amount");
-          if (inp) {
-            inp.value = "";
-            setTimeout(() => inp.focus(), 200);
-          }
-        }
-      } else {
-        updateAdminPaymentTotals();
-      }
+// 1. COINS TABLE & MORNING FLOAT CALCULATOR
+// ==========================================
+let currentCoinsBreakdown = { c1: 0, c2: 0, c5: 0, c10: 0, c20: 0, total: 0 };
+
+window.openCoinsBreakdownModal = function() {
+  document.getElementById("modal-coins-table")?.classList.remove("hidden");
+};
+
+window.closeCoinsBreakdownModal = function() {
+  document.getElementById("modal-coins-table")?.classList.add("hidden");
+};
+
+window.calculateSubCoinsTable = function() {
+  const c1 = (parseInt(document.getElementById("coin-qty-1")?.value, 10) || 0) * 1;
+  const c2 = (parseInt(document.getElementById("coin-qty-2")?.value, 10) || 0) * 2;
+  const c5 = (parseInt(document.getElementById("coin-qty-5")?.value, 10) || 0) * 5;
+  const c10 = (parseInt(document.getElementById("coin-qty-10")?.value, 10) || 0) * 10;
+  const c20 = (parseInt(document.getElementById("coin-qty-20")?.value, 10) || 0) * 20;
+
+  document.getElementById("coin-sub-1").innerText = `₹${c1.toFixed(2)}`;
+  document.getElementById("coin-sub-2").innerText = `₹${c2.toFixed(2)}`;
+  document.getElementById("coin-sub-5").innerText = `₹${c5.toFixed(2)}`;
+  document.getElementById("coin-sub-10").innerText = `₹${c10.toFixed(2)}`;
+  document.getElementById("coin-sub-20").innerText = `₹${c20.toFixed(2)}`;
+
+  const total = c1 + c2 + c5 + c10 + c20;
+  document.getElementById("txt-coin-table-total").innerText = `₹${total.toFixed(2)}`;
+  currentCoinsBreakdown = { c1, c2, c5, c10, c20, total };
+  return total;
+};
+
+window.commitCoinsTable = function() {
+  const coinsTotal = window.calculateSubCoinsTable();
+  const displayEl = document.getElementById("txt-display-coins-total");
+  if (displayEl) displayEl.innerText = `₹${coinsTotal.toFixed(2)}`;
+  closeCoinsBreakdownModal();
+  computeMasterFloatTotal();
+};
+
+window.computeMasterFloatTotal = function() {
+  const coins = currentCoinsBreakdown.total || 0;
+  const n10 = (parseInt(document.getElementById("inp-float-10")?.value, 10) || 0) * 10;
+  const n20 = (parseInt(document.getElementById("inp-float-20")?.value, 10) || 0) * 20;
+  const n50 = (parseInt(document.getElementById("inp-float-50")?.value, 10) || 0) * 50;
+
+  const grandFloat = coins + n10 + n20 + n50;
+  const totalEl = document.getElementById("txt-float-total-computed");
+  if (totalEl) totalEl.innerText = `₹${grandFloat.toFixed(2)}`;
+  return { grandFloat, coins, n10, n20, n50 };
+};
+
+window.submitDetailedMorningCash = function() {
+  const { grandFloat, coins, n10, n20, n50 } = window.computeMasterFloatTotal();
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayKey = `storepos_opening_cash_${currentGstin}_${todayIso}`;
+
+  // Persist exact float amount
+  localStorage.setItem(todayKey, grandFloat.toString());
+  localStorage.setItem(`storepos_float_breakdown_${currentGstin}_${todayIso}`, JSON.stringify({
+    grandFloat, coins, n10, n20, n50, coinsDetail: currentCoinsBreakdown, date: todayIso
+  }));
+
+  // Hide modal
+  document.getElementById("modal-morning-cash")?.classList.add("hidden");
+
+  // Update opening float card on Admin dashboard immediately
+  const openElem = document.getElementById("adm-txt-opening-cash");
+  if (openElem) openElem.innerText = `₹${grandFloat.toFixed(2)}`;
+
+  if (typeof updateAdminPaymentTotals === "function") {
+    updateAdminPaymentTotals();
+  }
+
+  alert(`✅ Morning cash float recorded: ₹${grandFloat.toFixed(2)}\n• Coins: ₹${coins.toFixed(2)}\n• Notes: ₹${(n10 + n20 + n50).toFixed(2)}`);
+};
+
+window.closeMorningCashModal = function() {
+  document.getElementById("modal-morning-cash")?.classList.add("hidden");
+};
+
+// ==========================================
+// 2. AUTHENTICATION & LOGIN FLOW (1st LOGIN, THEN CASH ENTRY)
+// ==========================================
+window.checkMorningCashDrawerPrompt = function() {
+  // Only execute if activeUser is logged in
+  if (!window.activeUser) return;
+
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayKey = `storepos_opening_cash_${currentGstin}_${todayIso}`;
+  const existingFloat = localStorage.getItem(todayKey);
+
+  if (!existingFloat) {
+    const modal = document.getElementById("modal-morning-cash");
+    if (modal) modal.classList.remove("hidden");
+  } else {
+    const openElem = document.getElementById("adm-txt-opening-cash");
+    if (openElem) openElem.innerText = `₹${parseFloat(existingFloat).toFixed(2)}`;
+    if (typeof updateAdminPaymentTotals === "function") updateAdminPaymentTotals();
+  }
+};
+
+window.submitAuthentication = async function() {
+  const gstinInput = document.getElementById("inp-auth-gstin")?.value.trim().toUpperCase();
+  const email = document.getElementById("inp-email").value.trim();
+  const password = document.getElementById("inp-password").value.trim();
+  const shopName = document.getElementById("inp-shop-name").value.trim();
+  const msg = document.getElementById("auth-status-msg");
+
+  msg.innerText = "";
+  if (!email || !password) {
+    msg.innerText = "Please provide email and password.";
+    return;
+  }
+  if (!gstinInput || gstinInput.length < 15) {
+    msg.innerText = "Please enter a valid 15-digit unique Store GSTIN.";
+    return;
+  }
+
+  // Bind store data to unique GSTIN tenant
+  localStorage.setItem("storepos_gstin", gstinInput);
+  window.storeGstin = gstinInput;
+  window.activeUser = { email, shopName: shopName || "ShopMaster Supermarket", gstin: gstinInput };
+
+  // Switch views
+  document.getElementById("view-landing")?.classList.add("hidden");
+  document.getElementById("view-app")?.classList.remove("hidden");
+  document.getElementById("header-shop-name").innerText = window.activeUser.shopName;
+  document.getElementById("header-user-email").innerText = window.activeUser.email;
+  syncGstinUI();
+  renderCoAdminList();
+
+  // 1st Login completes -> THEN prompt for Morning Cash Entry
+  window.checkMorningCashDrawerPrompt();
+};
+
+// ==========================================
+// 3. CO-ADMIN / PARTNER NOTIFICATIONS
+// ==========================================
+function getCoAdmins() {
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  return JSON.parse(localStorage.getItem(`storepos_co_admins_${currentGstin}`) || "[]");
+}
+
+function saveCoAdmins(list) {
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  localStorage.setItem(`storepos_co_admins_${currentGstin}`, JSON.stringify(list));
+  renderCoAdminList();
+}
+
+function renderCoAdminList() {
+  const container = document.getElementById("co-admin-list-container");
+  if (!container) return;
+  const list = getCoAdmins();
+
+  if (!list.length) {
+    container.innerHTML = `<div class="text-slate-400 text-[11px] py-1">No co-admins registered. Only primary store phone receives EOD summary.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map((admin, idx) => `
+    <div class="flex justify-between items-center bg-slate-50 dark:bg-[#08111e] p-2 rounded-xl border border-slate-200 dark:border-slate-800">
+      <div>
+        <strong class="text-white">${admin.name}</strong>
+        <span class="text-slate-400 font-mono text-[10px] ml-1.5">+91 ${admin.phone}</span>
+        <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1 rounded ml-1">Co-Owner</span>
+      </div>
+      <button type="button" onclick="removeCoAdmin(${idx})" class="text-red-400 hover:text-red-300 font-bold text-xs px-2 py-0.5">Remove</button>
+    </div>
+  `).join("");
+}
+
+window.promptAddCoAdmin = function() {
+  const name = prompt("Enter Co-Admin / Partner Full Name:");
+  if (!name || !name.trim()) return;
+  const phone = prompt("Enter Co-Admin 10-Digit WhatsApp Mobile Number:");
+  if (!phone || phone.replace(/\D/g, "").length < 10) return alert("Valid 10-digit WhatsApp phone required.");
+
+  const list = getCoAdmins();
+  list.push({ name: name.trim(), phone: phone.replace(/\D/g, "").slice(-10) });
+  saveCoAdmins(list);
+  alert(`✅ Added ${name} as Co-Admin!`);
+};
+
+window.removeCoAdmin = function(idx) {
+  const list = getCoAdmins();
+  if (confirm(`Remove ${list[idx].name} from Co-Admins?`)) {
+    list.splice(idx, 1);
+    saveCoAdmins(list);
+  }
+};
+
+// Dispatch WhatsApp EOD report to Primary Owner AND all Co-Admins
+window.sendDailyWhatsappSummary = function() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  const openingCash = parseFloat(localStorage.getItem(`storepos_opening_cash_${currentGstin}_${todayIso}`) || "0");
+
+  let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+
+  bills.forEach(bill => {
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      billCount++;
+      const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+      const amt = parseFloat(bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') : (bill.total_amount || 0));
+      totalSales += amt;
+      if (mode.includes("CASH")) cashSales += amt;
+      else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiSales += amt;
+      else cardSales += amt;
     }
+  });
 
-    function submitMorningOpeningCash() {
-      const inp = document.getElementById("inp-morning-cash-amount");
-      const amount = parseFloat(inp ? inp.value : 0);
+  const expectedDrawerCash = openingCash + cashSales;
+  const storeName = (window.activeUser && window.activeUser.shopName) || "ShopMaster Supermarket";
+  const coAdmins = getCoAdmins();
 
-      if (isNaN(amount) || amount < 0) {
-        return alert("Please enter a valid cash amount (e.g. 1500 or 0).");
-      }
+  const summaryText = 
+`🏪 *DAILY CLOSE REPORT: ${storeName}*
+📅 Date: ${todayUk}
+🧾 GSTIN: ${currentGstin}
 
-      const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
-      localStorage.setItem(todayKey, amount.toString());
+💵 *Cash Drawer:*
+• Opening Float: ₹${openingCash.toFixed(2)}
+• Cash Sales: ₹${cashSales.toFixed(2)}
+👉 *Expected Cash in Hand:* ₹${expectedDrawerCash.toFixed(2)}
 
-      document.getElementById("modal-morning-cash")?.classList.add("hidden");
-      updateAdminPaymentTotals();
-      alert(`✅ Morning cash float recorded: ₹${amount.toFixed(2)}. Counter register is now open.`);
-    }
+📱 *Digital Payments:*
+• UPI / Soundbox: ₹${upiSales.toFixed(2)}
+• Card / Other: ₹${cardSales.toFixed(2)}
 
-    window.updateAdminPaymentTotals = function() {
-      const now = new Date();
-      const todayIso = now.toISOString().slice(0, 10);
-      const todayUk = now.toLocaleDateString("en-GB");
-      const todayKey = "storepos_opening_cash_" + todayIso;
-      const openingCash = parseFloat(localStorage.getItem(todayKey) || "0");
+----------------------------
+⭐ *Total Revenue:* ₹${totalSales.toFixed(2)}
+🧾 *Total Invoices:* ${billCount} bills
+----------------------------
+_Generated automatically via StorePOS Master Terminal_`;
 
-      let cashTotal = 0;
-      let upiTotal = 0;
-      let cardTotal = 0;
+  const encodedText = encodeURIComponent(summaryText);
 
-      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-      bills.forEach(bill => {
-        const rawDate = String(bill.created_at || bill.date || "");
-        const isToday = rawDate.includes(todayIso) || rawDate.includes(todayUk);
+  // Send to Primary Owner
+  window.open(`https://wa.me/?text=${encodedText}`, "_blank");
 
-        if (isToday) {
-          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
-          const amt = parseFloat(
-            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
-            (bill.total_amount ?? bill.total ?? 0)
-          );
-
-          if (mode.includes("CASH")) cashTotal += amt;
-          else if (mode.includes("UPI") || mode.includes("SOUNDBOX") || mode.includes("QR")) upiTotal += amt;
-          else cardTotal += amt;
-        }
-      });
-
-      const openElem = document.getElementById("adm-txt-opening-cash");
-      const cashElem = document.getElementById("adm-txt-cash-total");
-      const upiElem = document.getElementById("adm-txt-upi-total");
-      const cardElem = document.getElementById("adm-txt-card-total");
-
-      if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
-      if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
-      if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
-      if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
-    };
-
-    function generateEndOfDayReport() {
-      const now = new Date();
-      const todayIso = now.toISOString().slice(0, 10);
-      const todayUk = now.toLocaleDateString("en-GB");
-      const openingCash = parseFloat(localStorage.getItem("storepos_opening_cash_" + todayIso) || "0");
-
-      let cashSales = 0, upiSales = 0, cardSales = 0, totalSales = 0, billCount = 0;
-      const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
-
-      bills.forEach(bill => {
-        const rawDate = String(bill.created_at || bill.date || "");
-        if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
-          billCount++;
-          const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
-          const amt = parseFloat(
-            bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, '') :
-            (bill.total_amount ?? bill.total ?? 0)
-          );
-          totalSales += amt;
-          if (mode.includes("CASH")) cashSales += amt;
-          else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiSales += amt;
-          else cardSales += amt;
-        }
-      });
-
-      const expectedDrawerCash = openingCash + cashSales;
-
-      const shouldPrint = confirm(
-        `📋 STOREPOS END-OF-DAY RECONCILIATION (${todayUk})\n\n` +
-        `• Morning Opening Cash:  ₹${openingCash.toFixed(2)}\n` +
-        `• Cash Sales Collected:  ₹${cashSales.toFixed(2)}\n` +
-        `--------------------------------------\n` +
-        `💵 Expected Cash in Drawer: ₹${expectedDrawerCash.toFixed(2)}\n\n` +
-        `📱 Total UPI Received:   ₹${upiSales.toFixed(2)}\n` +
-        `💳 Total Card/Other:     ₹${cardSales.toFixed(2)}\n` +
-        `--------------------------------------\n` +
-        `⭐ Total Daily Revenue:   ₹${totalSales.toFixed(2)}\n` +
-        `🧾 Total Bills:           ${billCount}\n\n` +
-        `Do you want to print the 58mm thermal EOD slip?`
-      );
-
-      if (shouldPrint && typeof printEodThermalSlip === "function") {
-        printEodThermalSlip();
-      }
-    }
-
+  // Send to all registered Co-Admins
+  coAdmins.forEach(co => {
+    window.open(`https://wa.me/91${co.phone}?text=${encodedText}`, "_blank");
+  });
+};
     function sendDailyWhatsappSummary() {
       const now = new Date();
       const todayIso = now.toISOString().slice(0, 10);
