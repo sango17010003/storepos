@@ -2033,7 +2033,6 @@ _Generated automatically via StorePOS Terminal_`;
       syncGstinUI();
       syncKhataUI();
       initNetworkHandlers();
-      
       renderCatalogCards();
       renderLiveInventoryTable();
       populateCategoryDropdowns();
@@ -2042,6 +2041,9 @@ _Generated automatically via StorePOS Terminal_`;
       renderCartUI();
       updateAdminPaymentTotals();
 
+      if (typeof window.checkMorningCashDrawerPrompt === "function") {
+         window.checkMorningCashDrawerPrompt();
+      }
       if (typeof checkStoreSubscriptionStatus === "function") {
         checkStoreSubscriptionStatus();
       }
@@ -2430,11 +2432,62 @@ _Generated automatically via StorePOS Terminal_`;
         localStorage.setItem("storepos_onboarded_v2", "true");
       }
       // 🚨 Trigger Morning Cash Float popup right after sign-in
-      if (typeof checkMorningCashDrawerPrompt === "function") {
-        checkMorningCashDrawerPrompt();
+      if (typeof window.checkMorningCashDrawerPrompt === "function") {
+        window.checkMorningCashDrawerPrompt();
       }
     }
-    
+    // ==========================================
+// MORNING CASH FLOAT & DENOMINATIONS LOGIC
+// ==========================================
+window.checkMorningCashDrawerPrompt = function() {
+  const todayKey = "storepos_opening_cash_" + new Date().toISOString().slice(0, 10);
+  const existingFloat = localStorage.getItem(todayKey);
+
+  // If no float recorded today, open the modal
+  if (!existingFloat) {
+    const modal = document.getElementById("modal-morning-cash");
+    if (modal) {
+      modal.classList.remove("hidden");
+      const inp = document.getElementById("inp-float-coins") || document.getElementById("inp-morning-cash-amount");
+      if (inp) setTimeout(() => inp.focus(), 150);
+    }
+  } else {
+    if (typeof updateAdminPaymentTotals === "function") {
+      updateAdminPaymentTotals();
+    }
+  }
+};
+
+window.computeFloatTotal = function() {
+  const coins = parseFloat(document.getElementById("inp-float-coins")?.value) || 0;
+  const n10 = (parseInt(document.getElementById("inp-float-10")?.value, 10) || 0) * 10;
+  const n20 = (parseInt(document.getElementById("inp-float-20")?.value, 10) || 0) * 20;
+  const n50 = (parseInt(document.getElementById("inp-float-50")?.value, 10) || 0) * 50;
+
+  const total = coins + n10 + n20 + n50;
+  const totalEl = document.getElementById("txt-float-total-computed");
+  if (totalEl) totalEl.innerText = `₹${total.toFixed(2)}`;
+  return { total, coins, n10, n20, n50 };
+};
+
+window.submitDetailedMorningCash = function() {
+  const { total, coins, n10, n20, n50 } = window.computeFloatTotal();
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  localStorage.setItem("storepos_opening_cash_" + todayIso, total.toString());
+  localStorage.setItem("storepos_float_breakdown_" + todayIso, JSON.stringify({
+    total, coins, n10, n20, n50, date: todayIso
+  }));
+
+  const modal = document.getElementById("modal-morning-cash");
+  if (modal) modal.classList.add("hidden");
+
+  if (typeof updateAdminPaymentTotals === "function") {
+    updateAdminPaymentTotals();
+  }
+
+  alert(`✅ Drawer Float saved: ₹${total.toFixed(2)}`);
+};
 
     function executeLogout() {
       if (!confirm("Are you sure you want to end shift and exit StorePOS System?")) return;
