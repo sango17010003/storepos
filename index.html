@@ -430,15 +430,15 @@
         </div>
         <!-- Register Controls & Subscription Management Row -->
           <div class="border-t border-slate-200 dark:border-slate-800 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <!-- Cash Drawer Return Calculator Toggle -->
+            <!-- Cash Change Return Audit Log Toggle -->
             <div class="flex items-center justify-between bg-slate-50 dark:bg-[#08111e] p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
               <div>
-                <span class="text-xs font-bold block">Cash Drawer Return Calculator</span>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Ask tendered cash, compute change & update notes/coins</span>
+                <span class="text-xs font-bold block">Log Cash Change Returns in Audit Trail</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Record customer cash tendered & return change in audit logs</span>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="chk-cash-calc-toggle" class="sr-only peer" onchange="toggleCashCalculatorSetting(this.checked)">
-                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                <input type="checkbox" id="chk-log-returns-toggle" class="sr-only peer" onchange="toggleReturnAuditLogging(this.checked)">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
               </label>
             </div>
 
@@ -454,29 +454,38 @@
             </div>
           </div>
         <!-- KPI Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Revenue</span>
             <div id="kpi-revenue" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono">₹0.00</div>
             <span class="text-[10px] text-emerald-500 font-medium">↗ Real-time Audited</span>
           </div>
+
+          <!-- NEW: Real-Time Live Cash in Hand -->
+          <div class="bg-white dark:bg-[#0e1a2b] border border-emerald-500/40 rounded-2xl p-3.5 space-y-1 shadow bg-emerald-950/10">
+            <span class="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider block">💵 Live Cash In Hand</span>
+            <div id="kpi-live-drawer-cash" class="text-xl font-black text-emerald-400 font-mono">₹0.00</div>
+            <span class="text-[10px] text-slate-400">Float + Net Cash Sales</span>
+          </div>
+
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Units Dispatched</span>
             <div id="kpi-units" class="text-xl font-black font-mono">0 <span class="text-xs font-normal text-slate-400">units</span></div>
             <span class="text-[10px] text-slate-500 dark:text-slate-400">Across active catalog</span>
           </div>
+
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Catalog SKUs</span>
             <div id="kpi-sku-count" class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">0 <span class="text-xs font-normal text-slate-400">goods</span></div>
             <span class="text-[10px] text-indigo-500 dark:text-indigo-300">Active retail stock</span>
           </div>
+
           <div class="bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl p-3.5 space-y-1 shadow">
             <span class="text-[10px] font-extrabold text-red-500 uppercase tracking-wider block">Low Stock Alerts</span>
             <div id="kpi-low-stock" class="text-xl font-black text-red-500 font-mono">0 <span class="text-xs font-normal text-slate-400">items</span></div>
             <span class="text-[10px] text-red-400">Threshold &lt; 5 units</span>
           </div>
         </div>
-
         <!-- Admin Real-Time Payment Breakdown Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 my-3">
           <div class="bg-[#08111e] border border-slate-800 p-3 rounded-xl">
@@ -1102,18 +1111,49 @@
   </div>
 
   <!-- 3J. KHATA CUSTOMER MODAL -->
-  <div id="modal-khata" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3">
-    <div class="w-full max-w-sm bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-        <span class="text-xs font-black">📖 Khata Credit Customer</span>
-        <button type="button" onclick="closeKhataModal()" class="text-slate-400 font-bold">✕</button>
+  <!-- 3J. KHATA / CREDIT LEDGER MANAGEMENT MODAL -->
+  <div id="modal-khata" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-3">
+    <div class="w-full max-w-xl bg-white dark:bg-[#0e1a2b] border border-slate-200 dark:border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] flex flex-col text-slate-100">
+      
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 text-lg">📖</span>
+          <div>
+            <h3 class="font-extrabold text-sm text-white">Khata (Customer Credit Ledger)</h3>
+            <p class="text-[10px] text-slate-400">Track pending balances, record settlements & add credit sales</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeKhataModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
       </div>
-      <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-mono font-bold outline-none">
-      <input id="khata-name" type="text" placeholder="Customer Name" class="w-full bg-slate-50 dark:bg-[#08111e] border border-slate-300 dark:border-slate-800 rounded-xl p-2.5 text-xs font-semibold outline-none">
-      <button type="button" onclick="confirmKhataCheckout()" class="w-full py-2.5 bg-amber-600 text-white font-black text-xs rounded-xl shadow">Confirm Credit Bill</button>
+
+      <!-- Add New Credit Sale / Select Existing Customer -->
+      <div class="bg-[#08111e] p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
+        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Add Customer for This Bill</span>
+        <div class="grid grid-cols-2 gap-2">
+          <input id="khata-phone" type="tel" maxlength="10" placeholder="10-Digit Mobile Number" oninput="autocompleteKhataCustomer(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono font-bold text-white outline-none focus:border-amber-500">
+          <input id="khata-name" type="text" placeholder="Customer Name" class="bg-slate-900 border border-slate-700 rounded-lg p-2 font-bold text-white outline-none focus:border-amber-500">
+        </div>
+        <button type="button" onclick="confirmKhataCheckout()" class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-black rounded-lg text-xs shadow transition">
+          Confirm & Punch Credit Sale →
+        </button>
+      </div>
+
+      <!-- Outstanding Khata Customer Accounts Ledger -->
+      <div class="flex-1 flex flex-col min-h-0 space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-300">Customer Balance Book</span>
+          <span id="txt-khata-total-receivable" class="font-mono text-emerald-400 font-black">Total Due: ₹0.00</span>
+        </div>
+        
+        <input id="inp-khata-search" type="text" placeholder="Search customer by name or phone..." oninput="renderKhataLedger(this.value)" class="w-full bg-[#08111e] border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
+
+        <div id="khata-ledger-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1 max-h-56">
+          <!-- Customer rows will render here -->
+        </div>
+      </div>
+
     </div>
   </div>
-
 <!-- Modal: Morning Opening Cash Drawer Float -->
   <div id="modal-morning-cash" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-3">
     <div class="w-full max-w-sm bg-[#0e1a2b] border border-[#1e324f] rounded-2xl shadow-2xl p-5 space-y-3.5 text-slate-100">
@@ -1920,7 +1960,6 @@ window.checkMorningCashDrawerPrompt = function() {
     }
   }
 };
-
 // ==========================================
 // 3. CO-ADMIN / PARTNER NOTIFICATIONS
 // ==========================================
@@ -2272,6 +2311,8 @@ _Generated automatically via StorePOS Terminal_`;
     window.openGeneralAddStockModal = function() {
       openAddProductModal();
     };
+    let isCashCalcEnabled = localStorage.getItem("storepos_cash_calc_enabled") !== "false"; // Default true
+    let isReturnAuditLogged = localStorage.getItem("storepos_log_returns_audit") === "true";
 
     window.addEventListener("DOMContentLoaded", () => {
       applyTheme();
@@ -2289,8 +2330,6 @@ _Generated automatically via StorePOS Terminal_`;
       initSalesCharts();
       renderCartUI();
       updateAdminPaymentTotals();
-      syncGstinUI();
-      syncKhataUI();
       
       if (typeof renderCoAdminList === "function") renderCoAdminList();
       if (typeof checkStoreSubscriptionStatus === "function") {
@@ -2299,6 +2338,11 @@ _Generated automatically via StorePOS Terminal_`;
       if (typeof syncLicenseStatusFromCloud === "function") {
         syncLicenseStatusFromCloud();
       }
+      const chkCalc = document.getElementById("chk-cash-calc-toggle");
+         if (chkCalc) chkCalc.checked = isCashCalcEnabled;
+
+      const chkLogReturns = document.getElementById("chk-log-returns-toggle");
+        if (chkLogReturns) chkLogReturns.checked = isReturnAuditLogged;
     });
 
     function toggleThemeMode() {
@@ -2742,13 +2786,125 @@ window.computeFloatTotal = function() {
 
   return { total, coins, n10, n20, n50 };
 };
+// ========================================================
+// 1. CASH DRAWER RETURN CALCULATOR (DEFAULT ACTIVE: TRUE)
+// ========================================================
+
+function toggleCashCalculatorSetting(enabled) {
+  isCashCalcEnabled = enabled;
+  localStorage.setItem("storepos_cash_calc_enabled", enabled ? "true" : "false");
+  alert(`Cash Drawer Return Calculator is now ${enabled ? "ACTIVE (Default)" : "DISABLED"}.`);
+}
+
+function toggleReturnAuditLogging(enabled) {
+  isReturnAuditLogged = enabled;
+  localStorage.setItem("storepos_log_returns_audit", enabled ? "true" : "false");
+  alert(`Logging change return in Audit Trail is now ${enabled ? "ENABLED" : "DISABLED"}.`);
+}
+
+function getLiveDrawerCash() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+
+  const openingFloat = parseFloat(
+    localStorage.getItem(`storepos_opening_cash_${currentGstin}_${todayIso}`) ||
+    localStorage.getItem("storepos_opening_cash_" + todayIso) ||
+    "0"
+  );
+
+  let cashSalesNet = 0;
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+  bills.forEach(bill => {
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+      const amt = parseFloat(
+        bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, "") :
+        (bill.total_amount ?? bill.total ?? 0)
+      );
+      if (mode.includes("CASH")) {
+        cashSalesNet += amt;
+      }
+    }
+  });
+
+  return openingFloat + cashSalesNet;
+}
+
+window.openCashCalculatorModal = function(billTotal) {
+  const modal = document.getElementById("modal-cash-change-calculator");
+  if (!modal) return;
+
+  const currentDrawerCash = getLiveDrawerCash();
+
+  document.getElementById("calc-bill-amount").innerText = `₹${billTotal.toFixed(2)}`;
+  document.getElementById("calc-drawer-balance").innerText = `₹${currentDrawerCash.toFixed(2)}`;
+
+  const inpTendered = document.getElementById("inp-tendered-cash");
+  if (inpTendered) {
+    inpTendered.value = "";
+    setTimeout(() => inpTendered.focus(), 150);
+  }
+
+  document.getElementById("txt-return-change-val").innerText = "₹0.00";
+  modal.classList.remove("hidden");
+};
+
+window.closeCashCalculatorModal = function() {
+  document.getElementById("modal-cash-change-calculator")?.classList.add("hidden");
+};
+
+window.computeChangeReturn = function() {
+  const billTotal = parseFloat(document.getElementById("calc-bill-amount")?.innerText.replace(/[^0-9.]/g, '')) || 0;
+  const tendered = parseFloat(document.getElementById("inp-tendered-cash")?.value) || 0;
+  const returnAmt = tendered - billTotal;
+
+  const retEl = document.getElementById("txt-return-change-val");
+  const btn = document.getElementById("btn-confirm-cash-calc");
+
+  if (tendered < billTotal) {
+    retEl.className = "text-2xl font-black font-mono text-rose-500";
+    retEl.innerText = `Short by ₹${(billTotal - tendered).toFixed(2)}`;
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("opacity-50", "cursor-not-allowed");
+    }
+  } else {
+    retEl.className = "text-2xl font-black font-mono text-emerald-400";
+    retEl.innerText = `₹${returnAmt.toFixed(2)}`;
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-50", "cursor-not-allowed");
+    }
+  }
+};
+
+window.confirmCashSaleWithCalculator = function() {
+  const billTotal = parseFloat(document.getElementById("calc-bill-amount")?.innerText.replace(/[^0-9.]/g, '')) || 0;
+  const tendered = parseFloat(document.getElementById("inp-tendered-cash")?.value) || 0;
+  const returnChange = Math.max(0, tendered - billTotal);
+
+  window.closeCashCalculatorModal();
+
+  if (isReturnAuditLogged && typeof recordAuditEntry === "function") {
+    recordAuditEntry({
+      type: "CASH RETURN",
+      title: `Cash Change Returned: ₹${returnChange.toFixed(2)}`,
+      details: `Bill: ₹${billTotal.toFixed(2)} | Tendered: ₹${tendered.toFixed(2)} | Returned: ₹${returnChange.toFixed(2)}`
+    });
+  }
+
+  window.executeActualSale("CASH");
+};
+
 window.updateAdminPaymentTotals = function() {
   const now = new Date();
   const todayIso = now.toISOString().slice(0, 10);
   const todayUk = now.toLocaleDateString("en-GB");
   const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
 
-  // Check all possible storage keys
   const openingCash = parseFloat(
     localStorage.getItem(`storepos_opening_cash_${currentGstin}_${todayIso}`) ||
     localStorage.getItem("storepos_opening_cash_" + todayIso) ||
@@ -2758,6 +2914,7 @@ window.updateAdminPaymentTotals = function() {
   let cashTotal = 0;
   let upiTotal = 0;
   let cardTotal = 0;
+  let grandRev = 0;
 
   const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
   bills.forEach(bill => {
@@ -2769,49 +2926,158 @@ window.updateAdminPaymentTotals = function() {
         (bill.total_amount ?? bill.total ?? 0)
       );
 
+      grandRev += amt;
       if (mode.includes("CASH")) cashTotal += amt;
       else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiTotal += amt;
       else cardTotal += amt;
     }
   });
 
+  const liveDrawerCash = openingCash + cashTotal;
+
   const openElem = document.getElementById("adm-txt-opening-cash");
   const cashElem = document.getElementById("adm-txt-cash-total");
   const upiElem = document.getElementById("adm-txt-upi-total");
   const cardElem = document.getElementById("adm-txt-card-total");
+  const liveDrawerElem = document.getElementById("kpi-live-drawer-cash");
+  const revElem = document.getElementById("kpi-revenue");
 
   if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
   if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
   if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
   if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
+  if (liveDrawerElem) liveDrawerElem.innerText = `₹${liveDrawerCash.toFixed(2)}`;
+  if (revElem) revElem.innerText = `₹${grandRev.toFixed(2)}`;
 };
 
-// Legacy fallback alias
-window.submitMorningOpeningCash = window.submitDetailedMorningCash;
-window.submitDetailedMorningCash = function() {
-  const { total, coins, n10, n20, n50 } = window.computeFloatTotal();
-  const todayIso = new Date().toISOString().slice(0, 10);
+// ========================================================
+// 2. KHATA LEDGER CONTROLLER
+// ========================================================
+function getKhataLedger() {
   const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  return JSON.parse(localStorage.getItem(`storepos_khata_ledger_${currentGstin}`) || "[]");
+}
 
-  // Save to both universal and tenant-specific keys so every screen sees it
-  localStorage.setItem("storepos_opening_cash_" + todayIso, total.toString());
-  localStorage.setItem(`storepos_opening_cash_${currentGstin}_${todayIso}`, total.toString());
-  localStorage.setItem("storepos_float_breakdown_" + todayIso, JSON.stringify({
-    total, coins, n10, n20, n50, coinsDetail: window.currentCoinsData, date: todayIso
-  }));
+function saveKhataLedger(data) {
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
+  localStorage.setItem(`storepos_khata_ledger_${currentGstin}`, JSON.stringify(data));
+  renderKhataLedger();
+}
 
-  // Close modal
-  document.getElementById("modal-morning-cash")?.classList.add("hidden");
+window.openKhataModal = function() {
+  if (!isKhataEnabled) return alert("Khata / Credit Billing is currently switched OFF by Admin.");
+  renderKhataLedger();
+  document.getElementById("modal-khata")?.classList.remove("hidden");
+};
 
-  // Update Admin dashboard UI card immediately
-  const openElem = document.getElementById("adm-txt-opening-cash");
-  if (openElem) openElem.innerText = `₹${total.toFixed(2)}`;
+window.closeKhataModal = function() {
+  document.getElementById("modal-khata")?.classList.add("hidden");
+};
 
-  if (typeof window.updateAdminPaymentTotals === "function") {
-    window.updateAdminPaymentTotals();
+window.autocompleteKhataCustomer = function(phoneVal) {
+  const clean = String(phoneVal).replace(/\D/g, "");
+  if (clean.length < 10) return;
+  const ledger = getKhataLedger();
+  const customer = ledger.find(c => c.phone === clean);
+  if (customer && document.getElementById("khata-name")) {
+    document.getElementById("khata-name").value = customer.name;
+  }
+};
+
+window.renderKhataLedger = function(searchQuery = "") {
+  const container = document.getElementById("khata-ledger-list");
+  if (!container) return;
+
+  const q = String(searchQuery).toLowerCase().trim();
+  const ledger = getKhataLedger();
+  const filtered = ledger.filter(c => !q || c.name.toLowerCase().includes(q) || c.phone.includes(q));
+
+  const totalDue = ledger.reduce((sum, c) => sum + (parseFloat(c.dueAmount) || 0), 0);
+  const dueEl = document.getElementById("txt-khata-total-receivable");
+  if (dueEl) dueEl.innerText = `Total Due: ₹${totalDue.toFixed(2)}`;
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">No active customer balances in ledger.</div>`;
+    return;
   }
 
-  alert(`✅ Drawer Float saved: ₹${total.toFixed(2)}`);
+  container.innerHTML = filtered.map((cust, idx) => `
+    <div class="flex items-center justify-between p-2.5 bg-slate-900/60 hover:bg-slate-800/80 rounded-xl border border-slate-800 transition">
+      <div>
+        <div class="text-xs font-bold text-white">${cust.name}</div>
+        <div class="text-[10px] text-slate-400 font-mono">📱 ${cust.phone} • Last Bill: ${cust.lastDate || 'Recent'}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="text-right">
+          <div class="text-xs font-black text-rose-400 font-mono">₹${parseFloat(cust.dueAmount).toFixed(2)}</div>
+          <div class="text-[9px] text-slate-500">Unsettled</div>
+        </div>
+        <button type="button" onclick="settleCustomerKhata(${idx})" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-[10px] rounded-lg shadow">
+          Settle ₹
+        </button>
+      </div>
+    </div>
+  `).join("");
+};
+
+window.settleCustomerKhata = function(idx) {
+  const ledger = getKhataLedger();
+  const cust = ledger[idx];
+  if (!cust) return;
+
+  const amtStr = prompt(`Enter received payment amount to settle for ${cust.name} (Due: ₹${cust.dueAmount}):`, cust.dueAmount);
+  if (!amtStr) return;
+  const payAmt = parseFloat(amtStr);
+  if (isNaN(payAmt) || payAmt <= 0) return alert("Please enter a valid payment amount.");
+
+  cust.dueAmount = Math.max(0, parseFloat((cust.dueAmount - payAmt).toFixed(2)));
+  if (cust.dueAmount === 0) {
+    ledger.splice(idx, 1);
+  }
+  saveKhataLedger(ledger);
+
+  if (typeof recordAuditEntry === "function") {
+    recordAuditEntry({
+      type: "KHATA SETTLEMENT",
+      title: `Payment Received from ${cust.name}`,
+      details: `Settled: ₹${payAmt.toFixed(2)} | Remaining Due: ₹${cust.dueAmount || 0}`
+    });
+  }
+
+  alert(`✅ Recorded settlement of ₹${payAmt.toFixed(2)} from ${cust.name}!`);
+};
+
+window.confirmKhataCheckout = function() {
+  const phone = document.getElementById("khata-phone")?.value.replace(/\D/g, "");
+  const name = document.getElementById("khata-name")?.value.trim();
+
+  if (!phone || phone.length < 10) return alert("Please provide a valid 10-digit mobile number.");
+  if (!name) return alert("Please enter customer name.");
+  if (!activeCart || !activeCart.length) return alert("Invoice is empty.");
+
+  const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+  const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+  const billTotal = subtotal * (1 - discountPct / 100) * (1 + taxPct / 100);
+
+  const ledger = getKhataLedger();
+  const existing = ledger.find(c => c.phone === phone);
+  if (existing) {
+    existing.name = name;
+    existing.dueAmount = parseFloat((parseFloat(existing.dueAmount) + billTotal).toFixed(2));
+    existing.lastDate = new Date().toLocaleDateString("en-GB");
+  } else {
+    ledger.push({
+      name,
+      phone,
+      dueAmount: parseFloat(billTotal.toFixed(2)),
+      lastDate: new Date().toLocaleDateString("en-GB")
+    });
+  }
+  saveKhataLedger(ledger);
+
+  window.closeKhataModal();
+  window.executeActualSale("KHATA", name, phone);
 };
 
     function executeLogout() {
@@ -3424,15 +3690,37 @@ window.submitDetailedMorningCash = function() {
       closeSoundboxModal();
       processSale("UPI");
     }
+  window.processSale = function(paymentMode, custName = null, custPhone = null) {
+  if (typeof checkStoreSubscriptionStatus === "function" && !checkStoreSubscriptionStatus()) return;
+  if (!activeCart || !activeCart.length) return alert("Invoice is empty.");
 
+  const isCalcActive = (typeof isCashCalcEnabled !== "undefined") ? isCashCalcEnabled : (localStorage.getItem("storepos_cash_calc_enabled") !== "false");
+
+  // Intercept Cash checkout when Return Calculator is active
+  if (paymentMode === "CASH" && isCalcActive) {
+    const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+    const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+    const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
+    const grandTotal = settle > 0 ? settle : (subtotal * (1 - discountPct / 100) * (1 + taxPct / 100));
+
+    if (typeof window.openCashCalculatorModal === "function") {
+      window.openCashCalculatorModal(grandTotal);
+      return;
+    }
+  }
+
+  // Execute actual sale for UPI, Card, Khata, or direct Cash
+  if (typeof executeActualSale === "function") {
+    executeActualSale(paymentMode, custName, custPhone);
+  }
+};
     // ==========================================
     // CHECKOUT PROCESSOR WITH CASH CALCULATOR & WHATSAPP SLIP
     // ==========================================
     // ========================================================
 // CASH DRAWER CALCULATOR & DENOMINATIONS CONTROLLER
 // ========================================================
-let isCashCalcEnabled = localStorage.getItem("storepos_cash_calc_enabled") === "true";
-
 function toggleCashCalculatorSetting(enabled) {
   isCashCalcEnabled = enabled;
   localStorage.setItem("storepos_cash_calc_enabled", enabled ? "true" : "false");
@@ -3552,7 +3840,61 @@ function computeChangeReturn() {
       closeCashCalculatorModal();
       executeActualSale("CASH");
     }
+// ========================================================
+// CHECKOUT DISPATCHER & CASH CALCULATOR INTERCEPTOR
+// ========================================================
+window.processSale = function(paymentMode, custName = null, custPhone = null) {
+  if (typeof checkStoreSubscriptionStatus === "function" && !checkStoreSubscriptionStatus()) return;
+  if (!activeCart || !activeCart.length) return alert("Invoice is empty.");
 
+  // Check if Cash Calculator is enabled in Admin settings
+  const isCalcActive = (typeof isCashCalcEnabled !== "undefined") ? isCashCalcEnabled : (localStorage.getItem("storepos_cash_calc_enabled") !== "false");
+
+  // Intercept Cash payments if Return Calculator is active
+  if (paymentMode === "CASH" && isCalcActive) {
+    const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+    const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+    const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
+    const grandTotal = settle > 0 ? settle : (subtotal * (1 - discountPct / 100) * (1 + taxPct / 100));
+
+    if (typeof window.openCashCalculatorModal === "function") {
+      window.openCashCalculatorModal(grandTotal);
+      return;
+    }
+  }
+
+  // Fallback / Non-cash modes (UPI, Card, Khata) go straight to execution
+  if (typeof executeActualSale === "function") {
+    executeActualSale(paymentMode, custName, custPhone);
+  }
+};
+// ========================================================
+// CHECKOUT DISPATCHER & CASH CALCULATOR INTERCEPTOR
+// ========================================================
+window.processSale = function(paymentMode, custName = null, custPhone = null) {
+  if (typeof checkStoreSubscriptionStatus === "function" && !checkStoreSubscriptionStatus()) return;
+  if (!activeCart || !activeCart.length) return alert("Invoice is empty.");
+
+  const isCalcActive = (typeof isCashCalcEnabled !== "undefined") ? isCashCalcEnabled : (localStorage.getItem("storepos_cash_calc_enabled") !== "false");
+
+  if (paymentMode === "CASH" && isCalcActive) {
+    const subtotal = activeCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const discountPct = parseFloat(document.getElementById("sel-discount-scheme")?.value) || 0;
+    const taxPct = parseFloat(document.getElementById("sel-tax-scheme")?.value) || 0;
+    const settle = parseFloat(document.getElementById("inp-cash-settle")?.value) || 0;
+    const grandTotal = settle > 0 ? settle : (subtotal * (1 - discountPct / 100) * (1 + taxPct / 100));
+
+    if (typeof window.openCashCalculatorModal === "function") {
+      window.openCashCalculatorModal(grandTotal);
+      return;
+    }
+  }
+
+  if (typeof executeActualSale === "function") {
+    executeActualSale(paymentMode, custName, custPhone);
+  }
+};
     function executeActualSale(paymentMode, custName = null, custPhone = null) {
       if (!checkStoreSubscriptionStatus()) return;
       if (!activeCart.length) return alert("Invoice is empty.");
