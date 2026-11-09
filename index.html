@@ -2735,33 +2735,94 @@ window.checkMorningCashDrawerPrompt = function() {
     }
   }
 };
-
 window.computeFloatTotal = function() {
-  const coins = parseFloat(document.getElementById("inp-float-coins")?.value) || 0;
-  const n10 = (parseInt(document.getElementById("inp-float-10")?.value, 10) || 0) * 10;
-  const n20 = (parseInt(document.getElementById("inp-float-20")?.value, 10) || 0) * 20;
-  const n50 = (parseInt(document.getElementById("inp-float-50")?.value, 10) || 0) * 50;
+  const coinText = document.getElementById("txt-display-coins-total")?.innerText.replace(/[^0-9.]/g, "") || "0";
+  const coinsFromText = parseFloat(coinText) || 0;
+  const coinsFromVar = window.currentCoinsData?.total || 0;
+  const coins = Math.max(coinsFromText, coinsFromVar);
+
+  const n10Count = parseInt(document.getElementById("inp-float-10")?.value, 10) || 0;
+  const n20Count = parseInt(document.getElementById("inp-float-20")?.value, 10) || 0;
+  const n50Count = parseInt(document.getElementById("inp-float-50")?.value, 10) || 0;
+
+  const n10 = n10Count * 10;
+  const n20 = n20Count * 20;
+  const n50 = n50Count * 50;
 
   const total = coins + n10 + n20 + n50;
+
   const totalEl = document.getElementById("txt-float-total-computed");
   if (totalEl) totalEl.innerText = `₹${total.toFixed(2)}`;
+
   return { total, coins, n10, n20, n50 };
 };
+window.updateAdminPaymentTotals = function() {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const todayUk = now.toLocaleDateString("en-GB");
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
 
+  // Check all possible storage keys
+  const openingCash = parseFloat(
+    localStorage.getItem(`storepos_opening_cash_${currentGstin}_${todayIso}`) ||
+    localStorage.getItem("storepos_opening_cash_" + todayIso) ||
+    "0"
+  );
+
+  let cashTotal = 0;
+  let upiTotal = 0;
+  let cardTotal = 0;
+
+  const bills = JSON.parse(localStorage.getItem("storepos_recent_bills_v2") || "[]");
+  bills.forEach(bill => {
+    const rawDate = String(bill.created_at || bill.date || "");
+    if (rawDate.includes(todayIso) || rawDate.includes(todayUk)) {
+      const mode = String(bill.paymentMode || bill.payment_mode || "").toUpperCase();
+      const amt = parseFloat(
+        bill.grandTotal ? String(bill.grandTotal).replace(/[^0-9.]/g, "") :
+        (bill.total_amount ?? bill.total ?? 0)
+      );
+
+      if (mode.includes("CASH")) cashTotal += amt;
+      else if (mode.includes("UPI") || mode.includes("SOUNDBOX")) upiTotal += amt;
+      else cardTotal += amt;
+    }
+  });
+
+  const openElem = document.getElementById("adm-txt-opening-cash");
+  const cashElem = document.getElementById("adm-txt-cash-total");
+  const upiElem = document.getElementById("adm-txt-upi-total");
+  const cardElem = document.getElementById("adm-txt-card-total");
+
+  if (openElem) openElem.innerText = `₹${openingCash.toFixed(2)}`;
+  if (cashElem) cashElem.innerText = `₹${cashTotal.toFixed(2)}`;
+  if (upiElem) upiElem.innerText = `₹${upiTotal.toFixed(2)}`;
+  if (cardElem) cardElem.innerText = `₹${cardTotal.toFixed(2)}`;
+};
+
+// Legacy fallback alias
+window.submitMorningOpeningCash = window.submitDetailedMorningCash;
 window.submitDetailedMorningCash = function() {
   const { total, coins, n10, n20, n50 } = window.computeFloatTotal();
   const todayIso = new Date().toISOString().slice(0, 10);
+  const currentGstin = localStorage.getItem("storepos_gstin") || "DEFAULT_STORE";
 
+  // Save to both universal and tenant-specific keys so every screen sees it
   localStorage.setItem("storepos_opening_cash_" + todayIso, total.toString());
+  localStorage.setItem(`storepos_opening_cash_${currentGstin}_${todayIso}`, total.toString());
   localStorage.setItem("storepos_float_breakdown_" + todayIso, JSON.stringify({
-    total, coins, n10, n20, n50, date: todayIso
+    total, coins, n10, n20, n50, coinsDetail: window.currentCoinsData, date: todayIso
   }));
 
-  const modal = document.getElementById("modal-morning-cash");
-  if (modal) modal.classList.add("hidden");
+  // Close modal
+  document.getElementById("modal-morning-cash")?.classList.add("hidden");
 
-  if (typeof updateAdminPaymentTotals === "function") {
-    updateAdminPaymentTotals();
+  // Update Admin dashboard UI card immediately
+  const openElem = document.getElementById("adm-txt-opening-cash");
+  if (openElem) openElem.innerText = `₹${total.toFixed(2)}`;
+
+  if (typeof window.updateAdminPaymentTotals === "function") {
+    window.updateAdminPaymentTotals();
   }
 
   alert(`✅ Drawer Float saved: ₹${total.toFixed(2)}`);
